@@ -1,0 +1,304 @@
+/// <reference types="node" />
+
+import { Resend } from 'resend'
+import { z } from 'zod'
+
+import { loadLocalEnv } from './_env.js'
+
+loadLocalEnv()
+
+interface ApiRequest {
+  method?: string
+  headers: {
+    origin?: string
+  }
+  body: unknown
+}
+
+interface ApiResponse {
+  setHeader: (name: string, value: string) => void
+  status: (statusCode: number) => {
+    json: (body: unknown) => void
+    end: () => void
+  }
+}
+
+const requestSchema = z.object({
+  reservationNumber: z.string().min(6).max(64),
+  ownerEmail: z.string().email(),
+  clientEmail: z.string().email(),
+  ownerSubject: z.string().min(1).max(160),
+  clientSubject: z.string().min(1).max(160),
+  clientBody: z.string().min(1).max(4000),
+  propertyName: z.string().min(1).max(120),
+  currency: z.string().min(1).max(8).default('PLN'),
+  locale: z.enum(['pl', 'en']).default('pl'),
+  request: z.object({
+    reservationNumber: z.string().min(6).max(64),
+    fullName: z.string().min(2).max(160),
+    email: z.string().email(),
+    phone: z.string().min(5).max(40),
+    guests: z.number().int().min(1).max(30),
+    checkIn: z.string().min(10).max(10),
+    checkOut: z.string().min(10).max(10),
+    nights: z.number().int().min(1).max(90),
+    roomsUsed: z.number().int().min(1).max(4),
+    nightlyPrice: z.number().min(0),
+    estimatedTotal: z.number().min(0),
+    message: z.string().max(1200).optional(),
+  }),
+})
+
+function escapeHtml(value: string | number) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function paragraph(value: string) {
+  return value
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => `<p style="margin:0 0 10px">${escapeHtml(line)}</p>`)
+    .join('')
+}
+
+function row(label: string, value: string | number) {
+  return `<tr>
+    <td style="padding:13px 16px;border-bottom:1px solid #e8e0d2;color:#5f695c;font-size:13px;line-height:1.35;width:42%">${escapeHtml(label)}</td>
+    <td style="padding:13px 16px;border-bottom:1px solid #e8e0d2;color:#172016;font-size:14px;line-height:1.35;font-weight:700">${escapeHtml(value)}</td>
+  </tr>`
+}
+
+function sectionTitle(title: string) {
+  return `<tr>
+    <td colspan="2" style="padding:11px 16px;background:#f2eadb;border-bottom:1px solid #e1d5c0;color:#8a6d32;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">${escapeHtml(title)}</td>
+  </tr>`
+}
+
+function detailsTable(rows: string) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e1d5c0;border-radius:8px;overflow:hidden;margin:0 0 22px;background:#fffaf1">
+    ${rows}
+  </table>`
+}
+
+function messageBoxWithTitle(title: string, message: string) {
+  return `<div style="margin-top:18px">
+    <h2 style="font-size:16px;line-height:1.35;margin:0 0 10px;color:#172016">${escapeHtml(title)}</h2>
+    <div style="border:1px solid #e1d5c0;border-radius:8px;background:#fffaf1;padding:16px;color:#172016;font-size:14px;line-height:1.6">
+      ${paragraph(message || '-')}
+    </div>
+  </div>`
+}
+
+function wrapEmail(title: string, body: string, lang: 'pl' | 'en') {
+  return `<!doctype html>
+<html lang="${lang}">
+  <body style="margin:0;background:#f6f3ec;font-family:Arial,sans-serif;color:#172016">
+    <div style="max-width:680px;margin:0 auto;padding:32px 18px">
+      <div style="background:#ffffff;border:1px solid #ded8cb;border-radius:10px;overflow:hidden">
+        <div style="background:#172016;padding:24px 28px">
+          <p style="margin:0 0 8px;color:#d6b36f;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Gerka Pool House</p>
+          <h1 style="margin:0;color:#ffffff;font-size:24px;line-height:1.25">${escapeHtml(title)}</h1>
+        </div>
+        <div style="padding:28px">
+        ${body}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>`
+}
+
+const emailCopy = {
+  pl: {
+    newInquiry: 'Nowe zapytanie',
+    inquiryDetails: 'Dane zapytania',
+    clientDetails: 'Dane klienta',
+    pricing: 'Wycena',
+    inquirySummary: 'Podsumowanie zapytania',
+    reservationNumber: 'Numer zapytania',
+    client: 'Klient',
+    email: 'E-mail',
+    phone: 'Telefon',
+    dates: 'Termin',
+    nights: 'Liczba nocy',
+    guests: 'Liczba gości',
+    rooms: 'Wykorzystane pokoje',
+    nightlyPrice: 'Cena za noc',
+    estimatedTotal: 'Cena szacunkowa',
+    clientMessage: 'Wiadomość klienta',
+    message: 'Wiadomość',
+  },
+  en: {
+    newInquiry: 'New booking inquiry',
+    inquiryDetails: 'Inquiry details',
+    clientDetails: 'Guest details',
+    pricing: 'Pricing',
+    inquirySummary: 'Inquiry summary',
+    reservationNumber: 'Inquiry number',
+    client: 'Guest',
+    email: 'Email',
+    phone: 'Phone',
+    dates: 'Dates',
+    nights: 'Number of nights',
+    guests: 'Number of guests',
+    rooms: 'Rooms used',
+    nightlyPrice: 'Price per night',
+    estimatedTotal: 'Estimated price',
+    clientMessage: 'Guest message',
+    message: 'Message',
+  },
+} as const
+
+function setCors(req: ApiRequest, res: ApiResponse) {
+  const allowedOrigin = process.env.ALLOWED_ORIGIN
+  const origin = req.headers.origin
+
+  if (allowedOrigin && origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+}
+
+function getResendError(error: unknown) {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message)
+  }
+
+  return 'Unknown Resend error'
+}
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  setCors(req, res)
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end()
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  const resendApiKey = process.env.RESEND_API_KEY
+  const fromEmail = process.env.RESEND_FROM_EMAIL
+  const ownerEmail = process.env.RESERVATION_OWNER_EMAIL
+
+  if (!resendApiKey || resendApiKey === 're_xxxxxxxxx' || !fromEmail) {
+    return res.status(500).json({ error: 'Email provider is not configured' })
+  }
+
+  const parsed = requestSchema.safeParse(req.body)
+
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid request payload' })
+  }
+
+  const payload = parsed.data
+  const inquiry = payload.request
+  const copy = emailCopy[payload.locale]
+  const finalOwnerEmail = ownerEmail || payload.ownerEmail
+  const resend = new Resend(resendApiKey)
+  const tagValue = payload.reservationNumber.replace(/[^a-zA-Z0-9_-]/g, '_')
+
+  const ownerHtml = wrapEmail(
+    `${copy.newInquiry} ${payload.reservationNumber}`,
+    `${detailsTable(`
+      ${sectionTitle(copy.inquiryDetails)}
+      ${row(copy.reservationNumber, payload.reservationNumber)}
+      ${row(copy.dates, `${inquiry.checkIn} - ${inquiry.checkOut}`)}
+      ${row(copy.nights, inquiry.nights)}
+      ${row(copy.guests, inquiry.guests)}
+      ${row(copy.rooms, inquiry.roomsUsed)}
+      ${sectionTitle(copy.clientDetails)}
+      ${row(copy.client, inquiry.fullName)}
+      ${row(copy.email, inquiry.email)}
+      ${row(copy.phone, inquiry.phone)}
+      ${sectionTitle(copy.pricing)}
+      ${row(copy.nightlyPrice, `${inquiry.nightlyPrice} ${payload.currency}`)}
+      ${row(copy.estimatedTotal, `${inquiry.estimatedTotal} ${payload.currency}`)}
+    `)}
+    ${messageBoxWithTitle(copy.clientMessage, inquiry.message || '-')}`,
+    payload.locale,
+  )
+
+  const clientHtml = wrapEmail(
+    payload.clientSubject,
+    `<div style="font-size:14px;line-height:1.65;color:#2a3328;margin:0 0 22px">
+      ${paragraph(payload.clientBody)}
+    </div>
+    ${detailsTable(`
+      ${sectionTitle(copy.inquirySummary)}
+      ${row(copy.reservationNumber, payload.reservationNumber)}
+      ${row(copy.dates, `${inquiry.checkIn} - ${inquiry.checkOut}`)}
+      ${row(copy.nights, inquiry.nights)}
+      ${row(copy.guests, inquiry.guests)}
+      ${row(copy.estimatedTotal, `${inquiry.estimatedTotal} ${payload.currency}`)}
+    `)}`,
+    payload.locale,
+  )
+
+  const ownerEmailResult = await resend.emails
+    .send({
+      from: fromEmail,
+      to: finalOwnerEmail,
+      replyTo: inquiry.email,
+      subject: `${payload.ownerSubject} (${payload.reservationNumber})`,
+      html: ownerHtml,
+      text: [
+        `${copy.reservationNumber}: ${payload.reservationNumber}`,
+        `${copy.client}: ${inquiry.fullName}`,
+        `${copy.email}: ${inquiry.email}`,
+        `${copy.phone}: ${inquiry.phone}`,
+        `${copy.dates}: ${inquiry.checkIn} - ${inquiry.checkOut}`,
+        `${copy.nights}: ${inquiry.nights}`,
+        `${copy.guests}: ${inquiry.guests}`,
+        `${copy.rooms}: ${inquiry.roomsUsed}`,
+        `${copy.estimatedTotal}: ${inquiry.estimatedTotal} ${payload.currency}`,
+        `${copy.message}: ${inquiry.message || '-'}`,
+      ].join('\n'),
+      tags: [{ name: 'reservation_number', value: tagValue }],
+    })
+    .catch((error: unknown) => ({ data: null, error: { message: getResendError(error) } }))
+
+  if (ownerEmailResult.error) {
+    return res.status(502).json({ error: `Owner email failed: ${ownerEmailResult.error.message}` })
+  }
+
+  const clientEmailResult = await resend.emails
+    .send({
+      from: fromEmail,
+      to: payload.clientEmail,
+      replyTo: finalOwnerEmail,
+      subject: `${payload.clientSubject} - ${payload.reservationNumber}`,
+      html: clientHtml,
+      text: [
+        payload.clientBody,
+        '',
+        `${copy.inquirySummary}:`,
+        `${copy.reservationNumber}: ${payload.reservationNumber}`,
+        `${copy.dates}: ${inquiry.checkIn} - ${inquiry.checkOut}`,
+        `${copy.nights}: ${inquiry.nights}`,
+        `${copy.guests}: ${inquiry.guests}`,
+        `${copy.estimatedTotal}: ${inquiry.estimatedTotal} ${payload.currency}`,
+      ].join('\n'),
+      tags: [{ name: 'reservation_number', value: tagValue }],
+    })
+    .catch((error: unknown) => ({ data: null, error: { message: getResendError(error) } }))
+
+  if (clientEmailResult.error) {
+    return res.status(502).json({ error: `Client email failed: ${clientEmailResult.error.message}` })
+  }
+
+  return res.status(200).json({
+    ok: true,
+    reservationNumber: payload.reservationNumber,
+    ownerEmailId: ownerEmailResult.data?.id,
+    clientEmailId: clientEmailResult.data?.id,
+  })
+}

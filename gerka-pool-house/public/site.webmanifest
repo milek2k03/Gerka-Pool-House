@@ -1,0 +1,17 @@
+{
+  "name": "Gerka Pool House",
+  "short_name": "Gerka",
+  "description": "Private pool house accommodation for families and groups.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#1c211b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+  --color-deep: #070a08;
+  --color-paper: #0d1310;
+  --color-surface: #151d18;
+  --color-surface-2: #1d2821;
+  --color-ink: #f6f1e7;
+  --color-muted: #aeb8aa;
+  --color-border: rgba(228, 219, 199, 0.16);
+  --color-sage: #85a878;
+  --color-water: #5ab6c7;
+  --color-brass: #d6b36f;
+  --color-clay: #d9866c;
+  --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.32);
+
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 104px;
+  overflow-x: hidden;
+}
+
+body {
+  min-width: 0;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+#root {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+picture,
+svg {
+  display: block;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-water) 38%, transparent);
+  color: var(--color-ink);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  border-radius: 0.375rem;
+  background: var(--color-surface);
+  padding: 0.75rem 1rem;
+  color: var(--color-ink);
+  font-weight: 700;
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--color-water);
+  outline-offset: 2px;
+}
+
+.field {
+  min-height: 2.75rem;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-deep);
+  padding: 0.65rem 0.8rem;
+  color: var(--color-ink);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.field:focus {
+  border-color: var(--color-water);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-water) 18%, transparent);
+  outline: none;
+}
+
+.field::placeholder {
+  color: color-mix(in srgb, var(--color-muted) 70%, transparent);
+}
+
+.admin-login-input {
+  min-height: 3.5rem;
+  padding-left: 4rem;
+  font-size: 1rem;
+}
+
+.calendar-unavailable {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(91, 142, 162, 0.34) 0,
+      rgba(91, 142, 162, 0.34) 6px,
+      rgba(32, 56, 66, 0.78) 6px,
+      rgba(32, 56, 66, 0.78) 12px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
