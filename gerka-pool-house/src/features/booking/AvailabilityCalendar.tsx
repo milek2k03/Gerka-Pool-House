@@ -39,7 +39,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
   }, [month])
 
   return (
-    <div className="min-w-0 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-4">
+    <div className="min-w-0 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-[var(--shadow-soft)] sm:p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <Button
           type="button"
@@ -97,14 +97,14 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
               disabled={disabled}
               onClick={() => onSelectDate(date)}
               className={cn(
-                'aspect-square rounded-md text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-water)]',
-                status === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-water)] hover:text-white',
+                'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
+                status === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',
                 status === 'booked' && 'cursor-not-allowed border border-red-400/30 bg-red-900/70 text-red-100',
                 isPast && status !== 'booked' && 'cursor-not-allowed bg-red-950/25 text-red-300/45',
                 status === 'unavailable' &&
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
-                isBetween && 'bg-[var(--color-water)]/14',
-                isSelected && 'bg-[var(--color-brass)] text-[var(--color-deep)]',
+                isBetween && 'bg-[rgba(214,181,138,0.14)]',
+                isSelected && 'bg-[var(--color-brass)] text-[#111827]',
               )}
             >
               {day.getDate()}

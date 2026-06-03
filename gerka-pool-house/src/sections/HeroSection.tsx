@@ -7,55 +7,58 @@ import { AnchorButton } from '../components/ui/Button'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from '../utils/locale'
+import { applyGuestLimitToText, getEffectiveMaxGuests } from '../utils/pricing'
 
 export function HeroSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
   const poolHighlight = content.about.highlights.find((item) => item.id === 'private-pool')
   const contactLine = content.contact.phone.trim() || content.contact.email
+  const maxGuests = getEffectiveMaxGuests(content.pricing)
 
   return (
-    <section className="relative isolate min-h-[100svh] overflow-hidden bg-[var(--color-deep)] text-white">
+    <section className="relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
       <ResponsiveImage
         image={content.hero.image}
+        mobileImage={content.hero.mobileImage}
         alt=""
-        className="absolute inset-0 -z-20 h-full w-full"
+        className="absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-0 sm:h-full"
         loading="eager"
         fetchPriority="high"
-        imgClassName="object-cover"
+        imgClassName="object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(18,22,18,0.72),rgba(18,22,18,0.34)_46%,rgba(18,22,18,0.15)),linear-gradient(0deg,rgba(18,22,18,0.72),rgba(18,22,18,0)_36%)]" />
-      <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-8 pt-28 sm:px-8 lg:px-10">
+      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))] sm:inset-0 sm:h-full" />
+      <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-8 pt-[62svh] sm:px-8 sm:pt-28 lg:px-10">
         <motion.div
-          className="max-w-3xl pb-10 sm:pb-16"
+          className="max-w-xl pb-10 sm:pb-16 lg:ml-auto lg:max-w-2xl lg:text-right"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-white/76">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brass)]">
             {localize(content.hero.eyebrow, locale)}
           </p>
-          <h1 className="text-5xl font-semibold leading-[1.04] text-white sm:text-6xl lg:text-7xl">
+          <h1 className="text-4xl font-semibold leading-[1.04] text-white sm:text-6xl lg:text-7xl">
             {content.brandName}
           </h1>
-          <p className="mt-5 max-w-2xl text-xl leading-8 text-white/90 sm:text-2xl">
+          <p className="mt-5 max-w-xl text-xl leading-8 text-white/90 sm:text-2xl lg:ml-auto">
             {localize(content.hero.slogan, locale)}
           </p>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/76 sm:text-lg">
-            {localize(content.hero.lead, locale)}
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/76 sm:text-lg lg:ml-auto">
+            {applyGuestLimitToText(localize(content.hero.lead, locale), content.pricing)}
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row lg:justify-end">
             <AnchorButton href="#booking" size="lg">
               <CalendarCheck aria-hidden="true" className="size-5" />
               {t('common.bookNow')}
             </AnchorButton>
-            <AnchorButton href="#about" size="lg" variant="secondary" className="border-white/30 bg-white/10 text-white hover:bg-white/18">
+            <AnchorButton href="#about" size="lg" variant="secondary">
               <ArrowDown aria-hidden="true" className="size-5" />
               {t('common.seeOffer')}
             </AnchorButton>
           </div>
         </motion.div>
-        <div className="grid gap-2 border-t border-white/18 pt-4 text-sm text-white/72 sm:grid-cols-3">
-          <span>{t('pricing.maxGuests', { count: content.pricing.maxGuests })}</span>
+        <div className="grid gap-2 border-t border-[var(--color-border)] pt-4 text-sm text-white/78 sm:grid-cols-3">
+          <span>{t('pricing.maxGuests', { count: maxGuests })}</span>
           <span>{poolHighlight ? localize(poolHighlight.title, locale) : localize(content.hero.eyebrow, locale)}</span>
           <span>{contactLine}</span>
         </div>

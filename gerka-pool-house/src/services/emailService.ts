@@ -31,9 +31,10 @@ const emailCopy = {
     guests: 'Goście',
     dates: 'Termin',
     nights: 'Liczba nocy',
-    rooms: 'Pokoje',
+    rooms: 'Apartamenty',
     estimatedPrice: 'Szacowana cena',
     message: 'Wiadomość',
+    automaticNotice: 'Ta wiadomość została wygenerowana automatycznie. Prosimy na nią nie odpowiadać.',
   },
   en: {
     ownerSubject: 'New booking inquiry',
@@ -44,11 +45,18 @@ const emailCopy = {
     guests: 'Guests',
     dates: 'Dates',
     nights: 'Number of nights',
-    rooms: 'Rooms',
+    rooms: 'Apartments',
     estimatedPrice: 'Estimated price',
     message: 'Message',
+    automaticNotice: 'This message was generated automatically. Please do not reply to it.',
   },
 } as const
+
+function appendAutomaticNotice(body: string, notice: string) {
+  if (body.includes(notice)) return body
+
+  return `${body}\n\n${notice}`
+}
 
 export const emailService = {
   async sendReservationInquiry(
@@ -77,7 +85,10 @@ export const emailService = {
       ownerSubject: `${copy.ownerSubject} - ${content.brandName}`,
       ownerBody,
       clientSubject: content.booking.confirmationSubject[locale],
-      clientBody: `${content.booking.confirmationBody[locale]}\n\n${copy.reservationNumber}: ${request.reservationNumber}`,
+      clientBody: appendAutomaticNotice(
+        `${content.booking.confirmationBody[locale]}\n\n${copy.reservationNumber}: ${request.reservationNumber}`,
+        copy.automaticNotice,
+      ),
     }
 
     if (endpointUrl) {

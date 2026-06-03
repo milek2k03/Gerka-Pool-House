@@ -8,8 +8,8 @@ export function NotFoundPage() {
 
   return (
     <section className="grid min-h-[70svh] place-items-center bg-[var(--color-paper)] px-5 pt-28">
-      <div className="max-w-xl text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-clay)]">404</p>
+      <div className="max-w-xl rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-[var(--shadow-soft)] sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brass)]">404</p>
         <h1 className="mt-3 text-4xl font-semibold text-[var(--color-ink)]">{t('notFound.title')}</h1>
         <p className="mt-4 text-lg text-[var(--color-muted)]">{t('notFound.body')}</p>
         <ButtonLink to="/" className="mt-8">

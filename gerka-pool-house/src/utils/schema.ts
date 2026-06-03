@@ -2,6 +2,7 @@ import { siteUrl } from '../config/site'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from './locale'
+import { applyGuestLimitToText, isApartment2Enabled } from './pricing'
 
 function absoluteUrl(path: string) {
   if (!path) return siteUrl
@@ -14,6 +15,9 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
   const image = absoluteUrl(content.seo.home.ogImage ?? content.hero.image.src)
   const address = localize(content.contact.address, locale)
   const telephone = content.contact.phone.trim()
+  const priceRange = isApartment2Enabled(content.pricing)
+    ? `${content.pricing.room1Nightly}-${content.pricing.room1Nightly + content.pricing.room2Nightly} PLN`
+    : `${content.pricing.room1Nightly} PLN`
 
   return {
     '@context': 'https://schema.org',
@@ -40,7 +44,7 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
         url: homeUrl,
         ...(telephone ? { telephone } : {}),
         email: content.contact.email,
-        priceRange: `${content.pricing.room1Nightly}-${content.pricing.room1Nightly + content.pricing.room2Nightly} PLN`,
+        priceRange,
         amenityFeature: content.amenities.map((amenity) => ({
           '@type': 'LocationFeatureSpecification',
           name: localize(amenity.title, locale),
@@ -50,14 +54,18 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
       {
         '@type': 'FAQPage',
         '@id': `${homeUrl}#faq`,
-        mainEntity: content.faq.map((item) => ({
-          '@type': 'Question',
-          name: localize(item.question, locale),
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: localize(item.answer, locale),
-          },
-        })),
+        mainEntity: content.faq.map((item) => {
+          const answer = localize(item.answer, locale)
+
+          return {
+            '@type': 'Question',
+            name: localize(item.question, locale),
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: item.id === 'capacity' ? applyGuestLimitToText(answer, content.pricing) : answer,
+            },
+          }
+        }),
       },
       {
         '@type': 'BreadcrumbList',

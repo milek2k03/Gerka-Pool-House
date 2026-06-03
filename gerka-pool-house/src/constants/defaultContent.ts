@@ -15,8 +15,10 @@ import poolPng from '../assets/images/pool-terrace.png'
 import poolWebp from '../assets/images/pool-terrace.webp'
 import type { SiteContent } from '../types/content'
 
+const socialPreviewImage = '/api/og-image?v=5'
+
 export const defaultSiteContent: SiteContent = {
-  version: 5,
+  version: 16,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -29,10 +31,15 @@ export const defaultSiteContent: SiteContent = {
       en: 'A calm private stay for families and groups, with a pool reserved for you.',
     },
     lead: {
-      pl: 'Wygodny dom do 12 osób z ogrodem, grillem, parkingiem i szybkim WiFi. Dobre miejsce na rodzinny weekend, wakacje albo spokojny wyjazd ze znajomymi.',
-      en: 'A comfortable house for up to 12 guests with a garden, barbecue, parking and fast WiFi. A good place for a family weekend, holidays or a calm trip with friends.',
+      pl: 'Wygodny apartament na parterze do 6 osób z prywatną strefą basenową, ogrodem, grillem, parkingiem i szybkim WiFi.',
+      en: 'A comfortable ground-floor apartment for up to 6 guests with a private pool area, garden, barbecue, parking and fast WiFi.',
     },
     image: {
+      src: heroPng,
+      webp: heroWebp,
+      avif: heroAvif,
+    },
+    mobileImage: {
       src: heroPng,
       webp: heroWebp,
       avif: heroAvif,
@@ -40,16 +47,16 @@ export const defaultSiteContent: SiteContent = {
   },
   about: {
     title: {
-      pl: 'Dom zaprojektowany wokół odpoczynku',
-      en: 'A house designed around rest',
+      pl: 'Apartament na parterze i prywatna strefa basenowa',
+      en: 'Ground-floor apartment and a private pool area',
     },
     lead: {
-      pl: 'Gerka Pool House daje swobodę prywatnego domu i wygodę pobytu przygotowanego pod wypoczynek. Cały obiekt jest do dyspozycji gości.',
-      en: 'Gerka Pool House gives you the freedom of a private home and the comfort of a stay prepared for rest. The whole property is available to guests.',
+      pl: 'Aktualnie rezerwowany jest komfortowy apartament na parterze przeznaczony dla maksymalnie 6 osób.',
+      en: 'The currently available stay is a comfortable ground-floor apartment designed for up to 6 guests.',
     },
     body: {
-      pl: 'Na miejscu czekają dwa pokoje, część dzienna, ogród, basen, miejsce do grillowania i spokojna strefa relaksu. Układ domu sprawdza się dla rodzin z dziećmi oraz grup znajomych, które chcą spędzić czas razem i mieć dla siebie prywatną przestrzeń.',
-      en: 'The property offers two rooms, a living area, garden, swimming pool, barbecue space and a quiet relaxation zone. The layout works well for families with children and groups of friends who want to spend time together and enjoy private space.',
+      pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie 6 osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest podgrzewany prywatny basen z leżakami, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.',
+      en: '#### Ground-floor apartment\nDesigned for up to 6 guests.\n\nIt offers:\n* a spacious living room with a comfortable sofa bed,\n* a fully equipped kitchen,\n* 2 comfortable bedrooms,\n* a bathroom,\n* direct access to the garden and pool area.\n\nGuests can enjoy a heated private swimming pool with loungers, a terrace for shared meals, a barbecue area and a relaxing green outdoor space.\n\nIt is an ideal place for family holidays, weekend breaks and gatherings with friends.',
     },
     highlights: [
       {
@@ -66,8 +73,8 @@ export const defaultSiteContent: SiteContent = {
         icon: 'relax',
         title: { pl: 'Rodziny i grupy', en: 'Families and groups' },
         description: {
-          pl: 'Elastyczny układ pobytu od 1 do 12 osób.',
-          en: 'Flexible stays for 1 to 12 guests.',
+          pl: 'Komfortowy pobyt dla maksymalnie 6 osób.',
+          en: 'A comfortable stay for up to 6 guests.',
         },
       },
       {
@@ -95,8 +102,8 @@ export const defaultSiteContent: SiteContent = {
       id: 'guest-room',
       title: { pl: 'Komfortowe wnętrza', en: 'Comfortable interiors' },
       alt: {
-        pl: 'Jasne wnętrze pokoju dla gości w domu wakacyjnym',
-        en: 'Bright guest room interior in a holiday house',
+        pl: 'Jasne wnętrze apartamentu dla gości w domu wakacyjnym',
+        en: 'Bright guest apartment interior in a holiday house',
       },
       image: { src: roomPng, webp: roomWebp, avif: roomAvif },
     },
@@ -117,6 +124,74 @@ export const defaultSiteContent: SiteContent = {
         en: 'Lake and peaceful walking path near the property',
       },
       image: { src: lakePng, webp: lakeWebp, avif: lakeAvif },
+    },
+  ],
+  gallerySections: [
+    {
+      id: 'apartment-1',
+      title: { pl: 'Apartament 1', en: 'Apartment 1' },
+      lead: {
+        pl: 'Galeria zdjęć apartamentu na parterze.',
+        en: 'Photo gallery of the ground-floor apartment.',
+      },
+      items: [
+        {
+          id: 'apartment-1-room',
+          title: { pl: 'Apartament na parterze', en: 'Ground-floor apartment' },
+          alt: {
+            pl: 'Jasne wnętrze apartamentu na parterze w Gerka Pool House',
+            en: 'Bright interior of the ground-floor apartment at Gerka Pool House',
+          },
+          image: { src: roomPng, webp: roomWebp, avif: roomAvif },
+        },
+      ],
+    },
+    {
+      id: 'apartment-2',
+      title: { pl: 'Apartament 2', en: 'Apartment 2' },
+      lead: {
+        pl: 'Galeria zdjęć apartamentu na piętrze.',
+        en: 'Photo gallery of the first-floor apartment.',
+      },
+      items: [
+        {
+          id: 'apartment-2-room',
+          title: { pl: 'Apartament na piętrze', en: 'First-floor apartment' },
+          alt: {
+            pl: 'Komfortowe wnętrze apartamentu na piętrze w Gerka Pool House',
+            en: 'Comfortable interior of the first-floor apartment at Gerka Pool House',
+          },
+          image: { src: roomPng, webp: roomWebp, avif: roomAvif },
+        },
+      ],
+    },
+    {
+      id: 'terrace-pool',
+      title: { pl: 'Taras i Strefa Basenowa', en: 'Terrace and Pool Area' },
+      lead: {
+        pl: 'Basen, leżaki, taras, grill i wieczorna strefa wypoczynku.',
+        en: 'Pool, loungers, terrace, barbecue and evening relaxation area.',
+      },
+      items: [
+        {
+          id: 'terrace-pool-main',
+          title: { pl: 'Basen i leżaki', en: 'Pool and loungers' },
+          alt: {
+            pl: 'Prywatny basen z leżakami przy Gerka Pool House',
+            en: 'Private swimming pool with loungers at Gerka Pool House',
+          },
+          image: { src: poolPng, webp: poolWebp, avif: poolAvif },
+        },
+        {
+          id: 'terrace-dining',
+          title: { pl: 'Taras i grill', en: 'Terrace and barbecue' },
+          alt: {
+            pl: 'Taras z miejscem do grillowania i wspólnego odpoczynku',
+            en: 'Terrace with barbecue and shared relaxation space',
+          },
+          image: { src: diningPng, webp: diningWebp, avif: diningAvif },
+        },
+      ],
     },
   ],
   amenities: [
@@ -187,57 +262,135 @@ export const defaultSiteContent: SiteContent = {
     image: { src: lakePng, webp: lakeWebp, avif: lakeAvif },
     items: [
       {
-        id: 'lakes',
-        icon: 'lake',
-        title: { pl: 'Jeziora', en: 'Lakes' },
+        id: 'ostromecko-palace',
+        icon: 'landmark',
+        title: { pl: 'Pałac w Ostromecku', en: 'Ostromecko Palace' },
         description: {
-          pl: 'Naturalne miejsca do spacerów, plażowania i spokojnych zachodów słońca.',
-          en: 'Natural places for walks, beach time and quiet sunsets.',
+          pl: 'Historyczny zespół pałacowo-parkowy z elegancką architekturą, zielenią i spokojnymi alejkami spacerowymi. Możliwy jest bezpośredni dojazd PKS-em, a po drodze można podziwiać widoki nadwiślańskich miejscowości.',
+          en: 'A historic palace and park complex with elegant architecture, greenery and peaceful walking alleys. It can be reached directly by regional PKS bus, with views of Vistula-side villages along the way.',
         },
-        distance: { pl: 'w okolicy', en: 'nearby' },
+        distance: { pl: 'ok. 11 km', en: 'approx. 11 km' },
       },
       {
-        id: 'restaurants',
-        icon: 'restaurant',
-        title: { pl: 'Restauracje', en: 'Restaurants' },
+        id: 'chelmno',
+        icon: 'landmark',
+        title: { pl: 'Chełmno', en: 'Chelmno' },
         description: {
-          pl: 'Lokalne kuchnie, rodzinne obiady i miejsca na wieczorne wyjście.',
-          en: 'Local kitchens, family lunches and places for an evening out.',
+          pl: 'Miasto zakochanych z zabytkową starówką, gotyckimi kościołami i klimatycznymi uliczkami nad Wisłą. Do Chełmna można dojechać bezpośrednio PKS-em, mijając po drodze malownicze nadwiślańskie miejscowości.',
+          en: 'The city of lovers, known for its historic old town, Gothic churches and atmospheric streets near the Vistula River. Chelmno can be reached directly by regional PKS bus, passing scenic Vistula-side villages on the way.',
         },
         distance: { pl: 'krótki dojazd', en: 'short drive' },
       },
       {
-        id: 'walking-routes',
-        icon: 'route',
-        title: { pl: 'Trasy spacerowe', en: 'Walking routes' },
+        id: 'bydgoszcz',
+        icon: 'landmark',
+        title: { pl: 'Bydgoszcz', en: 'Bydgoszcz' },
         description: {
-          pl: 'Leśne i polne ścieżki dobre na poranek, rower lub spacer z dziećmi.',
-          en: 'Forest and field paths for mornings, bikes or walks with children.',
+          pl: 'Miasto kanałów, Wyspy Młyńskiej, muzeów, spacerów nad Brdą i atrakcji dobrych na całodniową wycieczkę. Możliwy jest bezpośredni dojazd PKS-em, a trasa pozwala zobaczyć spokojne krajobrazy i nadwiślańskie miejscowości.',
+          en: 'A city of canals, Mill Island, museums, riverside walks and attractions ideal for a day trip. It can be reached directly by regional PKS bus, with a route through calm landscapes and Vistula-side villages.',
         },
-        distance: { pl: 'od wyjścia z obiektu', en: 'from the property' },
+        distance: { pl: 'ok. 25 km', en: 'approx. 25 km' },
       },
       {
-        id: 'places',
+        id: 'torun',
         icon: 'landmark',
-        title: { pl: 'Miejsca warte odwiedzenia', en: 'Places worth visiting' },
+        title: { pl: 'Toruń', en: 'Torun' },
         description: {
-          pl: 'Krótkie wycieczki do lokalnych atrakcji można łatwo dopasować do długości pobytu.',
-          en: 'Short trips to local attractions can be easily matched to the length of stay.',
+          pl: 'Miasto Mikołaja Kopernika, słynnych pierników, gotyckiej starówki i wyjątkowego klimatu nad Wisłą.',
+          en: 'The city of Nicolaus Copernicus, famous gingerbread, a Gothic old town and a unique Vistula-side atmosphere.',
         },
-        distance: { pl: 'planowane indywidualnie', en: 'planned individually' },
+        distance: { pl: 'ok. 45 km', en: 'approx. 45 km' },
       },
     ],
+    restaurants: [
+      {
+        id: 'bon-apetyt',
+        title: { pl: 'Bon Apetyt', en: 'Bon Apetyt' },
+        distance: { pl: '6 km od obiektu', en: '6 km from the property' },
+        description: {
+          pl: 'Lokalne miejsce z domowymi obiadami, przekąskami i cateringiem z dostawą pod wskazany adres. Dobre rozwiązanie, gdy chcecie zjeść spokojny posiłek na miejscu bez wychodzenia z obiektu.',
+          en: 'A local spot offering homemade dinners, snacks and catering with delivery to your address. A convenient option when you want a relaxed meal at the property without going out.',
+        },
+      },
+      {
+        id: 'big-basza',
+        title: { pl: 'Big Basza', en: 'Big Basza' },
+        distance: { pl: '6 km od obiektu', en: '6 km from the property' },
+        description: {
+          pl: 'Szybka opcja na luźny wieczór: kebaby, pizza i dania na wynos z dostawą w okolice obiektu. Sprawdza się po dniu nad basenem albo po wycieczce.',
+          en: 'A quick option for an easy evening: kebabs, pizza and takeaway-style meals delivered near the property. Useful after a day by the pool or a trip.',
+        },
+      },
+      {
+        id: 'restauracja-ostromecka',
+        title: { pl: 'Restauracja Ostromecka', en: 'Ostromecka Restaurant' },
+        distance: { pl: '11 km od obiektu', en: '11 km from the property' },
+        description: {
+          pl: 'Restauracja przy historycznym kompleksie pałacowo-parkowym w Ostromecku. Serwuje tradycyjną kuchnię polską w eleganckim wydaniu, szczególnie wartą rozważenia na spokojny obiad poza obiektem.',
+          en: 'A restaurant by the historic palace and park complex in Ostromecko. It serves traditional Polish cuisine in an elegant style, a good choice for a calm lunch or dinner outside the property.',
+        },
+        details: [
+          { pl: 'gęsina', en: 'goose' },
+          { pl: 'jagnięcina', en: 'lamb' },
+          { pl: 'cielęcina', en: 'veal' },
+        ],
+      },
+    ],
+    nearby: [
+      {
+        id: 'stan-mar',
+        title: { pl: 'Stan-Mar Piekarnia i Cukiernia', en: 'Stan-Mar Bakery and Confectionery' },
+        distance: { pl: '300 m od obiektu', en: '300 m from the property' },
+        description: {
+          pl: 'Piekarnia i cukiernia położona bardzo blisko obiektu. Dobre miejsce na świeże pieczywo, drożdżówki, ciasto do kawy i szybkie zakupy śniadaniowe bez planowania dłuższego wyjazdu.',
+          en: 'A bakery and confectionery located very close to the property. A convenient place for fresh bread, pastries, cake for coffee and quick breakfast shopping without planning a longer trip.',
+        },
+        details: [
+          { pl: 'świeże pieczywo', en: 'fresh bread' },
+          { pl: 'słodkości', en: 'sweets' },
+          { pl: 'czynna codziennie', en: 'open daily' },
+        ],
+      },
+      {
+        id: 'dino',
+        title: { pl: 'Dino', en: 'Dino' },
+        distance: { pl: '300 m od obiektu', en: '300 m from the property' },
+        description: {
+          pl: 'Supermarket w odległości krótkiego spaceru od domu. Przydatny na codzienne zakupy, napoje, produkty na grilla, kosmetyki i rzeczy potrzebne w trakcie pobytu.',
+          en: 'A supermarket within a short walk from the house. Useful for everyday shopping, drinks, barbecue supplies, toiletries and essentials needed during your stay.',
+        },
+        details: [
+          { pl: 'krótki spacer', en: 'short walk' },
+          { pl: 'produkty na grilla', en: 'barbecue supplies' },
+          { pl: 'codzienne zakupy', en: 'everyday shopping' },
+        ],
+      },
+    ],
+    bikeRoutes: {
+      title: { pl: 'Trasy rowerowe', en: 'Cycling routes' },
+      lead: {
+        pl: 'Przez Czarże przebiega Wiślana Trasa Rowerowa (WTR), jeden z najdłuższych i najbardziej malowniczych szlaków rowerowych w Polsce. Okolica dobrze sprawdza się zarówno na krótką rekreacyjną przejażdżkę, jak i dłuższą trasę przez Dolinę Dolnej Wisły, w pobliżu wałów przeciwpowodziowych, pól, lasów i punktów widokowych.',
+        en: 'The Vistula Cycling Route (WTR), one of the longest and most scenic cycling trails in Poland, runs through Czarze. The area works well for both a short recreational ride and a longer route through the Lower Vistula Valley, close to flood embankments, fields, forests and viewpoints.',
+      },
+      routes: [
+        { pl: 'Wiślana Trasa Rowerowa (WTR)', en: 'Vistula Cycling Route (WTR)' },
+        { pl: 'Zielony szlak „Dookoła Doliny Dolnej Wisły”', en: 'Green trail “Around the Lower Vistula Valley”' },
+        { pl: 'Czarny szlak „Po Dolinie Dolnej Wisły”', en: 'Black trail “Through the Lower Vistula Valley”' },
+      ],
+    },
   },
   pricing: {
     room1Nightly: 500,
     room2Nightly: 300,
+    room2Enabled: false,
     room1Capacity: 6,
-    maxGuests: 12,
+    maxGuests: 14,
     minStayNights: 1,
     currency: 'PLN',
+    discounts: [],
     extraInfo: {
-      pl: 'Cena jest szacunkowa i wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
-      en: 'The price is estimated and requires confirmation by the owner after checking availability.',
+      pl: 'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie 6 osób. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
+      en: 'The price is for the entire apartment per night and includes a stay for up to 6 guests. The amount requires confirmation by the owner after checking availability.',
     },
   },
   faq: [
@@ -248,8 +401,19 @@ export const defaultSiteContent: SiteContent = {
         en: 'How many people can stay at the property?',
       },
       answer: {
-        pl: 'Maksymalna liczba gości całego obiektu wynosi 12 osób. Pokój 2 aktywuje się automatycznie przy rezerwacjach powyżej 6 osób.',
-        en: 'The maximum capacity of the whole property is 12 guests. Room 2 is automatically included for bookings above 6 guests.',
+        pl: 'Aktualnie rezerwowany apartament na parterze jest przeznaczony dla maksymalnie 6 osób.',
+        en: 'The currently available ground-floor apartment is designed for up to 6 guests.',
+      },
+    },
+    {
+      id: 'pets',
+      question: {
+        pl: 'Czy obiekt przyjmuje zwierzęta?',
+        en: 'Are pets allowed?',
+      },
+      answer: {
+        pl: 'Ze względu na komfort i bezpieczeństwo wszystkich naszych gości, w tym osób z alergiami, obiekt nie przyjmuje zwierząt.',
+        en: 'For the comfort and safety of all guests, including people with allergies, pets are not allowed on the property.',
       },
     },
     {
@@ -270,8 +434,8 @@ export const defaultSiteContent: SiteContent = {
         en: 'How is the stay price calculated?',
       },
       answer: {
-        pl: 'Do 6 osób naliczana jest cena pokoju podstawowego. Powyżej 6 osób system dolicza pokój dodatkowy. Wynik mnożony jest przez liczbę nocy.',
-        en: 'Up to 6 guests, the base room price applies. Above 6 guests, the additional room is added. The result is multiplied by the number of nights.',
+        pl: 'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie 6 osób. Niezależnie od tego, czy przyjeżdżają 2, 4 czy 6 osób, obowiązuje ta sama cena za apartament.',
+        en: 'The price is for the entire apartment per night and includes a stay for up to 6 guests. Whether 2, 4 or 6 guests arrive, the same apartment rate applies.',
       },
     },
     {
@@ -292,8 +456,8 @@ export const defaultSiteContent: SiteContent = {
       en: 'Check dates and send an inquiry',
     },
     lead: {
-      pl: 'Wybierz daty, liczbę gości i zobacz szacunkową cenę przed wysłaniem wiadomości do właściciela.',
-      en: 'Choose dates and guest count to see an estimated price before sending your message to the owner.',
+      pl: 'Wybierz daty pobytu i liczbę gości, aby sprawdzić dostępność oraz koszt apartamentu za wybrane noce.',
+      en: 'Choose your stay dates and guest count to check availability and the apartment price for the selected nights.',
     },
     ownerEmail: 'rezerwacje@gerkapoolhouse.pl',
     confirmationSubject: {
@@ -325,11 +489,11 @@ export const defaultSiteContent: SiteContent = {
         en: 'Gerka Pool House | Private pool stay in Poland',
       },
       description: {
-        pl: 'Gerka Pool House to komfortowy obiekt noclegowy z prywatnym basenem, ogrodem, grillem, parkingiem i miejscem dla rodzin oraz grup do 12 osób.',
-        en: 'Gerka Pool House is a comfortable accommodation with a private pool, garden, barbecue, parking and space for families and groups of up to 12 guests.',
+        pl: 'Gerka Pool House to komfortowy apartament na parterze dla maksymalnie 6 osób, z prywatnym basenem, ogrodem, grillem i parkingiem.',
+        en: 'Gerka Pool House is a comfortable ground-floor apartment for up to 6 guests, with a private pool, garden, barbecue and parking.',
       },
       canonicalPath: '/',
-      ogImage: heroWebp,
+      ogImage: socialPreviewImage,
     },
     admin: {
       title: {
@@ -341,7 +505,7 @@ export const defaultSiteContent: SiteContent = {
         en: 'Management panel for content, gallery, pricing, FAQ, reservations and SEO of Gerka Pool House.',
       },
       canonicalPath: '/admin',
-      ogImage: heroWebp,
+      ogImage: socialPreviewImage,
     },
     privacy: {
       title: {
@@ -353,7 +517,7 @@ export const defaultSiteContent: SiteContent = {
         en: 'Information about personal data processing related to Gerka Pool House inquiries.',
       },
       canonicalPath: '/privacy',
-      ogImage: heroWebp,
+      ogImage: socialPreviewImage,
     },
     cookies: {
       title: {
@@ -365,7 +529,7 @@ export const defaultSiteContent: SiteContent = {
         en: 'Information about cookies, analytics and measurement tools on the Gerka Pool House website.',
       },
       canonicalPath: '/cookies',
-      ogImage: heroWebp,
+      ogImage: socialPreviewImage,
     },
   },
   updatedAt: new Date().toISOString(),

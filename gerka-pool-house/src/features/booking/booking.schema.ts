@@ -7,6 +7,7 @@ export const bookingSchema = z.object({
   fullName: z.string().trim().min(2, 'validation.fullName'),
   email: z.string().trim().email('validation.email'),
   phone: z.string().trim().min(6, 'validation.phone'),
+  discountCode: z.string().trim().max(40, 'validation.discountCodeMax').optional().default(''),
   message: z.string().trim().max(1000, 'validation.messageMax').optional().default(''),
 })
 

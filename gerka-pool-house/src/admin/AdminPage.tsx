@@ -2,6 +2,7 @@ import {
   BadgeDollarSign,
   BookOpen,
   CalendarOff,
+  ChevronDown,
   Download,
   FileText,
   GalleryHorizontalEnd,
@@ -9,6 +10,8 @@ import {
   Inbox,
   LogOut,
   MapPin,
+  RotateCcw,
+  Save as SaveIcon,
   Settings,
   Sparkles,
 } from 'lucide-react'
@@ -17,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import { Logo } from '../components/common/Logo'
+import { ResponsiveImage } from '../components/common/ResponsiveImage'
 import { Seo } from '../components/common/Seo'
 import { Button } from '../components/ui/Button'
 import { supportedLocales } from '../config/site'
@@ -24,7 +28,7 @@ import { useAdminAuth } from '../hooks/useAdminAuth'
 import { useSiteContent } from '../hooks/useSiteContent'
 import { reservationRepository } from '../services/reservationRepository'
 import type { Locale, LocalizedString } from '../types/common'
-import type { IconKey, SiteContent } from '../types/content'
+import type { IconKey, ImageAsset, SiteContent } from '../types/content'
 import type { AvailabilityRange, ReservationRequest, ReservationStatus } from '../types/booking'
 import { formatDate, formatMoney } from '../utils/format'
 import { getLocale, localize } from '../utils/locale'
@@ -46,6 +50,7 @@ type TabId =
   | 'availability'
   | 'faq'
   | 'amenities'
+  | 'area'
   | 'contact'
   | 'seo'
   | 'reservations'
@@ -148,6 +153,29 @@ function ReservationDetailRow({
   )
 }
 
+function MediaPreview({ image }: { image: ImageAsset }) {
+  if (image.type === 'video') {
+    return (
+      <video
+        className="aspect-video w-full rounded-md border border-[var(--color-border)] bg-[var(--color-deep)] object-cover"
+        src={image.src}
+        poster={image.poster}
+        controls
+        preload="metadata"
+      />
+    )
+  }
+
+  return (
+    <ResponsiveImage
+      image={image}
+      alt=""
+      className="aspect-video rounded-md border border-[var(--color-border)] bg-[var(--color-deep)]"
+      imgClassName="object-cover"
+    />
+  )
+}
+
 function LocalizedField({
   label,
   value,
@@ -186,6 +214,14 @@ function numberValue(event: ChangeEvent<HTMLInputElement>) {
   return Number(event.target.value || 0)
 }
 
+function discountCodeValue(value: string) {
+  return value.trim().replace(/\s+/g, '').toUpperCase()
+}
+
+function discountPercentValue(event: ChangeEvent<HTMLInputElement>) {
+  return Math.min(100, Math.max(1, Number(event.target.value || 1)))
+}
+
 function nextDayISO(date: string) {
   if (!date) return getTomorrowISO()
 
@@ -218,6 +254,35 @@ function createUnavailableRange(): AvailabilityRange {
     from,
     to: nextDayISO(from),
     status: 'unavailable',
+  }
+}
+
+function createGalleryItem(sourceImage: ImageAsset) {
+  return {
+    id: crypto.randomUUID(),
+    title: { pl: 'Nowe zdjęcie', en: 'New photo' },
+    alt: { pl: 'Zdjęcie prezentujące Gerka Pool House', en: 'Photo showing Gerka Pool House' },
+    image: { ...sourceImage, type: sourceImage.type ?? 'image' },
+  }
+}
+
+function createAreaInfoItem() {
+  return {
+    id: crypto.randomUUID(),
+    title: { pl: 'Nowa pozycja', en: 'New item' },
+    distance: { pl: 'odległość od obiektu', en: 'distance from the property' },
+    description: { pl: 'Opis pozycji', en: 'Item description' },
+    details: [],
+  }
+}
+
+function createAreaPlace() {
+  return {
+    id: crypto.randomUUID(),
+    icon: 'landmark' as IconKey,
+    title: { pl: 'Nowe miejsce', en: 'New place' },
+    distance: { pl: 'odległość od obiektu', en: 'distance from the property' },
+    description: { pl: 'Opis miejsca', en: 'Place description' },
   }
 }
 
@@ -286,8 +351,9 @@ export function AdminPage() {
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const [activeTab, setActiveTab] = useState<TabId>('content')
-  const [draft, setDraft] = useState<SiteContent>(content)
+  const [draftOverride, setDraft] = useState<SiteContent>(content)
   const [isDraftDirty, setIsDraftDirty] = useState(false)
+  const draft = isDraftDirty ? draftOverride : content
   const [notice, setNotice] = useState<AdminNotice>(null)
   const [contentActionError, setContentActionError] = useState('')
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
@@ -299,6 +365,9 @@ export function AdminPage() {
   const [reservationStatusFilter, setReservationStatusFilter] = useState<ReservationStatusFilter>('all')
   const [reservationStatusError, setReservationStatusError] = useState('')
   const [reservationConflictMessage, setReservationConflictMessage] = useState('')
+  const [openGallerySectionIds, setOpenGallerySectionIds] = useState<string[]>(() =>
+    content.gallerySections.slice(0, 1).map((section) => section.id),
+  )
 
   const tabs = useMemo(
     () => [
@@ -309,6 +378,7 @@ export function AdminPage() {
       { id: 'availability' as const, label: t('admin.tabs.availability'), icon: CalendarOff },
       { id: 'faq' as const, label: t('admin.tabs.faq'), icon: HelpCircle },
       { id: 'amenities' as const, label: t('admin.tabs.amenities'), icon: Sparkles },
+      { id: 'area' as const, label: t('admin.tabs.area'), icon: MapPin },
       { id: 'contact' as const, label: t('admin.tabs.contact'), icon: MapPin },
       { id: 'seo' as const, label: t('admin.tabs.seo'), icon: Settings },
       { id: 'reservations' as const, label: t('admin.tabs.reservations'), icon: Inbox },
@@ -355,6 +425,7 @@ export function AdminPage() {
   )
 
   const visibleReservationStatuses = reservationStatusFilter === 'all' ? reservationStatuses : [reservationStatusFilter]
+  const gallerySectionIds = useMemo(() => draft.gallerySections.map((section) => section.id), [draft.gallerySections])
 
   const instructionSections = useMemo(
     () =>
@@ -401,13 +472,22 @@ export function AdminPage() {
     }
   }, [adminAuth.status, t])
 
-  if (!isDraftDirty && draft.updatedAt !== content.updatedAt) {
-    setDraft(content)
+  const toggleGallerySection = (sectionId: string) => {
+    setOpenGallerySectionIds((current) =>
+      current.includes(sectionId) ? current.filter((id) => id !== sectionId) : [...current, sectionId],
+    )
+  }
+
+  const openGallerySectionAndScroll = (sectionId: string) => {
+    setOpenGallerySectionIds((current) => (current.includes(sectionId) ? current : [...current, sectionId]))
+    window.requestAnimationFrame(() => {
+      document.getElementById(`admin-gallery-${sectionId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const mutate = (updater: (next: SiteContent) => void) => {
     setDraft((current) => {
-      const next = structuredClone(current)
+      const next = structuredClone(isDraftDirty ? current : content)
       updater(next)
       return next
     })
@@ -438,6 +518,7 @@ export function AdminPage() {
 
       setDraft(restored)
       setIsDraftDirty(false)
+      setOpenGallerySectionIds(restored.gallerySections.slice(0, 1).map((section) => section.id))
       setNotice('restored')
       setIsResetConfirmOpen(false)
     } catch {
@@ -535,20 +616,20 @@ export function AdminPage() {
       <Seo settings={draft.seo.admin} locale={locale} noindex />
       <main className="min-h-screen bg-[var(--color-paper)]">
         <header className="border-b border-[var(--color-border)] bg-[var(--color-deep)] px-5 py-4 text-white">
-          <div className="mx-auto grid max-w-7xl gap-4 xl:grid-cols-[1fr_auto] xl:items-center">
-            <div className="flex min-w-0 items-center justify-between gap-4">
-              <Logo />
-              <Link className="rounded-md px-3 py-2 text-sm font-medium text-white/76 hover:text-white xl:hidden" to="/">
-                {draft.brandName}
-              </Link>
-            </div>
+          <div className="mx-auto grid max-w-7xl gap-4">
+            <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-center justify-between gap-4">
+                <Logo />
+                <Link className="rounded-md px-3 py-2 text-sm font-medium text-white/76 hover:text-white lg:hidden" to="/">
+                  {draft.brandName}
+                </Link>
+              </div>
 
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-              <div className="flex flex-wrap items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] p-1.5">
+              <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] p-1.5">
                 <span className="max-w-full truncate rounded-sm bg-[var(--color-surface)] px-3 py-2 text-sm text-white/76 sm:max-w-72">
                   {adminAuth.session?.user.email}
                 </span>
-                <Link className="hidden rounded-sm px-3 py-2 text-sm font-medium text-white/76 hover:bg-white/8 hover:text-white xl:inline-flex" to="/">
+                <Link className="hidden rounded-sm px-3 py-2 text-sm font-medium text-white/76 hover:bg-white/8 hover:text-white lg:inline-flex" to="/">
                   {draft.brandName}
                 </Link>
                 <Button
@@ -562,25 +643,36 @@ export function AdminPage() {
                   {t('admin.auth.signOut')}
                 </Button>
               </div>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] p-1.5">
+            <div className="grid gap-3 rounded-md border border-[var(--color-brass)]/30 bg-[var(--color-surface)]/55 p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[var(--color-ink)]">{t('admin.saveBarTitle')}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+                  {isDraftDirty ? t('admin.unsavedChanges') : t('admin.allChangesSaved')}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <Button
                   type="button"
-                  size="sm"
-                  variant="secondary"
+                  size="lg"
+                  className="w-full shadow-lg shadow-black/20 sm:w-auto"
                   onClick={() => {
                     void save()
                   }}
                 >
-                  {t('common.save')}
+                  <SaveIcon aria-hidden="true" className="size-4" />
+                  {t('admin.saveChanges')}
                 </Button>
                 <Button
                   type="button"
-                  size="sm"
+                  size="md"
                   variant="ghost"
-                  className="text-white hover:bg-white/10"
+                  className="w-full text-white hover:bg-white/10 sm:w-auto"
                   onClick={() => setIsResetConfirmOpen(true)}
                 >
+                  <RotateCcw aria-hidden="true" className="size-4" />
                   {t('common.reset')}
                 </Button>
               </div>
@@ -698,6 +790,100 @@ export function AdminPage() {
                   textarea
                   onChange={(language, value) => mutate((next) => void (next.hero.lead[language] = value))}
                 />
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                  <div className="grid gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                        {t('admin.fields.heroImage')}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                        {t('admin.fields.heroImageHelp')}
+                      </p>
+                    </div>
+                    <TextInput
+                      label={t('admin.fields.imageUrl')}
+                      value={draft.hero.image.src}
+                      onChange={(value) =>
+                        mutate((next) => {
+                          next.hero.image = { src: value, type: 'image' }
+                        })
+                      }
+                    />
+                    <GalleryItemMediaPicker
+                      accept="image/*"
+                      allowVideo={false}
+                      unsupportedMessage={t('admin.mediaUploadImageUnsupported')}
+                      onUploaded={(upload) =>
+                        mutate((next) => {
+                          next.hero.image = { ...upload.asset, type: 'image' }
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <p className="text-sm font-medium text-[var(--color-ink)]">{t('admin.fields.heroImagePreview')}</p>
+                    <ResponsiveImage
+                      image={draft.hero.image}
+                      alt=""
+                      className="aspect-[16/9] rounded-md border border-[var(--color-border)] bg-[var(--color-deep)]"
+                      imgClassName="object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                  <div className="grid gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                        {t('admin.fields.heroMobileImage')}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                        {t('admin.fields.heroMobileImageHelp')}
+                      </p>
+                    </div>
+                    <TextInput
+                      label={t('admin.fields.imageUrl')}
+                      value={(draft.hero.mobileImage ?? draft.hero.image).src}
+                      onChange={(value) =>
+                        mutate((next) => {
+                          next.hero.mobileImage = { src: value, type: 'image' }
+                        })
+                      }
+                    />
+                    <GalleryItemMediaPicker
+                      accept="image/*"
+                      allowVideo={false}
+                      unsupportedMessage={t('admin.mediaUploadImageUnsupported')}
+                      onUploaded={(upload) =>
+                        mutate((next) => {
+                          next.hero.mobileImage = { ...upload.asset, type: 'image' }
+                        })
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="justify-self-start"
+                      onClick={() =>
+                        mutate((next) => {
+                          next.hero.mobileImage = next.hero.image
+                        })
+                      }
+                    >
+                      {t('admin.fields.heroMobileImageUseDesktop')}
+                    </Button>
+                  </div>
+                  <div className="grid gap-2">
+                    <p className="text-sm font-medium text-[var(--color-ink)]">
+                      {t('admin.fields.heroMobileImagePreview')}
+                    </p>
+                    <ResponsiveImage
+                      image={draft.hero.mobileImage ?? draft.hero.image}
+                      alt=""
+                      className="aspect-[9/16] rounded-md border border-[var(--color-border)] bg-[var(--color-deep)]"
+                      imgClassName="object-cover object-[63%_48%]"
+                    />
+                  </div>
+                </div>
                 <LocalizedField
                   label={t('admin.fields.aboutTitle')}
                   value={draft.about.title}
@@ -720,6 +906,46 @@ export function AdminPage() {
                   value={draft.area.title}
                   onChange={(language, value) => mutate((next) => void (next.area.title[language] = value))}
                 />
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                  <div className="grid gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                        {t('admin.fields.areaImage')}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                        {t('admin.fields.areaImageHelp')}
+                      </p>
+                    </div>
+                    <TextInput
+                      label={t('admin.fields.imageUrl')}
+                      value={draft.area.image.src}
+                      onChange={(value) =>
+                        mutate((next) => {
+                          next.area.image = { src: value, type: 'image' }
+                        })
+                      }
+                    />
+                    <GalleryItemMediaPicker
+                      accept="image/*"
+                      allowVideo={false}
+                      unsupportedMessage={t('admin.mediaUploadImageUnsupported')}
+                      onUploaded={(upload) =>
+                        mutate((next) => {
+                          next.area.image = { ...upload.asset, type: 'image' }
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <p className="text-sm font-medium text-[var(--color-ink)]">{t('admin.fields.areaImagePreview')}</p>
+                    <ResponsiveImage
+                      image={draft.area.image}
+                      alt=""
+                      className="aspect-[4/3] rounded-md border border-[var(--color-border)] bg-[var(--color-deep)]"
+                      imgClassName="object-cover"
+                    />
+                  </div>
+                </div>
                 <LocalizedField
                   label={t('sections.bookingEyebrow')}
                   value={draft.booking.title}
@@ -730,86 +956,241 @@ export function AdminPage() {
 
             {activeTab === 'gallery' ? (
               <div className="grid gap-5">
-                {draft.gallery.map((item, index) => (
-                  <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <h2 className="text-lg font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h2>
+                <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                        {t('admin.fields.gallerySectionsTitle')}
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                        {t('admin.fields.gallerySectionsLead')}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         size="sm"
-                        variant="danger"
-                        onClick={() => mutate((next) => void next.gallery.splice(index, 1))}
+                        variant="secondary"
+                        onClick={() => setOpenGallerySectionIds(gallerySectionIds)}
                       >
-                        {t('common.remove')}
+                        {t('admin.fields.expandAllGalleries')}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setOpenGallerySectionIds([])}
+                      >
+                        {t('admin.fields.collapseAllGalleries')}
                       </Button>
                     </div>
-                    <LocalizedField
-                      label={t('admin.fields.title')}
-                      value={item.title}
-                      onChange={(language, value) =>
-                        mutate((next) => void (next.gallery[index].title[language] = value))
-                      }
-                    />
-                    <LocalizedField
-                      label={t('admin.fields.alt')}
-                      value={item.alt}
-                      onChange={(language, value) => mutate((next) => void (next.gallery[index].alt[language] = value))}
-                    />
-                    <div className="grid gap-4 sm:grid-cols-[1fr_180px]">
-                      <div className="grid gap-3">
-                        <TextInput
-                          label={t('admin.fields.mediaUrl')}
-                          value={item.image.src}
-                          onChange={(value) => mutate((next) => void (next.gallery[index].image.src = value))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {draft.gallerySections.map((section) => {
+                      const isOpen = openGallerySectionIds.includes(section.id)
+
+                      return (
+                        <button
+                          key={section.id}
+                          type="button"
+                          className={cn(
+                            'rounded-md border px-3 py-2 text-left text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-water)]',
+                            isOpen
+                              ? 'border-[var(--color-brass)] bg-[var(--color-brass)] text-[var(--color-deep)]'
+                              : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:border-[var(--color-sage)]',
+                          )}
+                          onClick={() => openGallerySectionAndScroll(section.id)}
+                        >
+                          {localize(section.title, locale)}
+                          <span className="ml-2 font-medium opacity-75">
+                            {t('admin.fields.galleryMediaCount', { count: section.items.length })}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                {draft.gallerySections.map((section, sectionIndex) => (
+                  <article
+                    key={section.id}
+                    id={`admin-gallery-${section.id}`}
+                    className="grid gap-5 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4"
+                  >
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-left transition hover:border-[var(--color-sage)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-water)]"
+                      aria-expanded={openGallerySectionIds.includes(section.id)}
+                      aria-controls={`admin-gallery-panel-${section.id}`}
+                      onClick={() => toggleGallerySection(section.id)}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-lg font-semibold text-[var(--color-ink)]">
+                          {localize(section.title, locale)}
+                        </span>
+                        <span className="mt-1 block text-sm leading-6 text-[var(--color-muted)]">
+                          {t('admin.fields.galleryMediaCount', { count: section.items.length })}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-3 text-sm font-semibold text-[var(--color-ink)]">
+                        {openGallerySectionIds.includes(section.id)
+                          ? t('admin.fields.collapseGallery')
+                          : t('admin.fields.expandGallery')}
+                        <ChevronDown
+                          aria-hidden="true"
+                          className={cn(
+                            'size-5 transition',
+                            openGallerySectionIds.includes(section.id) && 'rotate-180',
+                          )}
                         />
-                        <GalleryItemMediaPicker
-                          onUploaded={(upload) =>
-                            mutate((next) => {
-                              next.gallery[index].image = upload.asset
-                            })
+                      </span>
+                    </button>
+                    <div
+                      id={`admin-gallery-panel-${section.id}`}
+                      className={cn('grid gap-5', !openGallerySectionIds.includes(section.id) && 'hidden')}
+                    >
+                      <div className="grid gap-4">
+                        <LocalizedField
+                          label={t('admin.fields.galleryGroupTitle')}
+                          value={section.title}
+                          onChange={(language, value) =>
+                            mutate((next) => void (next.gallerySections[sectionIndex].title[language] = value))
+                          }
+                        />
+                        <LocalizedField
+                          label={t('admin.fields.galleryGroupLead')}
+                          value={section.lead}
+                          textarea
+                          onChange={(language, value) =>
+                            mutate((next) => void (next.gallerySections[sectionIndex].lead[language] = value))
                           }
                         />
                       </div>
-                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-                        {t('admin.fields.mediaType')}
-                        <select
-                          className="field"
-                          value={item.image.type ?? 'image'}
-                          onChange={(event) =>
-                            mutate(
-                              (next) =>
-                                void (next.gallery[index].image.type = event.target.value as 'image' | 'video'),
+                      <div className="grid gap-4">
+                        {section.items.map((item, itemIndex) => (
+                          <div key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                                {localize(item.title, locale)}
+                              </h2>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="danger"
+                                onClick={() =>
+                                  mutate((next) => void next.gallerySections[sectionIndex].items.splice(itemIndex, 1))
+                                }
+                              >
+                                {t('common.remove')}
+                              </Button>
+                            </div>
+                            <LocalizedField
+                              label={t('admin.fields.title')}
+                              value={item.title}
+                              onChange={(language, value) =>
+                                mutate(
+                                  (next) =>
+                                    void (next.gallerySections[sectionIndex].items[itemIndex].title[language] = value),
+                                )
+                              }
+                            />
+                            <LocalizedField
+                              label={t('admin.fields.alt')}
+                              value={item.alt}
+                              onChange={(language, value) =>
+                                mutate(
+                                  (next) =>
+                                    void (next.gallerySections[sectionIndex].items[itemIndex].alt[language] = value),
+                                )
+                              }
+                            />
+                            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_260px] lg:items-start">
+                              <div className="grid gap-3">
+                                <TextInput
+                                  label={t('admin.fields.mediaUrl')}
+                                  value={item.image.src}
+                                  onChange={(value) =>
+                                    mutate((next) => {
+                                      next.gallerySections[sectionIndex].items[itemIndex].image = {
+                                        src: value,
+                                        type: next.gallerySections[sectionIndex].items[itemIndex].image.type ?? 'image',
+                                      }
+                                    })
+                                  }
+                                />
+                                <GalleryItemMediaPicker
+                                  onUploaded={(upload) =>
+                                    mutate((next) => {
+                                      next.gallerySections[sectionIndex].items[itemIndex].image = upload.asset
+                                    })
+                                  }
+                                />
+                              </div>
+                              <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                                {t('admin.fields.mediaType')}
+                                <select
+                                  className="field"
+                                  value={item.image.type ?? 'image'}
+                                  onChange={(event) =>
+                                    mutate(
+                                      (next) =>
+                                        void (next.gallerySections[sectionIndex].items[itemIndex].image.type =
+                                          event.target.value as 'image' | 'video'),
+                                    )
+                                  }
+                                >
+                                  <option value="image">{t('admin.mediaTypeImage')}</option>
+                                  <option value="video">{t('admin.mediaTypeVideo')}</option>
+                                </select>
+                              </label>
+                              <div className="grid gap-2">
+                                <p className="text-sm font-medium text-[var(--color-ink)]">
+                                  {t('admin.fields.mediaPreview')}
+                                </p>
+                                <MediaPreview image={item.image} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() =>
+                            mutate((next) =>
+                              void next.gallerySections[sectionIndex].items.push(createGalleryItem(next.hero.image)),
                             )
                           }
                         >
-                          <option value="image">{t('admin.mediaTypeImage')}</option>
-                          <option value="video">{t('admin.mediaTypeVideo')}</option>
-                        </select>
-                      </label>
+                          {t('admin.fields.addGalleryMedia')}
+                        </Button>
+                      </div>
                     </div>
                   </article>
                 ))}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() =>
-                    mutate((next) =>
-                      void next.gallery.push({
-                        id: crypto.randomUUID(),
-                        title: { pl: 'Materiał z galerii', en: 'Gallery media' },
-                        alt: { pl: 'Materiał prezentujący Gerka Pool House', en: 'Media showing Gerka Pool House' },
-                        image: { src: next.hero.image.src, type: 'image' },
-                      }),
-                    )
-                  }
-                >
-                  {t('common.add')}
-                </Button>
               </div>
             ) : null}
 
             {activeTab === 'pricing' ? (
               <div className="grid gap-5">
+                <label className="flex flex-col gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="min-w-0">
+                    <span className="block text-base font-semibold text-[var(--color-ink)]">
+                      {t('admin.fields.room2Enabled')}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-[var(--color-muted)]">
+                      {t('admin.fields.room2EnabledHelp', { count: draft.pricing.room1Capacity })}
+                    </span>
+                  </span>
+                  <input
+                    className="h-6 w-11 shrink-0 accent-[var(--color-brass)]"
+                    type="checkbox"
+                    checked={draft.pricing.room2Enabled}
+                    onChange={(event) =>
+                      mutate((next) => {
+                        next.pricing.room2Enabled = event.target.checked
+                      })
+                    }
+                  />
+                </label>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
                     {t('admin.fields.room1Price')}
@@ -858,8 +1239,84 @@ export function AdminPage() {
                   textarea
                   onChange={(language, value) => mutate((next) => void (next.pricing.extraInfo[language] = value))}
                 />
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                      {t('admin.fields.discountsTitle')}
+                    </h2>
+                    <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                      {t('admin.fields.discountsLead')}
+                    </p>
+                  </div>
+                  {draft.pricing.discounts.length === 0 ? (
+                    <p className="rounded-md bg-[var(--color-deep)] p-3 text-sm text-[var(--color-muted)]">
+                      {t('admin.fields.discountsEmpty')}
+                    </p>
+                  ) : null}
+                  {draft.pricing.discounts.map((discount, index) => (
+                    <article
+                      key={discount.id}
+                      className="grid gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:grid-cols-[1fr_160px_auto] sm:items-end"
+                    >
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.discountCode')}
+                        <input
+                          className="field uppercase"
+                          value={discount.code}
+                          onChange={(event) =>
+                            mutate(
+                              (next) =>
+                                void (next.pricing.discounts[index].code = discountCodeValue(event.target.value)),
+                            )
+                          }
+                        />
+                      </label>
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.discountPercent')}
+                        <input
+                          className="field"
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={discount.percent}
+                          onChange={(event) =>
+                            mutate(
+                              (next) =>
+                                void (next.pricing.discounts[index].percent = discountPercentValue(event)),
+                            )
+                          }
+                        />
+                      </label>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="danger"
+                        onClick={() => mutate((next) => void next.pricing.discounts.splice(index, 1))}
+                      >
+                        {t('common.remove')}
+                      </Button>
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                      mutate((next) =>
+                        void next.pricing.discounts.push({
+                          id: crypto.randomUUID(),
+                          code: 'RABAT10',
+                          percent: 10,
+                        }),
+                      )
+                    }
+                  >
+                    {t('admin.fields.addDiscount')}
+                  </Button>
+                </div>
                 <p className="rounded-md bg-[var(--color-paper)] p-4 text-sm text-[var(--color-muted)]">
-                  8 osób: {formatMoney(draft.pricing.room1Nightly + draft.pricing.room2Nightly, locale)}
+                  {draft.pricing.room2Enabled
+                    ? `8 osób: ${formatMoney(draft.pricing.room1Nightly + draft.pricing.room2Nightly, locale)}`
+                    : t('admin.fields.room2DisabledSummary', { count: draft.pricing.room1Capacity })}
                 </p>
               </div>
             ) : null}
@@ -1036,6 +1493,260 @@ export function AdminPage() {
                     }
                   >
                     {t('common.add')}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            {activeTab === 'area' ? (
+              <div className="grid gap-6">
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">{t('sections.restaurantsTitle')}</h2>
+                  {draft.area.restaurants.map((item, index) => (
+                    <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.area.restaurants.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+                      <LocalizedField
+                        label={t('admin.fields.title')}
+                        value={item.title}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.restaurants[index].title[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.distance')}
+                        value={item.distance}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.restaurants[index].distance[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.description')}
+                        value={item.description}
+                        textarea
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.restaurants[index].description[language] = value))
+                        }
+                      />
+                      <div className="grid gap-3">
+                        <p className="text-sm font-medium text-[var(--color-ink)]">
+                          {t('admin.fields.restaurantSpecialties')}
+                        </p>
+                        {(item.details ?? []).map((detail, detailIndex) => (
+                          <div key={`${item.id}-${detailIndex}`} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                            <LocalizedField
+                              label={t('admin.fields.specialty')}
+                              value={detail}
+                              onChange={(language, value) =>
+                                mutate((next) => {
+                                  const details = next.area.restaurants[index].details ?? []
+                                  next.area.restaurants[index].details = details
+                                  details[detailIndex][language] = value
+                                })
+                              }
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="danger"
+                              onClick={() =>
+                                mutate((next) => {
+                                  next.area.restaurants[index].details?.splice(detailIndex, 1)
+                                })
+                              }
+                            >
+                              {t('common.remove')}
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() =>
+                            mutate((next) => {
+                              next.area.restaurants[index].details = next.area.restaurants[index].details ?? []
+                              next.area.restaurants[index].details?.push({ pl: 'Specjalność', en: 'Specialty' })
+                            })
+                          }
+                        >
+                          {t('admin.fields.addSpecialty')}
+                        </Button>
+                      </div>
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => mutate((next) => void next.area.restaurants.push(createAreaInfoItem()))}
+                  >
+                    {t('admin.fields.addRestaurant')}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">{t('sections.nearbyTitle')}</h2>
+                  {draft.area.nearby.map((item, index) => (
+                    <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.area.nearby.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+                      <LocalizedField
+                        label={t('admin.fields.title')}
+                        value={item.title}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.nearby[index].title[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.distance')}
+                        value={item.distance}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.nearby[index].distance[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.description')}
+                        value={item.description}
+                        textarea
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.nearby[index].description[language] = value))
+                        }
+                      />
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => mutate((next) => void next.area.nearby.push(createAreaInfoItem()))}
+                  >
+                    {t('admin.fields.addNearbyPlace')}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <LocalizedField
+                    label={t('admin.fields.bikeRoutesTitle')}
+                    value={draft.area.bikeRoutes.title}
+                    onChange={(language, value) =>
+                      mutate((next) => void (next.area.bikeRoutes.title[language] = value))
+                    }
+                  />
+                  <LocalizedField
+                    label={t('admin.fields.bikeRoutesLead')}
+                    value={draft.area.bikeRoutes.lead}
+                    textarea
+                    onChange={(language, value) =>
+                      mutate((next) => void (next.area.bikeRoutes.lead[language] = value))
+                    }
+                  />
+                  {draft.area.bikeRoutes.routes.map((route, index) => (
+                    <div key={index} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                      <LocalizedField
+                        label={t('admin.fields.routeName')}
+                        value={route}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.bikeRoutes.routes[index][language] = value))
+                        }
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="danger"
+                        onClick={() => mutate((next) => void next.area.bikeRoutes.routes.splice(index, 1))}
+                      >
+                        {t('common.remove')}
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() =>
+                      mutate((next) => void next.area.bikeRoutes.routes.push({ pl: 'Nowa trasa', en: 'New route' }))
+                    }
+                  >
+                    {t('admin.fields.addRoute')}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">{t('sections.placesTitle')}</h2>
+                  {draft.area.items.map((item, index) => (
+                    <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                      <div className="grid gap-4 sm:grid-cols-[1fr_180px_auto] sm:items-end">
+                        <LocalizedField
+                          label={t('admin.fields.title')}
+                          value={item.title}
+                          onChange={(language, value) =>
+                            mutate((next) => void (next.area.items[index].title[language] = value))
+                          }
+                        />
+                        <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                          {t('admin.fields.icon')}
+                          <select
+                            className="field"
+                            value={item.icon}
+                            onChange={(event) =>
+                              mutate((next) => void (next.area.items[index].icon = event.target.value as IconKey))
+                            }
+                          >
+                            {iconOptions.map((icon) => (
+                              <option key={icon} value={icon}>
+                                {icon}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.area.items.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+                      <LocalizedField
+                        label={t('admin.fields.distance')}
+                        value={item.distance}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.items[index].distance[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.description')}
+                        value={item.description}
+                        textarea
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.items[index].description[language] = value))
+                        }
+                      />
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => mutate((next) => void next.area.items.push(createAreaPlace()))}
+                  >
+                    {t('admin.fields.addPlace')}
                   </Button>
                 </div>
               </div>
@@ -1378,7 +2089,7 @@ export function AdminPage() {
 
         {isResetConfirmOpen ? (
           <div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/70 px-5 py-8"
+            className="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.78)] px-5 py-8 backdrop-blur-sm"
             role="presentation"
             onClick={() => setIsResetConfirmOpen(false)}
           >
@@ -1416,7 +2127,7 @@ export function AdminPage() {
 
         {reservationConflictMessage ? (
           <div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/70 px-5 py-8"
+            className="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.78)] px-5 py-8 backdrop-blur-sm"
             role="presentation"
             onClick={() => setReservationConflictMessage('')}
           >

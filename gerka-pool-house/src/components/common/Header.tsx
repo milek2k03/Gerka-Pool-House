@@ -15,15 +15,15 @@ export function Header() {
   const close = () => setOpen(false)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-5 sm:pt-3">
-      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-2 rounded-md border border-white/20 bg-[rgba(7,10,8,0.72)] px-2 py-2 text-white shadow-lg shadow-black/30 backdrop-blur-xl sm:px-3">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
+      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[rgba(15,23,42,0.75)] px-3 py-2.5 text-white shadow-[0_20px_55px_rgba(0,0,0,0.22)] backdrop-blur-[20px] sm:px-4">
         <Logo />
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {navSections.map((item) => (
             <a
               key={item.id}
               href={`/#${item.id}`}
-              className="rounded-md px-3 py-2 text-sm font-medium text-white/84 transition hover:bg-white/12 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="rounded-full px-3.5 py-2 text-sm font-medium text-white/84 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]"
             >
               {t(item.labelKey)}
             </a>
@@ -39,7 +39,7 @@ export function Header() {
           type="button"
           variant="ghost"
           size="icon"
-          className="shrink-0 text-white hover:bg-white/14 lg:hidden"
+          className="shrink-0 text-white hover:bg-white/10 lg:hidden"
           aria-label={open ? t('common.closeMenu') : t('common.openMenu')}
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
@@ -50,7 +50,7 @@ export function Header() {
 
       <div
         className={cn(
-          'mx-auto mt-2 max-w-7xl rounded-md border border-white/20 bg-[rgba(7,10,8,0.92)] p-3 text-white shadow-xl backdrop-blur-xl lg:hidden',
+          'mx-auto mt-2 max-w-7xl rounded-[1.35rem] border border-[var(--color-border)] bg-[rgba(15,23,42,0.90)] p-3 text-white shadow-[0_20px_55px_rgba(0,0,0,0.24)] backdrop-blur-[20px] lg:hidden',
           open ? 'block' : 'hidden',
         )}
       >
@@ -60,7 +60,7 @@ export function Header() {
               key={item.id}
               href={`/#${item.id}`}
               onClick={close}
-              className="rounded-md px-3 py-3 text-base font-medium text-white/88 hover:bg-white/12 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="rounded-xl px-3 py-3 text-base font-medium text-white/88 hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]"
             >
               {t(item.labelKey)}
             </a>

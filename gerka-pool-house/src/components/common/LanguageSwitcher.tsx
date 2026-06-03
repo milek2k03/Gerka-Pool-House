@@ -14,7 +14,7 @@ export function LanguageSwitcher() {
       type="button"
       size="sm"
       variant="secondary"
-      className="min-h-10 border-white/20 bg-white/16 px-3 text-white backdrop-blur-xl hover:bg-white/24"
+      className="min-h-10 px-3 backdrop-blur-xl"
       aria-label={`${t('common.language')}: ${nextLocale.toUpperCase()}`}
       onClick={() => void i18n.changeLanguage(nextLocale)}
     >

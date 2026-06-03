@@ -10,7 +10,7 @@ export function BookingSection({ content, locale }: { content: SiteContent; loca
   const { t } = useTranslation()
 
   return (
-    <section id="booking" className="bg-[var(--color-paper)] px-4 py-16 sm:px-8 sm:py-20 lg:px-10">
+    <section id="booking" className="bg-[var(--color-paper)] px-4 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow={t('sections.bookingEyebrow')}

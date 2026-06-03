@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn'
 
 interface ResponsiveImageProps {
   image: ImageAsset
+  mobileImage?: ImageAsset
   alt: string
   className?: string
   imgClassName?: string
@@ -13,6 +14,7 @@ interface ResponsiveImageProps {
 
 export function ResponsiveImage({
   image,
+  mobileImage,
   alt,
   className,
   imgClassName,
@@ -22,6 +24,13 @@ export function ResponsiveImage({
 }: ResponsiveImageProps) {
   return (
     <picture className={cn('block overflow-hidden', className)}>
+      {mobileImage?.avif ? (
+        <source media="(max-width: 639px)" srcSet={mobileImage.avif} type="image/avif" sizes={sizes} />
+      ) : null}
+      {mobileImage?.webp ? (
+        <source media="(max-width: 639px)" srcSet={mobileImage.webp} type="image/webp" sizes={sizes} />
+      ) : null}
+      {mobileImage?.src ? <source media="(max-width: 639px)" srcSet={mobileImage.src} sizes={sizes} /> : null}
       {image.avif ? <source srcSet={image.avif} type="image/avif" sizes={sizes} /> : null}
       {image.webp ? <source srcSet={image.webp} type="image/webp" sizes={sizes} /> : null}
       <img

@@ -35,7 +35,11 @@ export interface StaySummary {
   roomsUsed: number
   roomLabels: string[]
   nightlyPrice: number
+  priceBeforeDiscount: number
   estimatedTotal: number
+  discountCode?: string
+  discountPercent?: number
+  discountAmount?: number
   isAvailable: boolean
   isValid: boolean
   reason?: string

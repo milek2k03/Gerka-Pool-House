@@ -31,6 +31,13 @@ export interface GalleryItem {
   image: ImageAsset
 }
 
+export interface GallerySection {
+  id: string
+  title: LocalizedString
+  lead: LocalizedString
+  items: GalleryItem[]
+}
+
 export interface FeatureItem {
   id: string
   icon: IconKey
@@ -46,6 +53,14 @@ export interface AreaItem {
   distance: LocalizedString
 }
 
+export interface AreaInfoItem {
+  id: string
+  title: LocalizedString
+  description: LocalizedString
+  distance: LocalizedString
+  details?: LocalizedString[]
+}
+
 export interface FaqItem {
   id: string
   question: LocalizedString
@@ -55,11 +70,19 @@ export interface FaqItem {
 export interface PriceSettings {
   room1Nightly: number
   room2Nightly: number
+  room2Enabled: boolean
   room1Capacity: number
   maxGuests: number
   minStayNights: number
   currency: 'PLN'
+  discounts: DiscountCode[]
   extraInfo: LocalizedString
+}
+
+export interface DiscountCode {
+  id: string
+  code: string
+  percent: number
 }
 
 export interface ContactSettings {
@@ -94,6 +117,7 @@ export interface SiteContent {
     slogan: LocalizedString
     lead: LocalizedString
     image: ImageAsset
+    mobileImage?: ImageAsset
   }
   about: {
     title: LocalizedString
@@ -102,11 +126,19 @@ export interface SiteContent {
     highlights: FeatureItem[]
   }
   gallery: GalleryItem[]
+  gallerySections: GallerySection[]
   amenities: FeatureItem[]
   area: {
     title: LocalizedString
     lead: LocalizedString
     items: AreaItem[]
+    restaurants: AreaInfoItem[]
+    nearby: AreaInfoItem[]
+    bikeRoutes: {
+      title: LocalizedString
+      lead: LocalizedString
+      routes: LocalizedString[]
+    }
     image: ImageAsset
   }
   pricing: PriceSettings

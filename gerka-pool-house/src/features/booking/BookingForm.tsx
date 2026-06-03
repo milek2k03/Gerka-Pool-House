@@ -14,7 +14,9 @@ import type { SiteContent } from '../../types/content'
 import { formatDate, formatMoney } from '../../utils/format'
 import { localize } from '../../utils/locale'
 import { addDays, getTomorrowISO, toDate, toISODate } from '../../utils/date'
-import { calculateStaySummary } from './booking.utils'
+import { cn } from '../../utils/cn'
+import { getEffectiveMaxGuests, isApartment2Enabled } from '../../utils/pricing'
+import { calculateStaySummary, normalizeDiscountCode } from './booking.utils'
 import { bookingSchema, type BookingFormInput, type BookingFormValues } from './booking.schema'
 import { AvailabilityCalendar } from './AvailabilityCalendar'
 
@@ -28,6 +30,7 @@ function summaryReasonKey(reason?: string) {
   if (reason === 'invalidDates') return 'booking.invalidDates'
   if (reason === 'pastDate') return 'booking.pastDate'
   if (reason === 'minStay') return 'booking.minStay'
+  if (reason === 'minGuests') return 'booking.minGuests'
   if (reason === 'guestLimit') return 'booking.guestLimit'
   if (reason === 'booked' || reason === 'unavailable') return 'booking.dateBlocked'
   return undefined
@@ -52,7 +55,8 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     defaultValues: {
       checkIn: '',
       checkOut: '',
-      guests: content.pricing.room1Capacity,
+      guests: 0,
+      discountCode: '',
       fullName: '',
       email: '',
       phone: '',
@@ -60,19 +64,22 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     },
   })
 
-  const [checkIn, checkOut, guestsValue] = useWatch({
+  const [checkIn, checkOut, guestsValue, discountCode] = useWatch({
     control,
-    name: ['checkIn', 'checkOut', 'guests'],
+    name: ['checkIn', 'checkOut', 'guests', 'discountCode'],
   })
   const guests = Number(guestsValue || 0)
+  const normalizedDiscountCode = normalizeDiscountCode(discountCode)
   const availability = useMemo(
     () => [...content.availability, ...reservationAvailability],
     [content.availability, reservationAvailability],
   )
+  const maxGuests = getEffectiveMaxGuests(content.pricing)
+  const room2Enabled = isApartment2Enabled(content.pricing)
 
   const summary = useMemo(
-    () => calculateStaySummary(checkIn, checkOut, guests, content.pricing, availability),
-    [checkIn, checkOut, guests, availability, content.pricing],
+    () => calculateStaySummary(checkIn, checkOut, guests, content.pricing, availability, discountCode),
+    [checkIn, checkOut, guests, availability, content.pricing, discountCode],
   )
 
   useEffect(() => {
@@ -129,11 +136,25 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       Number(values.guests),
       content.pricing,
       availability,
+      values.discountCode,
     )
 
     if (!nextSummary.isValid) return
 
     let saved
+
+    const discountOwnerNote =
+      nextSummary.discountCode && nextSummary.discountPercent
+        ? t('booking.discountOwnerNote', {
+            code: nextSummary.discountCode,
+            percent: nextSummary.discountPercent,
+            before: formatMoney(nextSummary.priceBeforeDiscount, locale, content.pricing.currency),
+            after: formatMoney(nextSummary.estimatedTotal, locale, content.pricing.currency),
+          })
+        : ''
+    const message = [discountOwnerNote, values.message ? `${t('booking.clientMessagePrefix')}\n${values.message}` : '']
+      .filter(Boolean)
+      .join('\n\n')
 
     try {
       saved = await reservationRepository.add({
@@ -147,7 +168,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         roomsUsed: nextSummary.roomsUsed,
         nightlyPrice: nextSummary.nightlyPrice,
         estimatedTotal: nextSummary.estimatedTotal,
-        message: values.message ?? '',
+        message,
       })
     } catch {
       setSubmissionFailed(t('booking.saveFailed'))
@@ -161,8 +182,19 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       setEmailFailed(t('booking.emailFailed'))
       setSuccess({ reservationNumber: saved.reservationNumber, provider: 'local' })
     }
-    reset({ ...values, fullName: '', email: '', phone: '', message: '' })
+    reset({ ...values, discountCode: '', fullName: '', email: '', phone: '', message: '' })
   })
+
+  const discountInvalid = Boolean(normalizedDiscountCode && !summary.discountCode)
+  const discountStatus =
+    discountInvalid
+      ? t('booking.discountInvalid')
+      : summary.discountCode && summary.discountPercent
+        ? t('booking.discountApplied', {
+            code: summary.discountCode,
+            percent: summary.discountPercent,
+          })
+        : ''
 
   return (
     <div className="grid min-w-0 gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:gap-6">
@@ -175,17 +207,17 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       />
 
       <form
-        className="min-w-0 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-6"
+        className="min-w-0 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-6"
         onSubmit={onSubmit}
         noValidate
       >
-        <div className="grid min-w-0 gap-4 sm:grid-cols-3">
-          <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+        <div className="grid min-w-0 gap-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-4 sm:grid-cols-3">
+          <label className="grid min-w-0 gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.checkIn')}
             <input className="field" type="date" min={earliestCheckIn} {...register('checkIn')} />
             <FieldError message={errors.checkIn?.message} />
           </label>
-          <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+          <label className="grid min-w-0 gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.checkOut')}
             <input
               className="field"
@@ -195,14 +227,14 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
             />
             <FieldError message={errors.checkOut?.message} />
           </label>
-          <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+          <label className="grid min-w-0 gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.guests')}
-            <input className="field" type="number" min={1} max={content.pricing.maxGuests} {...register('guests')} />
+            <input className="field" type="number" min={0} max={maxGuests} {...register('guests')} />
             <FieldError message={errors.guests?.message} />
           </label>
         </div>
 
-        <div className="mt-5 min-w-0 rounded-md bg-[var(--color-paper)] p-4">
+        <div className="mt-5 min-w-0 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-4 sm:p-5">
           <h3 className="text-base font-semibold text-[var(--color-ink)]">{t('booking.summary')}</h3>
           {summary.nights > 0 ? (
             <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
@@ -221,17 +253,62 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
                 <dd className="font-medium text-[var(--color-ink)]">{summary.guests}</dd>
               </div>
               <div>
-                <dt className="text-[var(--color-muted)]">{t('booking.rooms')}</dt>
+                <dt className="text-[var(--color-muted)]">
+                  {room2Enabled ? t('booking.rooms') : t('booking.apartment')}
+                </dt>
                 <dd className="font-medium text-[var(--color-ink)]">
-                  {summary.roomLabels.map((room) => t(`booking.${room}`)).join(', ')}
+                  {room2Enabled ? summary.roomLabels.map((room) => t(`booking.${room}`)).join(', ') : t('booking.groundApartment')}
                 </dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-[var(--color-muted)]">{t('booking.estimatedPrice')}</dt>
-                <dd className="text-2xl font-semibold text-[var(--color-ink)]">
-                  {formatMoney(summary.estimatedTotal, locale, content.pricing.currency)}
+                <dt className="sr-only">{t(room2Enabled ? 'booking.estimatedPrice' : 'booking.apartmentPrice')}</dt>
+                <dd
+                  className={cn(
+                    'mt-1 rounded-[1.1rem] border p-4',
+                    summary.discountCode
+                      ? 'border-emerald-400/20 bg-emerald-950/15'
+                      : 'border-[var(--color-border)] bg-[var(--color-surface)]',
+                  )}
+                >
+                  {summary.discountCode && summary.discountPercent ? (
+                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                      <div className="grid gap-1">
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+                          {t('booking.priceBeforeDiscount')}
+                        </span>
+                        <span className="text-base font-semibold text-[var(--color-muted)] line-through">
+                          {formatMoney(summary.priceBeforeDiscount, locale, content.pricing.currency)}
+                        </span>
+                      </div>
+                      <div className="grid gap-1 sm:text-right">
+                        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">
+                          {t('booking.priceAfterDiscount')}
+                        </span>
+                        <span className="text-3xl font-semibold text-[var(--color-ink)]">
+                          {formatMoney(summary.estimatedTotal, locale, content.pricing.currency)}
+                        </span>
+                      </div>
+                      <span className="inline-flex w-fit rounded-full border border-emerald-400/20 bg-emerald-950/45 px-3 py-1 text-xs font-semibold text-emerald-100 sm:col-span-2">
+                        -{summary.discountPercent}% {summary.discountCode}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="grid gap-1">
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+                        {t(room2Enabled ? 'booking.estimatedPrice' : 'booking.apartmentPrice')}
+                      </span>
+                      <span className="text-3xl font-semibold text-[var(--color-ink)]">
+                        {formatMoney(summary.estimatedTotal, locale, content.pricing.currency)}
+                      </span>
+                    </div>
+                  )}
                 </dd>
               </div>
+              {!room2Enabled ? (
+                <p className="rounded-[1rem] border border-[var(--color-brass)] bg-[rgba(214,181,138,0.10)] p-3 text-xs leading-5 text-[var(--color-muted)] sm:col-span-2">
+                  {t('booking.fixedApartmentPriceNote', { count: maxGuests })}
+                </p>
+              ) : null}
             </dl>
           ) : (
             <p className="mt-3 text-sm text-[var(--color-muted)]">{t('booking.chooseDates')}</p>
@@ -264,7 +341,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         </div>
 
         {success ? (
-          <div className="mt-4 rounded-md bg-emerald-950/40 p-3 text-sm text-emerald-200">
+          <div className="mt-4 rounded-[1rem] bg-emerald-950/40 p-3 text-sm text-emerald-200">
             <p>{t('booking.success')}</p>
             <p className="mt-1 font-semibold">
               {t('booking.reservationNumber')}: {success.reservationNumber}
@@ -280,15 +357,51 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         ) : null}
 
         {submissionFailed ? (
-          <p className="mt-4 rounded-md border border-red-400/25 bg-red-950/35 p-3 text-sm text-red-100" role="alert">
+          <p className="mt-4 rounded-[1rem] border border-red-400/25 bg-red-950/35 p-3 text-sm text-red-100" role="alert">
             {submissionFailed}
           </p>
         ) : null}
 
-        <Button type="submit" className="mt-5 w-full sm:w-auto" disabled={isSubmitting || !summary.isValid}>
-          <Send aria-hidden="true" className="size-4" />
-          {t('booking.send')}
-        </Button>
+        <div className="mt-5 grid min-w-0 gap-3 xl:grid-cols-[auto_minmax(16rem,21rem)] xl:items-start">
+          <Button type="submit" className="w-full xl:min-w-80 xl:self-start" disabled={isSubmitting || !summary.isValid}>
+            <Send aria-hidden="true" className="size-4" />
+            {t('booking.send')}
+          </Button>
+
+          <div className="relative min-w-0">
+            <label
+              className={cn(
+                'grid min-w-0 gap-2 rounded-[1.1rem] border px-3 py-2.5 text-sm font-medium text-[var(--color-ink)]',
+                summary.discountCode
+                  ? 'border-emerald-400/25 bg-emerald-950/15'
+                  : discountInvalid
+                    ? 'border-red-400/25 bg-red-950/15'
+                    : 'border-[var(--color-border)] bg-[var(--color-paper-2)]',
+              )}
+            >
+              <span>{t('booking.discountCode')}</span>
+              <input
+                className="field min-h-11 uppercase"
+                autoComplete="off"
+                placeholder={t('booking.discountCodePlaceholder')}
+                {...register('discountCode')}
+              />
+              <FieldError message={errors.discountCode?.message} />
+            </label>
+            {discountStatus ? (
+              <p
+                className={cn(
+                  'mt-2 rounded-[1rem] border px-3 py-2 text-xs font-medium leading-5 xl:absolute xl:left-0 xl:right-0 xl:top-full xl:z-10',
+                  discountInvalid
+                    ? 'border-red-400/25 bg-red-950/90 text-red-100'
+                    : 'border-emerald-400/20 bg-emerald-950/90 text-emerald-100',
+                )}
+              >
+                {discountStatus}
+              </p>
+            ) : null}
+          </div>
+        </div>
       </form>
     </div>
   )

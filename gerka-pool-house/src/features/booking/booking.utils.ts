@@ -1,6 +1,43 @@
 import type { AvailabilityRange, StaySummary } from '../../types/booking'
-import type { PriceSettings } from '../../types/content'
+import type { DiscountCode, PriceSettings } from '../../types/content'
 import { eachNight, getTomorrowISO, isDateWithinRange, nightsBetween } from '../../utils/date'
+import { getEffectiveMaxGuests, isApartment2Enabled } from '../../utils/pricing'
+
+export function normalizeDiscountCode(value?: string) {
+  return (value ?? '').trim().replace(/\s+/g, '').toUpperCase()
+}
+
+function findDiscountCode(discounts: DiscountCode[], value?: string) {
+  const normalized = normalizeDiscountCode(value)
+
+  if (!normalized) return undefined
+
+  return discounts.find((discount) => normalizeDiscountCode(discount.code) === normalized)
+}
+
+function clampDiscountPercent(value: number) {
+  return Math.min(100, Math.max(1, Math.round(value)))
+}
+
+function createDiscountedPrice(total: number, discount?: DiscountCode) {
+  if (!discount) {
+    return {
+      priceBeforeDiscount: total,
+      estimatedTotal: total,
+    }
+  }
+
+  const discountPercent = clampDiscountPercent(discount.percent)
+  const discountAmount = Math.round(total * (discountPercent / 100))
+
+  return {
+    priceBeforeDiscount: total,
+    estimatedTotal: Math.max(0, total - discountAmount),
+    discountCode: normalizeDiscountCode(discount.code),
+    discountPercent,
+    discountAmount,
+  }
+}
 
 export function calculateStaySummary(
   checkIn: string,
@@ -8,10 +45,16 @@ export function calculateStaySummary(
   guests: number,
   pricing: PriceSettings,
   availability: AvailabilityRange[],
+  discountCode?: string,
 ): StaySummary {
   const nights = nightsBetween(checkIn, checkOut)
-  const roomsUsed = guests > pricing.room1Capacity ? 2 : 1
+  const room2Enabled = isApartment2Enabled(pricing)
+  const maxGuests = getEffectiveMaxGuests(pricing)
+  const roomsUsed = room2Enabled && guests > pricing.room1Capacity ? 2 : 1
   const nightlyPrice = roomsUsed === 1 ? pricing.room1Nightly : pricing.room1Nightly + pricing.room2Nightly
+  const baseTotal = nightlyPrice * nights
+  const discount = findDiscountCode(pricing.discounts ?? [], discountCode)
+  const discountedPrice = createDiscountedPrice(baseTotal, discount)
   const roomLabels = roomsUsed === 1 ? ['room1'] : ['room1', 'room2']
   const selectedNights = eachNight(checkIn, checkOut)
   const blockedRange = availability.find((range) =>
@@ -28,6 +71,7 @@ export function calculateStaySummary(
       roomsUsed,
       roomLabels,
       nightlyPrice,
+      priceBeforeDiscount: 0,
       estimatedTotal: 0,
       isAvailable: true,
       isValid: false,
@@ -44,10 +88,27 @@ export function calculateStaySummary(
       roomsUsed,
       roomLabels,
       nightlyPrice,
-      estimatedTotal: nightlyPrice * nights,
+      ...discountedPrice,
       isAvailable: true,
       isValid: false,
       reason: 'pastDate',
+    }
+  }
+
+  if (guests < 1) {
+    return {
+      checkIn,
+      checkOut,
+      guests,
+      nights,
+      roomsUsed,
+      roomLabels,
+      nightlyPrice,
+      priceBeforeDiscount: 0,
+      estimatedTotal: 0,
+      isAvailable: true,
+      isValid: false,
+      reason: 'minGuests',
     }
   }
 
@@ -60,14 +121,14 @@ export function calculateStaySummary(
       roomsUsed,
       roomLabels,
       nightlyPrice,
-      estimatedTotal: nightlyPrice * nights,
+      ...discountedPrice,
       isAvailable: true,
       isValid: false,
       reason: 'minStay',
     }
   }
 
-  if (guests < 1 || guests > pricing.maxGuests) {
+  if (guests < 1 || guests > maxGuests) {
     return {
       checkIn,
       checkOut,
@@ -76,7 +137,7 @@ export function calculateStaySummary(
       roomsUsed,
       roomLabels,
       nightlyPrice,
-      estimatedTotal: nightlyPrice * nights,
+      ...discountedPrice,
       isAvailable: true,
       isValid: false,
       reason: 'guestLimit',
@@ -91,7 +152,7 @@ export function calculateStaySummary(
     roomsUsed,
     roomLabels,
     nightlyPrice,
-    estimatedTotal: nightlyPrice * nights,
+    ...discountedPrice,
     isAvailable: !blockedRange,
     isValid: !blockedRange,
     reason: blockedRange ? blockedRange.status : undefined,

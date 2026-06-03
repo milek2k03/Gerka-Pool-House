@@ -11,7 +11,7 @@ export function AmenitiesSection({ items, locale }: { items: FeatureItem[]; loca
   const { t } = useTranslation()
 
   return (
-    <section id="amenities" className="bg-[var(--color-paper)] px-5 py-20 sm:px-8 lg:px-10">
+    <section id="amenities" className="bg-[var(--color-paper)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow={t('sections.amenitiesEyebrow')}
@@ -22,13 +22,13 @@ export function AmenitiesSection({ items, locale }: { items: FeatureItem[]; loca
           {items.map((item, index) => (
             <motion.article
               key={item.id}
-              className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
+              className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)]"
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ delay: index * 0.05 }}
             >
-              <div className="mb-5 grid size-11 place-items-center rounded-md bg-[var(--color-water)] text-white">
+              <div className="mb-5 grid size-11 place-items-center rounded-xl bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
                 <FeatureIcon icon={item.icon} />
               </div>
               <h3 className="text-lg font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>

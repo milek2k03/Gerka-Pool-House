@@ -12,9 +12,9 @@ export function PrivacyPage() {
   return (
     <>
       <Seo settings={content.seo.privacy} locale={locale} />
-      <section className="bg-[var(--color-paper)] px-5 pb-20 pt-36 sm:px-8 lg:px-10">
-        <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-clay)]">
+      <section className="bg-[var(--color-paper)] px-5 pb-20 pt-36 sm:px-8 lg:px-10 lg:pb-[120px]">
+        <div className="mx-auto max-w-3xl rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brass)]">
             Gerka Pool House
           </p>
           <h1 className="text-4xl font-semibold text-[var(--color-ink)]">{t('legal.privacyTitle')}</h1>

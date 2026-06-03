@@ -60,7 +60,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
             <Logo />
           </Link>
 
-          <section className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm sm:p-8">
+          <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
             <div className="mb-8">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-brass)]">
                 {content.brandName}
@@ -70,7 +70,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
             </div>
 
             {!isConfigured ? (
-              <div className="rounded-md border border-amber-300/25 bg-amber-950/25 p-4 text-sm leading-6 text-amber-100">
+              <div className="rounded-[1.1rem] border border-amber-300/25 bg-amber-950/25 p-4 text-sm leading-6 text-amber-100">
                 <p className="font-semibold">{t('admin.auth.notConfiguredTitle')}</p>
                 <p className="mt-2">{t('admin.auth.notConfiguredBody')}</p>
               </div>
@@ -79,7 +79,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
                 <label className="grid gap-2 text-sm font-semibold text-[var(--color-ink)]">
                   {t('admin.auth.email')}
                   <span className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[var(--color-brass)]">
+                    <span className="pointer-events-none absolute left-4 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-lg bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
                       <Mail aria-hidden="true" className="size-4" />
                     </span>
                     <input
@@ -96,7 +96,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
                 <label className="grid gap-2 text-sm font-semibold text-[var(--color-ink)]">
                   {t('admin.auth.password')}
                   <span className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[var(--color-brass)]">
+                    <span className="pointer-events-none absolute left-4 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-lg bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
                       <Lock aria-hidden="true" className="size-4" />
                     </span>
                     <input
@@ -111,7 +111,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
                 </label>
 
                 {authError ? (
-                  <p className="rounded-md border border-red-400/25 bg-red-950/35 p-3 text-sm text-red-100">
+                  <p className="rounded-[1rem] border border-red-400/25 bg-red-950/35 p-3 text-sm text-red-100">
                     {authError}
                   </p>
                 ) : null}

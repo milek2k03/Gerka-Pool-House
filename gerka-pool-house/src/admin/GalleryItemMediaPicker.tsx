@@ -9,9 +9,17 @@ import { isSupportedMediaFile } from './mediaUploadUtils'
 
 interface GalleryItemMediaPickerProps {
   onUploaded: (upload: UploadedMedia) => void
+  accept?: string
+  allowVideo?: boolean
+  unsupportedMessage?: string
 }
 
-export function GalleryItemMediaPicker({ onUploaded }: GalleryItemMediaPickerProps) {
+export function GalleryItemMediaPicker({
+  onUploaded,
+  accept = 'image/*,video/*',
+  allowVideo = true,
+  unsupportedMessage,
+}: GalleryItemMediaPickerProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -28,8 +36,8 @@ export function GalleryItemMediaPicker({ onUploaded }: GalleryItemMediaPickerPro
       return
     }
 
-    if (!file || !isSupportedMediaFile(file)) {
-      setError(t('admin.mediaUploadUnsupported'))
+    if (!file || !isSupportedMediaFile(file, { allowVideo })) {
+      setError(unsupportedMessage ?? t('admin.mediaUploadUnsupported'))
       return
     }
 
@@ -55,7 +63,7 @@ export function GalleryItemMediaPicker({ onUploaded }: GalleryItemMediaPickerPro
         ref={inputRef}
         className="sr-only"
         type="file"
-        accept="image/*,video/*"
+        accept={accept}
         onChange={(event) => void uploadFile(event.target.files?.[0])}
       />
       <div

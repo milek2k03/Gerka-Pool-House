@@ -66,6 +66,12 @@ function paragraph(value: string) {
     .join('')
 }
 
+function appendAutomaticNotice(body: string, notice: string) {
+  if (body.includes(notice)) return body
+
+  return `${body}\n\n${notice}`
+}
+
 function row(label: string, value: string | number) {
   return `<tr>
     <td style="padding:13px 16px;border-bottom:1px solid #e8e0d2;color:#5f695c;font-size:13px;line-height:1.35;width:42%">${escapeHtml(label)}</td>
@@ -127,11 +133,12 @@ const emailCopy = {
     dates: 'Termin',
     nights: 'Liczba nocy',
     guests: 'Liczba gości',
-    rooms: 'Wykorzystane pokoje',
+    rooms: 'Wykorzystane apartamenty',
     nightlyPrice: 'Cena za noc',
     estimatedTotal: 'Cena szacunkowa',
     clientMessage: 'Wiadomość klienta',
     message: 'Wiadomość',
+    automaticNotice: 'Ta wiadomość została wygenerowana automatycznie. Prosimy na nią nie odpowiadać.',
   },
   en: {
     newInquiry: 'New booking inquiry',
@@ -146,11 +153,12 @@ const emailCopy = {
     dates: 'Dates',
     nights: 'Number of nights',
     guests: 'Number of guests',
-    rooms: 'Rooms used',
+    rooms: 'Apartments used',
     nightlyPrice: 'Price per night',
     estimatedTotal: 'Estimated price',
     clientMessage: 'Guest message',
     message: 'Message',
+    automaticNotice: 'This message was generated automatically. Please do not reply to it.',
   },
 } as const
 
@@ -202,6 +210,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const payload = parsed.data
   const inquiry = payload.request
   const copy = emailCopy[payload.locale]
+  const clientBody = appendAutomaticNotice(payload.clientBody, copy.automaticNotice)
   const finalOwnerEmail = ownerEmail || payload.ownerEmail
   const resend = new Resend(resendApiKey)
   const tagValue = payload.reservationNumber.replace(/[^a-zA-Z0-9_-]/g, '_')
@@ -230,7 +239,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const clientHtml = wrapEmail(
     payload.clientSubject,
     `<div style="font-size:14px;line-height:1.65;color:#2a3328;margin:0 0 22px">
-      ${paragraph(payload.clientBody)}
+      ${paragraph(clientBody)}
     </div>
     ${detailsTable(`
       ${sectionTitle(copy.inquirySummary)}
@@ -278,7 +287,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       subject: `${payload.clientSubject} - ${payload.reservationNumber}`,
       html: clientHtml,
       text: [
-        payload.clientBody,
+        clientBody,
         '',
         `${copy.inquirySummary}:`,
         `${copy.reservationNumber}: ${payload.reservationNumber}`,
