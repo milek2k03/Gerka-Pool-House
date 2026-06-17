@@ -86,11 +86,12 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
 
           const date = toISODate(day)
           const status = getStatus(date, ranges)
-          const displayStatus = status === 'unavailable' && date <= today ? 'booked' : status
+          const isTodayOrEarlier = date <= today
+          const displayStatus = isTodayOrEarlier ? 'booked' : status
           const isSelected = date === checkIn || date === checkOut
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
-          const disabled = status !== 'available' || isPast
+          const disabled = displayStatus !== 'available' || isPast
 
           return (
             <button
