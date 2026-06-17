@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { AvailabilityRange } from '../../types/booking'
 import { cn } from '../../utils/cn'
-import { isDateWithinRange, toISODate } from '../../utils/date'
+import { getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
 import { Button } from '../../components/ui/Button'
 import { getLocale } from '../../utils/locale'
 
@@ -25,6 +25,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const minMonth = useMemo(() => startOfMonth(new Date()), [])
+  const today = useMemo(() => getTodayISO(), [])
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const canGoPrevious = month > minMonth
 
@@ -85,6 +86,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
 
           const date = toISODate(day)
           const status = getStatus(date, ranges)
+          const displayStatus = status === 'unavailable' && date <= today ? 'booked' : status
           const isSelected = date === checkIn || date === checkOut
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
@@ -98,10 +100,10 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
               onClick={() => onSelectDate(date)}
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
-                status === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',
-                status === 'booked' && 'cursor-not-allowed border border-red-400/30 bg-red-900/70 text-red-100',
-                isPast && status !== 'booked' && 'cursor-not-allowed bg-red-950/25 text-red-300/45',
-                status === 'unavailable' &&
+                displayStatus === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',
+                displayStatus === 'booked' && 'cursor-not-allowed border border-red-400/30 bg-red-900/70 text-red-100',
+                isPast && displayStatus !== 'booked' && 'cursor-not-allowed bg-red-950/25 text-red-300/45',
+                displayStatus === 'unavailable' &&
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
                 isBetween && 'bg-[rgba(214,181,138,0.14)]',
                 isSelected && 'bg-[var(--color-brass)] text-[#111827]',
