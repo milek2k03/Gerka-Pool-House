@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import logoMark from '../../../Logo (2).png'
+import logoMark from '../../assets/images/gerka-logo.png'
 import { useSiteContent } from '../../hooks/useSiteContent'
 
 export function Logo({ to = '/' }: { to?: string }) {

@@ -239,6 +239,21 @@ function replaceAccommodationTerms(content: SiteContent) {
     replaceLocalized(item.distance)
     item.details?.forEach(replaceLocalized)
   })
+  content.area.busRoutes.forEach((item) => {
+    replaceLocalized(item.title)
+    replaceLocalized(item.description)
+    replaceLocalized(item.distance)
+    item.details?.forEach(replaceLocalized)
+    if (item.link) {
+      replaceLocalized(item.link.label)
+    }
+  })
+  content.area.airports.forEach((item) => {
+    replaceLocalized(item.title)
+    replaceLocalized(item.description)
+    replaceLocalized(item.distance)
+    item.details?.forEach(replaceLocalized)
+  })
   replaceLocalized(content.area.bikeRoutes.title)
   replaceLocalized(content.area.bikeRoutes.lead)
   content.area.bikeRoutes.routes.forEach(replaceLocalized)
@@ -366,6 +381,8 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     content.area.items = cloneContent(defaultSiteContent).area.items
     content.area.restaurants = cloneContent(defaultSiteContent).area.restaurants
     content.area.nearby = cloneContent(defaultSiteContent).area.nearby
+    content.area.busRoutes = cloneContent(defaultSiteContent).area.busRoutes
+    content.area.airports = cloneContent(defaultSiteContent).area.airports
     content.area.bikeRoutes = cloneContent(defaultSiteContent).area.bikeRoutes
     content.pricing.maxGuests = Math.max(content.pricing.maxGuests, defaultSiteContent.pricing.maxGuests)
 
@@ -661,6 +678,42 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     if (content.seo.home.description.en.includes('up to 14 guests')) {
       content.seo.home.description.en = defaultSiteContent.seo.home.description.en
     }
+  }
+
+  if (storedVersion < 17) {
+    content.version = defaultSiteContent.version
+
+    if (!content.area.airports?.length) {
+      content.area.airports = cloneContent(defaultSiteContent).area.airports
+    }
+  }
+
+  if (storedVersion < 18) {
+    content.version = defaultSiteContent.version
+
+    if (!content.area.busRoutes?.length) {
+      content.area.busRoutes = cloneContent(defaultSiteContent).area.busRoutes
+    }
+  }
+
+  if (storedVersion < 19) {
+    content.version = defaultSiteContent.version
+
+    const defaultBusRoutes = cloneContent(defaultSiteContent).area.busRoutes
+    content.area.busRoutes = content.area.busRoutes ?? []
+
+    defaultBusRoutes.forEach((defaultRoute) => {
+      const existingIndex = content.area.busRoutes.findIndex((route) => route.id === defaultRoute.id)
+
+      if (existingIndex === -1) {
+        content.area.busRoutes.push(defaultRoute)
+        return
+      }
+
+      if (defaultRoute.link && !content.area.busRoutes[existingIndex].link) {
+        content.area.busRoutes[existingIndex].link = defaultRoute.link
+      }
+    })
   }
 
   return repairBundledAssetPaths(content)

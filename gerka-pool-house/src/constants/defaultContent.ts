@@ -1,24 +1,19 @@
 import heroAvif from '../assets/images/gerka-hero.avif'
-import heroPng from '../assets/images/gerka-hero.png'
 import heroWebp from '../assets/images/gerka-hero.webp'
 import diningAvif from '../assets/images/garden-dining.avif'
-import diningPng from '../assets/images/garden-dining.png'
 import diningWebp from '../assets/images/garden-dining.webp'
 import roomAvif from '../assets/images/guest-room.avif'
-import roomPng from '../assets/images/guest-room.png'
 import roomWebp from '../assets/images/guest-room.webp'
 import lakeAvif from '../assets/images/nearby-lake.avif'
-import lakePng from '../assets/images/nearby-lake.png'
 import lakeWebp from '../assets/images/nearby-lake.webp'
 import poolAvif from '../assets/images/pool-terrace.avif'
-import poolPng from '../assets/images/pool-terrace.png'
 import poolWebp from '../assets/images/pool-terrace.webp'
 import type { SiteContent } from '../types/content'
 
 const socialPreviewImage = '/api/og-image?v=5'
 
 export const defaultSiteContent: SiteContent = {
-  version: 16,
+  version: 19,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -35,12 +30,12 @@ export const defaultSiteContent: SiteContent = {
       en: 'A comfortable ground-floor apartment for up to 6 guests with a private pool area, garden, barbecue, parking and fast WiFi.',
     },
     image: {
-      src: heroPng,
+      src: heroWebp,
       webp: heroWebp,
       avif: heroAvif,
     },
     mobileImage: {
-      src: heroPng,
+      src: heroWebp,
       webp: heroWebp,
       avif: heroAvif,
     },
@@ -96,7 +91,7 @@ export const defaultSiteContent: SiteContent = {
         pl: 'Prywatny basen przy domu Gerka Pool House',
         en: 'Private pool terrace at Gerka Pool House',
       },
-      image: { src: poolPng, webp: poolWebp, avif: poolAvif },
+      image: { src: poolWebp, webp: poolWebp, avif: poolAvif },
     },
     {
       id: 'guest-room',
@@ -105,7 +100,7 @@ export const defaultSiteContent: SiteContent = {
         pl: 'Jasne wnętrze apartamentu dla gości w domu wakacyjnym',
         en: 'Bright guest apartment interior in a holiday house',
       },
-      image: { src: roomPng, webp: roomWebp, avif: roomAvif },
+      image: { src: roomWebp, webp: roomWebp, avif: roomAvif },
     },
     {
       id: 'garden-dining',
@@ -114,7 +109,7 @@ export const defaultSiteContent: SiteContent = {
         pl: 'Zewnętrzna strefa grillowa i stół w ogrodzie',
         en: 'Outdoor barbecue zone and garden dining table',
       },
-      image: { src: diningPng, webp: diningWebp, avif: diningAvif },
+      image: { src: diningWebp, webp: diningWebp, avif: diningAvif },
     },
     {
       id: 'nearby-lake',
@@ -123,7 +118,7 @@ export const defaultSiteContent: SiteContent = {
         pl: 'Jezioro i spokojna ścieżka spacerowa w okolicy obiektu',
         en: 'Lake and peaceful walking path near the property',
       },
-      image: { src: lakePng, webp: lakeWebp, avif: lakeAvif },
+      image: { src: lakeWebp, webp: lakeWebp, avif: lakeAvif },
     },
   ],
   gallerySections: [
@@ -142,7 +137,7 @@ export const defaultSiteContent: SiteContent = {
             pl: 'Jasne wnętrze apartamentu na parterze w Gerka Pool House',
             en: 'Bright interior of the ground-floor apartment at Gerka Pool House',
           },
-          image: { src: roomPng, webp: roomWebp, avif: roomAvif },
+          image: { src: roomWebp, webp: roomWebp, avif: roomAvif },
         },
       ],
     },
@@ -161,7 +156,7 @@ export const defaultSiteContent: SiteContent = {
             pl: 'Komfortowe wnętrze apartamentu na piętrze w Gerka Pool House',
             en: 'Comfortable interior of the first-floor apartment at Gerka Pool House',
           },
-          image: { src: roomPng, webp: roomWebp, avif: roomAvif },
+          image: { src: roomWebp, webp: roomWebp, avif: roomAvif },
         },
       ],
     },
@@ -180,7 +175,7 @@ export const defaultSiteContent: SiteContent = {
             pl: 'Prywatny basen z leżakami przy Gerka Pool House',
             en: 'Private swimming pool with loungers at Gerka Pool House',
           },
-          image: { src: poolPng, webp: poolWebp, avif: poolAvif },
+          image: { src: poolWebp, webp: poolWebp, avif: poolAvif },
         },
         {
           id: 'terrace-dining',
@@ -189,7 +184,7 @@ export const defaultSiteContent: SiteContent = {
             pl: 'Taras z miejscem do grillowania i wspólnego odpoczynku',
             en: 'Terrace with barbecue and shared relaxation space',
           },
-          image: { src: diningPng, webp: diningWebp, avif: diningAvif },
+          image: { src: diningWebp, webp: diningWebp, avif: diningAvif },
         },
       ],
     },
@@ -259,7 +254,7 @@ export const defaultSiteContent: SiteContent = {
       pl: 'W pobliżu są miejsca na spacer, rodzinny obiad, dzień nad wodą i krótkie wycieczki po okolicy.',
       en: 'Nearby you will find places for walks, family meals, days by the water and short local trips.',
     },
-    image: { src: lakePng, webp: lakeWebp, avif: lakeAvif },
+    image: { src: lakeWebp, webp: lakeWebp, avif: lakeAvif },
     items: [
       {
         id: 'ostromecko-palace',
@@ -364,6 +359,101 @@ export const defaultSiteContent: SiteContent = {
           { pl: 'produkty na grilla', en: 'barbecue supplies' },
           { pl: 'codzienne zakupy', en: 'everyday shopping' },
         ],
+      },
+    ],
+    busRoutes: [
+      {
+        id: 'bus-local',
+        title: { pl: 'Autobus gminny w Czarżu', en: 'Municipal bus in Czarze' },
+        distance: { pl: 'przystanek Czarże, Chełmińska 18/47', en: 'Czarze, Chelminska 18/47 stop' },
+        description: {
+          pl: 'W Czarżu kursuje autobus gminny / lokalny obsługujący przejazdy przez miejscowość i połączenia z okolicą. Najbliższy przystanek znajduje się przy ul. Chełmińskiej, kilka minut spacerem od obiektu. Przed podróżą warto sprawdzić aktualne godziny odjazdów w rozkładzie online.',
+          en: 'A municipal / local bus serves Czarze and connects the village with the surrounding area. The nearest stop is on Chelminska Street, a few minutes on foot from the property. Before travelling, please check the current departure times in the online timetable.',
+        },
+        details: [
+          { pl: 'autobus gminny', en: 'municipal bus' },
+          { pl: 'blisko obiektu', en: 'close to the property' },
+          { pl: 'rozkład online', en: 'online timetable' },
+        ],
+        link: {
+          label: { pl: 'Sprawdź rozkład jazdy', en: 'Check the timetable' },
+          href: 'https://www.pks.bydgoszcz.pl/tabliczki-przystankowe?przystanek=073164_01&nazwa=CZAR%C5%BBE%2C+CHE%C5%81MI%C5%83SKA+18%2F47',
+        },
+      },
+      {
+        id: 'bus-bydgoszcz',
+        title: { pl: 'PKS / autobus regionalny z Bydgoszczy', en: 'PKS / regional bus from Bydgoszcz' },
+        distance: { pl: 'połączenie w kierunku Czarża', en: 'connection towards Czarze' },
+        description: {
+          pl: 'Najwygodniej rozpocząć podróż z dworca autobusowego w Bydgoszczy i wybrać kurs jadący w kierunku Czarża, Chełmna lub okolicznych miejscowości. Autobus gminny / regionalny zatrzymuje się w Czarżu przy ul. Chełmińskiej, a dojście do obiektu przy numerze 41 zajmuje zwykle tylko kilka minut.',
+          en: 'The most convenient option is to start from the bus station in Bydgoszcz and choose a route towards Czarze, Chelmno or nearby villages. The municipal / regional bus stops in Czarze on Chelminska Street, and the walk to the property at number 41 usually takes only a few minutes.',
+        },
+        details: [
+          { pl: 'z Bydgoszczy', en: 'from Bydgoszcz' },
+          { pl: 'PKS / autobus gminny', en: 'PKS / municipal bus' },
+          { pl: 'sprawdź aktualny rozkład', en: 'check current timetable' },
+        ],
+      },
+      {
+        id: 'bus-chelmno',
+        title: { pl: 'PKS / autobus regionalny z Chełmna', en: 'PKS / regional bus from Chelmno' },
+        distance: { pl: 'krótki dojazd do Czarża', en: 'short ride to Czarze' },
+        description: {
+          pl: 'Z Chełmna można dojechać do Czarża autobusem gminnym / regionalnym lub PKS-em kursującym w stronę Bydgoszczy i okolicznych miejscowości. To wygodne rozwiązanie dla gości bez samochodu oraz osób planujących krótką wycieczkę do Chełmna w trakcie pobytu.',
+          en: 'From Chelmno, guests can reach Czarze by municipal / regional bus or PKS service travelling towards Bydgoszcz and nearby villages. It is a convenient option for guests without a car and for anyone planning a short trip to Chelmno during the stay.',
+        },
+        details: [
+          { pl: 'z Chełmna', en: 'from Chelmno' },
+          { pl: 'krótki przejazd', en: 'short ride' },
+          { pl: 'dobry wybór bez auta', en: 'good without a car' },
+        ],
+      },
+    ],
+    airports: [
+      {
+        id: 'airport-bydgoszcz',
+        title: { pl: 'Port Lotniczy Bydgoszcz', en: 'Bydgoszcz Airport' },
+        distance: { pl: 'ok. 35 km od obiektu', en: 'approx. 35 km from the property' },
+        description: {
+          pl: 'Najbliższe lotnisko dla gości Gerka Pool House. To najwygodniejszy wybór przy podróży z przesiadką lub połączeniach krajowych. Do obiektu najlepiej dojechać samochodem, taksówką albo wcześniej zamówionym transportem.',
+          en: 'The closest airport for Gerka Pool House guests. It is the most convenient choice for connecting or domestic routes. The property is best reached by car, taxi or pre-arranged transport.',
+        },
+      },
+      {
+        id: 'airport-gdansk',
+        title: { pl: 'Port Lotniczy Gdańsk im. Lecha Wałęsy', en: 'Gdansk Lech Walesa Airport' },
+        distance: { pl: 'ok. 170 km od obiektu', en: 'approx. 170 km from the property' },
+        description: {
+          pl: 'Duże lotnisko międzynarodowe z szeroką siatką połączeń europejskich. Dobre rozwiązanie dla gości przylatujących z zagranicy, którzy planują dalszy dojazd samochodem przez Pomorze i Dolinę Dolnej Wisły.',
+          en: 'A large international airport with a broad network of European connections. A good option for guests arriving from abroad and continuing by car through Pomerania and the Lower Vistula Valley.',
+        },
+      },
+      {
+        id: 'airport-poznan',
+        title: { pl: 'Port Lotniczy Poznań-Ławica', en: 'Poznan-Lawica Airport' },
+        distance: { pl: 'ok. 180 km od obiektu', en: 'approx. 180 km from the property' },
+        description: {
+          pl: 'Wygodna alternatywa dla gości lecących z zachodniej Polski lub z wybranych kierunków europejskich. Dojazd do obiektu prowadzi spokojną trasą przez Wielkopolskę i Kujawy.',
+          en: 'A convenient alternative for guests flying from western Poland or selected European routes. The drive to the property leads through Greater Poland and Kuyavia.',
+        },
+      },
+      {
+        id: 'airport-warsaw-modlin',
+        title: { pl: 'Lotnisko Warszawa-Modlin', en: 'Warsaw Modlin Airport' },
+        distance: { pl: 'ok. 240 km od obiektu', en: 'approx. 240 km from the property' },
+        description: {
+          pl: 'Lotnisko obsługujące wiele połączeń niskokosztowych. Może być dobrym wyborem dla gości, którzy przylatują do Warszawy i planują dalszy przejazd samochodem w stronę Kujaw.',
+          en: 'An airport serving many low-cost connections. It can be a good choice for guests arriving in Warsaw and continuing by car towards Kuyavia.',
+        },
+      },
+      {
+        id: 'airport-warsaw-chopin',
+        title: { pl: 'Lotnisko Chopina w Warszawie', en: 'Warsaw Chopin Airport' },
+        distance: { pl: 'ok. 280 km od obiektu', en: 'approx. 280 km from the property' },
+        description: {
+          pl: 'Największe lotnisko w Polsce, z dużą liczbą połączeń międzynarodowych i krajowych. To dobra opcja dla gości podróżujących z dalszych kierunków i planujących dojazd autem do Gerka Pool House.',
+          en: 'Poland’s largest airport, with many international and domestic connections. A good option for guests travelling from farther destinations and planning to drive to Gerka Pool House.',
+        },
       },
     ],
     bikeRoutes: {

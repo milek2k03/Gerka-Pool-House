@@ -1642,6 +1642,132 @@ export function AdminPage() {
                 </div>
 
                 <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">{t('sections.busAccessTitle')}</h2>
+                  {draft.area.busRoutes.map((item, index) => (
+                    <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.area.busRoutes.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+                      <LocalizedField
+                        label={t('admin.fields.title')}
+                        value={item.title}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.busRoutes[index].title[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.distance')}
+                        value={item.distance}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.busRoutes[index].distance[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.description')}
+                        value={item.description}
+                        textarea
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.busRoutes[index].description[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.linkLabel')}
+                        value={item.link?.label ?? { pl: 'Rozkład jazdy', en: 'Timetable' }}
+                        onChange={(language, value) =>
+                          mutate((next) => {
+                            const link = next.area.busRoutes[index].link ?? {
+                              label: { pl: 'Rozkład jazdy', en: 'Timetable' },
+                              href: '',
+                            }
+
+                            link.label[language] = value
+                            next.area.busRoutes[index].link = link
+                          })
+                        }
+                      />
+                      <TextInput
+                        label={t('admin.fields.linkUrl')}
+                        value={item.link?.href ?? ''}
+                        onChange={(value) =>
+                          mutate((next) => {
+                            const link = next.area.busRoutes[index].link ?? {
+                              label: { pl: 'Rozkład jazdy', en: 'Timetable' },
+                              href: '',
+                            }
+
+                            link.href = value
+                            next.area.busRoutes[index].link = link
+                          })
+                        }
+                      />
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => mutate((next) => void next.area.busRoutes.push(createAreaInfoItem()))}
+                  >
+                    {t('admin.fields.addBusRoute')}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">{t('sections.airportsTitle')}</h2>
+                  {draft.area.airports.map((item, index) => (
+                    <article key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-base font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.area.airports.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+                      <LocalizedField
+                        label={t('admin.fields.title')}
+                        value={item.title}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.airports[index].title[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.distance')}
+                        value={item.distance}
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.airports[index].distance[language] = value))
+                        }
+                      />
+                      <LocalizedField
+                        label={t('admin.fields.description')}
+                        value={item.description}
+                        textarea
+                        onChange={(language, value) =>
+                          mutate((next) => void (next.area.airports[index].description[language] = value))
+                        }
+                      />
+                    </article>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => mutate((next) => void next.area.airports.push(createAreaInfoItem()))}
+                  >
+                    {t('admin.fields.addAirport')}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
                   <LocalizedField
                     label={t('admin.fields.bikeRoutesTitle')}
                     value={draft.area.bikeRoutes.title}

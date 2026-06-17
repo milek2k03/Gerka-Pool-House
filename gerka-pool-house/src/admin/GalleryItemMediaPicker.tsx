@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/Button'
 import { mediaStorage, type UploadedMedia } from '../services/mediaStorage'
 import { cn } from '../utils/cn'
-import { isSupportedMediaFile } from './mediaUploadUtils'
+import { isSupportedMediaFile, optimizeImageForUpload } from './mediaUploadUtils'
 
 interface GalleryItemMediaPickerProps {
   onUploaded: (upload: UploadedMedia) => void
@@ -44,7 +44,8 @@ export function GalleryItemMediaPicker({
     setIsUploading(true)
 
     try {
-      const upload = await mediaStorage.upload(file)
+      const optimizedFile = await optimizeImageForUpload(file)
+      const upload = await mediaStorage.upload(optimizedFile)
       onUploaded(upload)
       setSuccess(t('admin.mediaReplaceSuccess'))
     } catch (uploadError) {

@@ -59,6 +59,10 @@ export interface AreaInfoItem {
   description: LocalizedString
   distance: LocalizedString
   details?: LocalizedString[]
+  link?: {
+    label: LocalizedString
+    href: string
+  }
 }
 
 export interface FaqItem {
@@ -134,6 +138,8 @@ export interface SiteContent {
     items: AreaItem[]
     restaurants: AreaInfoItem[]
     nearby: AreaInfoItem[]
+    busRoutes: AreaInfoItem[]
+    airports: AreaInfoItem[]
     bikeRoutes: {
       title: LocalizedString
       lead: LocalizedString

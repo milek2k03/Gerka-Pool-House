@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Route, ShoppingBasket, Utensils } from 'lucide-react'
+import { BusFront, ExternalLink, PlaneLanding, Route, ShoppingBasket, Utensils } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { FeatureIcon } from '../components/common/Icon'
@@ -43,6 +43,17 @@ function InfoCard({
           ))}
         </ul>
       ) : null}
+      {item.link?.href ? (
+        <a
+          href={item.link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-[rgba(214,181,138,0.35)] px-4 py-2 text-sm font-semibold text-[var(--color-brass)] transition hover:border-[var(--color-brass)] hover:bg-[rgba(214,181,138,0.12)] hover:text-[var(--color-brass-hover)]"
+        >
+          {localize(item.link.label, locale)}
+          <ExternalLink aria-hidden="true" className="size-4" />
+        </a>
+      ) : null}
     </motion.article>
   )
 }
@@ -72,6 +83,8 @@ function PlaceCard({ item, locale, index }: { item: AreaItem; locale: Locale; in
 
 export function AreaSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
+  const busRoutes = content.area.busRoutes ?? []
+  const airports = content.area.airports ?? []
 
   return (
     <section id="area" className="bg-[var(--color-deep)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
@@ -115,6 +128,40 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
               ))}
             </div>
           </div>
+
+          {busRoutes.length > 0 ? (
+            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
+              <div className="flex items-center gap-3 text-[var(--color-brass)]">
+                <BusFront aria-hidden="true" className="size-5" />
+                <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.busAccessTitle')}</h2>
+              </div>
+              <p className="mt-4 max-w-4xl text-sm leading-6 text-[var(--color-muted)]">
+                {t('sections.busAccessLead')}
+              </p>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {busRoutes.map((item, index) => (
+                  <InfoCard key={item.id} item={item} locale={locale} index={index} />
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {airports.length > 0 ? (
+            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
+              <div className="flex items-center gap-3 text-[var(--color-brass)]">
+                <PlaneLanding aria-hidden="true" className="size-5" />
+                <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.airportsTitle')}</h2>
+              </div>
+              <p className="mt-4 max-w-4xl text-sm leading-6 text-[var(--color-muted)]">
+                {t('sections.airportsLead')}
+              </p>
+              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {airports.map((item, index) => (
+                  <InfoCard key={item.id} item={item} locale={locale} index={index} />
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
             <div className="flex items-center gap-3 text-[var(--color-brass)]">

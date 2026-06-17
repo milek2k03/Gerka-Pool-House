@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { UsersRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { FeatureIcon } from '../components/common/Icon'
@@ -230,21 +229,12 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
   return (
     <section id="about" className="bg-[var(--color-paper)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+        <div className="max-w-4xl">
           <SectionHeading
             eyebrow={t('sections.aboutEyebrow')}
             title={localize(content.about.title, locale)}
             lead={localize(content.about.lead, locale)}
           />
-          <div className="flex items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 text-white shadow-[var(--shadow-soft)]">
-            <UsersRound aria-hidden="true" className="size-6 shrink-0 text-[var(--color-brass)]" />
-            <p className="text-sm leading-6 text-white/78">
-              {t('pricing.room1')}: {t('pricing.upToGuests', { count: content.pricing.room1Capacity })}.{' '}
-              {room2Enabled
-                ? `${t('pricing.room2')}: ${t('pricing.activatedAbove', { count: content.pricing.room1Capacity })}.`
-                : t('pricing.fixedLead', { count: content.pricing.room1Capacity })}
-            </p>
-          </div>
         </div>
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
