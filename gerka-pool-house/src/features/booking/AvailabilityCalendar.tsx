@@ -102,7 +102,8 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
                 displayStatus === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',
-                displayStatus === 'booked' && 'cursor-not-allowed border border-red-400/30 bg-red-900/70 text-red-100',
+                displayStatus === 'booked' &&
+                  'cursor-not-allowed border border-[#b87979]/25 bg-[#5c3030]/55 text-[#f3dddd]',
                 isPast && displayStatus !== 'booked' && 'cursor-not-allowed bg-red-950/25 text-red-300/45',
                 displayStatus === 'unavailable' &&
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
@@ -120,7 +121,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           <span className="size-3 rounded-sm bg-[var(--color-surface-2)]" /> {t('booking.available')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-3 rounded-sm bg-red-900/70 ring-1 ring-red-400/30" /> {t('booking.booked')}
+          <span className="size-3 rounded-sm bg-[#5c3030]/55 ring-1 ring-[#b87979]/25" /> {t('booking.booked')}
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.unavailable')}
