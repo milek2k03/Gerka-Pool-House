@@ -22,7 +22,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         fetchPriority="high"
         imgClassName="object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
-      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))] sm:inset-0 sm:h-full" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.18),rgba(15,23,42,0.08))] sm:inset-0 sm:h-full sm:bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))]" />
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-8 pt-[62svh] sm:px-8 sm:pt-28 lg:px-10">
         <div className="max-w-xl pb-10 sm:pb-16 lg:ml-auto lg:max-w-2xl lg:text-right">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brass)]">
