@@ -1,14 +1,25 @@
-import { Link } from 'react-router'
+import type { MouseEvent } from 'react'
+import { Link, useLocation } from 'react-router'
 
 import logoMark from '../../assets/images/gerka-logo.png'
 import { useSiteContent } from '../../hooks/useSiteContent'
 
 export function Logo({ to = '/' }: { to?: string }) {
   const { content } = useSiteContent()
+  const location = useLocation()
+
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (location.pathname !== '/') return
+
+    event.preventDefault()
+    window.history.replaceState(null, '', '/')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <Link
       to={to}
+      onClick={handleClick}
       aria-label={content.brandName}
       className="inline-flex min-w-0 items-center rounded-[1.1rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]"
     >
