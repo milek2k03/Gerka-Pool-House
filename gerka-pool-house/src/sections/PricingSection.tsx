@@ -28,7 +28,7 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
   const exampleGuestCounts = getExampleGuestCounts(pricing)
 
   return (
-    <section id="pricing" className="bg-[var(--color-paper)] px-5 py-20 text-white sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="pricing" className="section-spacing bg-[var(--color-paper)] px-5 text-white sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow={t('sections.pricingEyebrow')}

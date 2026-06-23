@@ -103,7 +103,7 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
   const activeItems = activeSectionIndex === null ? [] : (sections[activeSectionIndex]?.items ?? [])
 
   return (
-    <section id="gallery" className="bg-[var(--color-deep)] px-4 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="gallery" className="section-spacing bg-[var(--color-deep)] px-4 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow={t('sections.galleryEyebrow')}

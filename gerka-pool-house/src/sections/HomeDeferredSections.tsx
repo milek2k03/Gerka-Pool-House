@@ -18,7 +18,7 @@ const BookingSection = lazy(() =>
 
 function BookingPlaceholder({ content, locale }: { content: SiteContent; locale: Locale }) {
   return (
-    <section id="booking" className="bg-[var(--color-paper)] px-4 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="booking" className="section-spacing bg-[var(--color-paper)] px-4 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-card)] px-6 py-10 text-center shadow-[var(--shadow-soft)] sm:px-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-brass)]">

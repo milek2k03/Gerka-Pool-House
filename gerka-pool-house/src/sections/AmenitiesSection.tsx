@@ -10,7 +10,7 @@ export function AmenitiesSection({ items, locale }: { items: FeatureItem[]; loca
   const { t } = useTranslation()
 
   return (
-    <section id="amenities" className="bg-[var(--color-paper)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="amenities" className="section-spacing bg-[var(--color-paper)] px-5 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow={t('sections.amenitiesEyebrow')}

@@ -92,8 +92,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
   const airports = content.area.airports ?? []
 
   return (
-    <section id="area" className="bg-[var(--color-deep)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
-      <div className="mx-auto grid max-w-7xl gap-12">
+    <section id="area" className="section-spacing bg-[var(--color-deep)] px-5 sm:px-8 lg:px-10">
+      <div className="section-stack mx-auto grid max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
             <SectionHeading

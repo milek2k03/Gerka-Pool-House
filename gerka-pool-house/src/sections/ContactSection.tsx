@@ -12,7 +12,7 @@ export function ContactSection({ content, locale }: { content: SiteContent; loca
   const phone = content.contact.phone.trim()
 
   return (
-    <section id="contact" className="bg-[var(--color-deep)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="contact" className="section-spacing bg-[var(--color-deep)] px-5 sm:px-8 lg:px-10">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <SectionHeading

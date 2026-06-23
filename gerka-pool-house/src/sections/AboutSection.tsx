@@ -218,7 +218,7 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
   ]
 
   return (
-    <section id="about" className="bg-[var(--color-paper)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="about" className="section-spacing bg-[var(--color-paper)] px-5 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-4xl">
           <SectionHeading

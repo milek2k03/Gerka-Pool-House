@@ -14,7 +14,7 @@ export function FaqSection({ items, locale, pricing }: { items: FaqItem[]; local
   const [openId, setOpenId] = useState(items[0]?.id)
 
   return (
-    <section id="faq" className="bg-[var(--color-deep)] px-5 py-20 sm:px-8 lg:px-10 lg:py-[120px]">
+    <section id="faq" className="section-spacing bg-[var(--color-deep)] px-5 sm:px-8 lg:px-10">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
         <SectionHeading eyebrow={t('sections.faqEyebrow')} title={t('sections.faqTitle')} />
         <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)]">
