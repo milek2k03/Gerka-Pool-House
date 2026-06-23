@@ -32,6 +32,7 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true
+    let midnightTimer: ReturnType<typeof window.setTimeout> | undefined
 
     const loadContent = async () => {
       try {
@@ -49,11 +50,24 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    const scheduleMidnightRefresh = () => {
+      if (!active) return
+
+      const now = new Date()
+      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1)
+
+      midnightTimer = window.setTimeout(() => {
+        void loadContent().finally(scheduleMidnightRefresh)
+      }, nextMidnight.getTime() - now.getTime())
+    }
+
     void loadContent()
+    scheduleMidnightRefresh()
     const unsubscribe = contentRepository.subscribe(loadContent)
 
     return () => {
       active = false
+      if (midnightTimer) window.clearTimeout(midnightTimer)
       unsubscribe()
     }
   }, [])

@@ -1,5 +1,6 @@
 import { defaultSiteContent } from '../constants/defaultContent'
 import type { ImageAsset, SiteContent } from '../types/content'
+import { removeExpiredManualAvailabilityRanges } from '../utils/availability'
 import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient'
 
 const tableName = 'site_content'
@@ -8,6 +9,12 @@ const storageKey = 'gerka-pool-house:site-content:v1'
 
 function cloneContent(content: SiteContent): SiteContent {
   return structuredClone(content)
+}
+
+function removeExpiredAvailability(content: SiteContent) {
+  content.availability = removeExpiredManualAvailabilityRanges(content.availability ?? [])
+
+  return content
 }
 
 function fileStem(value?: string) {
@@ -783,7 +790,7 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     }
   }
 
-  return repairBundledAssetPaths(content)
+  return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 
 export const contentRepository = {
@@ -802,9 +809,13 @@ export const contentRepository = {
     try {
       const parsed = JSON.parse(stored) as Partial<SiteContent>
       const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
+      const previousAvailabilityCount = parsed.availability?.length ?? 0
       const migrated = migrateContent(mergeDeep(cloneContent(defaultSiteContent), parsed), storedVersion)
 
-      if (storedVersion < defaultSiteContent.version) {
+      if (
+        storedVersion < defaultSiteContent.version ||
+        migrated.availability.length !== previousAvailabilityCount
+      ) {
         window.localStorage.setItem(storageKey, JSON.stringify(migrated))
       }
 
@@ -823,7 +834,22 @@ export const contentRepository = {
       if (!error && data?.content) {
         const parsed = data.content as Partial<SiteContent>
         const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
+        const previousAvailabilityCount = parsed.availability?.length ?? 0
         const next = migrateContent(mergeDeep(cloneContent(defaultSiteContent), parsed), storedVersion)
+
+        if (next.availability.length !== previousAvailabilityCount) {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession()
+
+          if (session?.user) {
+            try {
+              return await this.save(next)
+            } catch {
+              // The cleaned content still remains active locally if persistence temporarily fails.
+            }
+          }
+        }
 
         this.saveLocal(next)
         return next
@@ -842,7 +868,11 @@ export const contentRepository = {
   },
 
   async save(content: SiteContent) {
-    const next = { ...content, version: defaultSiteContent.version, updatedAt: new Date().toISOString() }
+    const next = removeExpiredAvailability({
+      ...content,
+      version: defaultSiteContent.version,
+      updatedAt: new Date().toISOString(),
+    })
     const supabase = await getSupabaseClient()
 
     if (supabase) {
@@ -854,6 +884,24 @@ export const contentRepository = {
     }
 
     return this.saveLocal(next)
+  },
+
+  async cleanupExpiredAvailability() {
+    const supabase = await getSupabaseClient()
+    if (!supabase) return null
+
+    const { data, error } = await supabase.from(tableName).select('content').eq('id', contentId).maybeSingle()
+    if (error || !data?.content) return null
+
+    const parsed = data.content as Partial<SiteContent>
+    const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
+    const merged = mergeDeep(cloneContent(defaultSiteContent), parsed)
+    const previousCount = merged.availability?.length ?? 0
+    const next = migrateContent(merged, storedVersion)
+
+    if (next.availability.length === previousCount) return null
+
+    return this.save(next)
   },
 
   async reset() {

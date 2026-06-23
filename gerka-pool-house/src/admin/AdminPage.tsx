@@ -26,6 +26,7 @@ import { Button } from '../components/ui/Button'
 import { supportedLocales } from '../config/site'
 import { useAdminAuth } from '../hooks/useAdminAuth'
 import { useSiteContent } from '../hooks/useSiteContent'
+import { contentRepository } from '../services/contentRepository'
 import { reservationRepository } from '../services/reservationRepository'
 import type { Locale, LocalizedString } from '../types/common'
 import type { IconKey, ImageAsset, SiteContent } from '../types/content'
@@ -472,6 +473,12 @@ export function AdminPage() {
       unsubscribe()
     }
   }, [adminAuth.status, t])
+
+  useEffect(() => {
+    if (adminAuth.status !== 'authenticated') return
+
+    void contentRepository.cleanupExpiredAvailability().catch(() => undefined)
+  }, [adminAuth.status])
 
   const toggleGallerySection = (sectionId: string) => {
     setOpenGallerySectionIds((current) =>
