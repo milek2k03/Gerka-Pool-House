@@ -745,6 +745,12 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
 }
 
 export const contentRepository = {
+  hasLocalContent(): boolean {
+    if (typeof window === 'undefined') return false
+
+    return Boolean(window.localStorage.getItem(storageKey))
+  },
+
   loadLocal(): SiteContent {
     if (typeof window === 'undefined') return cloneContent(defaultSiteContent)
 

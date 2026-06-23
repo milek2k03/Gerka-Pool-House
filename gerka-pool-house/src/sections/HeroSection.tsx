@@ -1,5 +1,4 @@
 import { ArrowDown, CalendarCheck } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
 import { ResponsiveImage } from '../components/common/ResponsiveImage'
@@ -25,12 +24,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
       />
       <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))] sm:inset-0 sm:h-full" />
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-8 pt-[62svh] sm:px-8 sm:pt-28 lg:px-10">
-        <motion.div
-          className="max-w-xl pb-10 sm:pb-16 lg:ml-auto lg:max-w-2xl lg:text-right"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
+        <div className="max-w-xl pb-10 sm:pb-16 lg:ml-auto lg:max-w-2xl lg:text-right">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brass)]">
             {localize(content.hero.eyebrow, locale)}
           </p>
@@ -53,7 +47,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
               {t('common.seeOffer')}
             </AnchorButton>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

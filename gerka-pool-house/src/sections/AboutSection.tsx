@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
 import { FeatureIcon } from '../components/common/Icon'
@@ -150,40 +149,32 @@ function RichParts({
   )
 }
 
-function ApartmentCard({ section, index }: { section: RichSectionContent; index: number }) {
+function ApartmentCard({ section }: { section: RichSectionContent }) {
   return (
-    <motion.article
+    <article
       className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:shadow-[var(--shadow-premium)]"
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ delay: index * 0.08 }}
     >
       <h3 className="text-xl font-semibold text-[var(--color-ink)]">{section.heading}</h3>
       <div className="mt-4">
         <RichParts parts={section.parts} compact />
       </div>
-    </motion.article>
+    </article>
   )
 }
 
-function ApartmentComingSoonCard({ title, message, index }: { title: string; message: string; index: number }) {
+function ApartmentComingSoonCard({ title, message }: { title: string; message: string }) {
   const { t } = useTranslation()
 
   return (
-    <motion.article
+    <article
       className="rounded-[var(--radius-card)] border border-dashed border-[rgba(214,181,138,0.36)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:shadow-[var(--shadow-premium)]"
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ delay: index * 0.08 }}
     >
       <span className="inline-flex rounded-full border border-[var(--color-brass)] bg-[rgba(214,181,138,0.12)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-brass)]">
         {t('pricing.room2ComingSoon')}
       </span>
       <h3 className="mt-4 text-xl font-semibold text-[var(--color-ink)]">{title}</h3>
       <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">{message}</p>
-    </motion.article>
+    </article>
   )
 }
 
@@ -240,14 +231,13 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           {apartment1Split ? (
             <>
-              <ApartmentCard section={apartment1Split.card} index={0} />
+              <ApartmentCard section={apartment1Split.card} />
               {room2Enabled ? (
-                <ApartmentCard section={apartment2Split?.card ?? fallbackApartment2Section} index={1} />
+                <ApartmentCard section={apartment2Split?.card ?? fallbackApartment2Section} />
               ) : (
                 <ApartmentComingSoonCard
                   title={t('about.apartment2FallbackTitle')}
                   message={t('pricing.room2DisabledNotice', { count: content.pricing.room1Capacity })}
-                  index={1}
                 />
               )}
             </>
@@ -265,14 +255,10 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
             </div>
           ) : null}
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            {content.about.highlights.map((item, index) => (
-              <motion.article
+            {content.about.highlights.map((item) => (
+              <article
                 key={item.id}
                 className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:shadow-[var(--shadow-premium)]"
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ delay: index * 0.08 }}
               >
                 <div className="mb-4 grid size-10 place-items-center rounded-xl bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
                   <FeatureIcon icon={item.icon} />
@@ -281,7 +267,7 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
                 <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
                   {applyGuestLimitToText(localize(item.description, locale), content.pricing)}
                 </p>
-              </motion.article>
+              </article>
             ))}
           </div>
         </div>

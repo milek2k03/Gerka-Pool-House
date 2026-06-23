@@ -26,7 +26,9 @@ function SiteContentBootScreen() {
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState(() => contentRepository.loadLocal())
-  const [isBootstrapping, setIsBootstrapping] = useState(isSupabaseConfigured)
+  const [isBootstrapping, setIsBootstrapping] = useState(
+    () => isSupabaseConfigured && !contentRepository.hasLocalContent(),
+  )
 
   useEffect(() => {
     let active = true

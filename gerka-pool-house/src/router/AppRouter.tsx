@@ -2,8 +2,8 @@ import { lazy } from 'react'
 import { Route, Routes } from 'react-router'
 
 import { MainLayout } from '../layouts/MainLayout'
+import { HomePage } from '../pages/HomePage'
 
-const HomePage = lazy(() => import('../pages/HomePage').then((module) => ({ default: module.HomePage })))
 const AdminPage = lazy(() => import('../admin/AdminPage').then((module) => ({ default: module.AdminPage })))
 const PrivacyPage = lazy(() => import('../pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })))
 const CookiesPage = lazy(() => import('../pages/CookiesPage').then((module) => ({ default: module.CookiesPage })))

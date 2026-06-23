@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { BusFront, ExternalLink, PlaneLanding, Route, ShoppingBasket, Utensils } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -13,24 +12,18 @@ import { localize } from '../utils/locale'
 function InfoCard({
   item,
   locale,
-  index,
   compact = false,
 }: {
   item: AreaInfoItem
   locale: Locale
-  index: number
   compact?: boolean
 }) {
   return (
-    <motion.article
+    <article
       className={cn(
         'rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)]',
         compact ? 'p-4' : 'p-5',
       )}
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ delay: index * 0.05 }}
     >
       <p className={cn('font-semibold uppercase tracking-[0.12em] text-[var(--color-brass)]', compact ? 'text-[0.68rem]' : 'text-xs')}>
         {localize(item.distance, locale)}
@@ -70,18 +63,14 @@ function InfoCard({
           <ExternalLink aria-hidden="true" className={compact ? 'size-3.5' : 'size-4'} />
         </a>
       ) : null}
-    </motion.article>
+    </article>
   )
 }
 
-function PlaceCard({ item, locale, index }: { item: AreaItem; locale: Locale; index: number }) {
+function PlaceCard({ item, locale }: { item: AreaItem; locale: Locale }) {
   return (
-    <motion.article
+    <article
       className="grid gap-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)] sm:grid-cols-[auto_1fr]"
-      initial={{ opacity: 0, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ delay: index * 0.05 }}
     >
       <div className="grid size-11 place-items-center rounded-xl bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
         <FeatureIcon icon={item.icon} />
@@ -93,7 +82,7 @@ function PlaceCard({ item, locale, index }: { item: AreaItem; locale: Locale; in
         <h3 className="mt-2 text-lg font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
         <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{localize(item.description, locale)}</p>
       </div>
-    </motion.article>
+    </article>
   )
 }
 
@@ -125,8 +114,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
               <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.restaurantsTitle')}</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {content.area.restaurants.map((item, index) => (
-                <InfoCard key={item.id} item={item} locale={locale} index={index} />
+              {content.area.restaurants.map((item) => (
+                <InfoCard key={item.id} item={item} locale={locale} />
               ))}
             </div>
           </div>
@@ -139,8 +128,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
               <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.nearbyTitle')}</h2>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {content.area.nearby.map((item, index) => (
-                <InfoCard key={item.id} item={item} locale={locale} index={index} />
+              {content.area.nearby.map((item) => (
+                <InfoCard key={item.id} item={item} locale={locale} />
               ))}
             </div>
           </div>
@@ -155,8 +144,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
                 {t('sections.busAccessLead')}
               </p>
               <div className="mt-5 grid gap-4 md:grid-cols-3">
-                {busRoutes.map((item, index) => (
-                  <InfoCard key={item.id} item={item} locale={locale} index={index} compact />
+                {busRoutes.map((item) => (
+                  <InfoCard key={item.id} item={item} locale={locale} compact />
                 ))}
               </div>
             </div>
@@ -172,8 +161,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
                 {t('sections.airportsLead')}
               </p>
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {airports.map((item, index) => (
-                  <InfoCard key={item.id} item={item} locale={locale} index={index} />
+                {airports.map((item) => (
+                  <InfoCard key={item.id} item={item} locale={locale} />
                 ))}
               </div>
             </div>
@@ -209,8 +198,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
             lead={t('sections.placesLead')}
           />
           <div className="grid gap-4 md:grid-cols-2">
-            {content.area.items.map((item, index) => (
-              <PlaceCard key={item.id} item={item} locale={locale} index={index} />
+            {content.area.items.map((item) => (
+              <PlaceCard key={item.id} item={item} locale={locale} />
             ))}
           </div>
         </div>

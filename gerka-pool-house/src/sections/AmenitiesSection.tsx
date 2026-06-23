@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
 import { FeatureIcon } from '../components/common/Icon'
@@ -19,21 +18,17 @@ export function AmenitiesSection({ items, locale }: { items: FeatureItem[]; loca
           lead={t('sections.amenitiesLead')}
         />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, index) => (
-            <motion.article
+          {items.map((item) => (
+            <article
               key={item.id}
               className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)]"
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ delay: index * 0.05 }}
             >
               <div className="mb-5 grid size-11 place-items-center rounded-xl bg-[rgba(214,181,138,0.14)] text-[var(--color-brass)]">
                 <FeatureIcon icon={item.icon} />
               </div>
               <h3 className="text-lg font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
               <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">{localize(item.description, locale)}</p>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

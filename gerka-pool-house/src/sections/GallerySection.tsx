@@ -1,5 +1,4 @@
 import { Maximize2, Play } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -30,7 +29,7 @@ function GalleryMosaic({
         const isMoreTrigger = hiddenItemsCount > 0 && index === visibleItems.length - 1
 
         return (
-          <motion.button
+          <button
             key={item.id}
             type="button"
             className={cn(
@@ -39,10 +38,6 @@ function GalleryMosaic({
               'lg:aspect-[4/5] lg:first:col-span-2 lg:first:row-span-2 lg:first:aspect-auto',
             )}
             onClick={() => onOpen(index)}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ delay: index * 0.06 }}
             aria-label={
               isMoreTrigger
                 ? `${t('gallery.viewMore')}. ${t('gallery.moreCount', { count: hiddenItemsCount })}`
@@ -94,7 +89,7 @@ function GalleryMosaic({
                 </span>
               </span>
             ) : null}
-          </motion.button>
+          </button>
         )
       })}
     </div>

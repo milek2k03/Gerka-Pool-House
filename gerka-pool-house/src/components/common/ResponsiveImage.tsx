@@ -4,6 +4,7 @@ import { cn } from '../../utils/cn'
 const supabasePublicObjectPath = '/storage/v1/object/public/'
 const supabaseImageRenderPath = '/storage/v1/render/image/public/'
 const responsiveWidths = [320, 480, 640, 768, 960, 1200, 1600, 1920]
+const mobileResponsiveWidths = [320, 480, 640, 768, 960, 1200]
 
 interface ResponsiveImageProps {
   image: ImageAsset
@@ -24,7 +25,7 @@ function getSupabaseImageUrl(src: string, width: number, format: 'origin' | 'web
 
     url.pathname = url.pathname.replace(supabasePublicObjectPath, supabaseImageRenderPath)
     url.searchParams.set('width', String(width))
-    url.searchParams.set('quality', '76')
+    url.searchParams.set('quality', '72')
     url.searchParams.set('resize', 'contain')
     url.searchParams.set('format', format)
 
@@ -34,10 +35,14 @@ function getSupabaseImageUrl(src: string, width: number, format: 'origin' | 'web
   }
 }
 
-function getSupabaseSrcSet(image: ImageAsset, format: 'origin' | 'webp' = 'webp') {
+function getSupabaseSrcSet(
+  image: ImageAsset,
+  format: 'origin' | 'webp' = 'webp',
+  widths = responsiveWidths,
+) {
   if (image.type === 'video') return null
 
-  const entries = responsiveWidths
+  const entries = widths
     .map((width) => {
       const url = getSupabaseImageUrl(image.src, width, format)
       return url ? `${url} ${width}w` : null
@@ -57,7 +62,7 @@ export function ResponsiveImage({
   fetchPriority = 'auto',
   sizes = '100vw',
 }: ResponsiveImageProps) {
-  const mobileSupabaseSrcSet = mobileImage ? getSupabaseSrcSet(mobileImage) : null
+  const mobileSupabaseSrcSet = mobileImage ? getSupabaseSrcSet(mobileImage, 'webp', mobileResponsiveWidths) : null
   const supabaseSrcSet = getSupabaseSrcSet(image)
   const mobileOptimizedFallbackSrc = mobileImage
     ? (getSupabaseImageUrl(mobileImage.src, 960, 'origin') ?? mobileImage.src)
