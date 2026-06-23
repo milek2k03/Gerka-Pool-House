@@ -7,36 +7,49 @@ import { ResponsiveImage } from '../components/common/ResponsiveImage'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import type { Locale } from '../types/common'
 import type { AreaInfoItem, AreaItem, SiteContent } from '../types/content'
+import { cn } from '../utils/cn'
 import { localize } from '../utils/locale'
 
 function InfoCard({
   item,
   locale,
   index,
+  compact = false,
 }: {
   item: AreaInfoItem
   locale: Locale
   index: number
+  compact?: boolean
 }) {
   return (
     <motion.article
-      className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)]"
+      className={cn(
+        'rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)] hover:shadow-[var(--shadow-premium)]',
+        compact ? 'p-4' : 'p-5',
+      )}
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ delay: index * 0.05 }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brass)]">
+      <p className={cn('font-semibold uppercase tracking-[0.12em] text-[var(--color-brass)]', compact ? 'text-[0.68rem]' : 'text-xs')}>
         {localize(item.distance, locale)}
       </p>
-      <h3 className="mt-3 text-lg font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
-      <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">{localize(item.description, locale)}</p>
+      <h3 className={cn('font-semibold text-[var(--color-ink)]', compact ? 'mt-2 text-base' : 'mt-3 text-lg')}>
+        {localize(item.title, locale)}
+      </h3>
+      <p className={cn('text-sm text-[var(--color-muted)]', compact ? 'mt-2 leading-5' : 'mt-3 leading-6')}>
+        {localize(item.description, locale)}
+      </p>
       {item.details?.length ? (
-        <ul className="mt-4 flex flex-wrap gap-2">
+        <ul className={cn('flex flex-wrap gap-2', compact ? 'mt-3' : 'mt-4')}>
           {item.details.map((detail) => (
             <li
               key={localize(detail, locale)}
-              className="rounded-full bg-[rgba(214,181,138,0.12)] px-3 py-1.5 text-xs font-semibold text-[var(--color-brass)]"
+              className={cn(
+                'rounded-full bg-[rgba(214,181,138,0.12)] font-semibold text-[var(--color-brass)]',
+                compact ? 'px-2.5 py-1 text-[0.68rem]' : 'px-3 py-1.5 text-xs',
+              )}
             >
               {localize(detail, locale)}
             </li>
@@ -48,10 +61,13 @@ function InfoCard({
           href={item.link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-[rgba(214,181,138,0.35)] px-4 py-2 text-sm font-semibold text-[var(--color-brass)] transition hover:border-[var(--color-brass)] hover:bg-[rgba(214,181,138,0.12)] hover:text-[var(--color-brass-hover)]"
+          className={cn(
+            'inline-flex items-center gap-2 rounded-full border border-[rgba(214,181,138,0.35)] font-semibold text-[var(--color-brass)] transition hover:border-[var(--color-brass)] hover:bg-[rgba(214,181,138,0.12)] hover:text-[var(--color-brass-hover)]',
+            compact ? 'mt-4 px-3 py-2 text-xs' : 'mt-5 px-4 py-2 text-sm',
+          )}
         >
           {localize(item.link.label, locale)}
-          <ExternalLink aria-hidden="true" className="size-4" />
+          <ExternalLink aria-hidden="true" className={compact ? 'size-3.5' : 'size-4'} />
         </a>
       ) : null}
     </motion.article>
@@ -130,17 +146,17 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
           </div>
 
           {busRoutes.length > 0 ? (
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
+            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-5 shadow-[var(--shadow-soft)] sm:p-6">
               <div className="flex items-center gap-3 text-[var(--color-brass)]">
                 <BusFront aria-hidden="true" className="size-5" />
                 <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.busAccessTitle')}</h2>
               </div>
-              <p className="mt-4 max-w-4xl text-sm leading-6 text-[var(--color-muted)]">
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-muted)]">
                 {t('sections.busAccessLead')}
               </p>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
                 {busRoutes.map((item, index) => (
-                  <InfoCard key={item.id} item={item} locale={locale} index={index} />
+                  <InfoCard key={item.id} item={item} locale={locale} index={index} compact />
                 ))}
               </div>
             </div>

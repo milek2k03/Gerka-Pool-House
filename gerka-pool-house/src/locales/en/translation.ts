@@ -52,7 +52,7 @@ export const en = {
     nearbyTitle: 'Nearby',
     busAccessTitle: 'Bus access',
     busAccessLead:
-      'Czarze can be reached by regional bus or PKS service, especially from Bydgoszcz and Chelmno. Before travelling, it is best to check the current timetable and nearest stop with the operator.',
+      'Czarze can be reached by municipal, regional or PKS bus. The nearest stop is only a few minutes on foot from the property.',
     airportsTitle: 'Airport access',
     airportsLead:
       'Gerka Pool House can be reached from several regional airports and major Polish hubs. Bydgoszcz is the closest option, while Gdansk, Poznan and Warsaw are convenient alternatives for guests flying from farther destinations.',

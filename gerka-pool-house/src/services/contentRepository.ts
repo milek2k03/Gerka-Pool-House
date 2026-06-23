@@ -716,6 +716,31 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     })
   }
 
+  if (storedVersion < 20) {
+    content.version = defaultSiteContent.version
+
+    const defaultBusRoutes = cloneContent(defaultSiteContent).area.busRoutes
+    content.area.busRoutes = content.area.busRoutes ?? []
+
+    defaultBusRoutes.forEach((defaultRoute) => {
+      const existingIndex = content.area.busRoutes.findIndex((route) => route.id === defaultRoute.id)
+
+      if (existingIndex === -1) {
+        content.area.busRoutes.push(defaultRoute)
+        return
+      }
+
+      content.area.busRoutes[existingIndex] = {
+        ...content.area.busRoutes[existingIndex],
+        title: defaultRoute.title,
+        distance: defaultRoute.distance,
+        description: defaultRoute.description,
+        details: defaultRoute.details,
+        link: defaultRoute.link,
+      }
+    })
+  }
+
   return repairBundledAssetPaths(content)
 }
 

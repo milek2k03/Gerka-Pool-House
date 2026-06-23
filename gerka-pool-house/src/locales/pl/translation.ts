@@ -52,7 +52,7 @@ export const pl = {
     nearbyTitle: 'W pobliżu',
     busAccessTitle: 'Dojazd autobusem',
     busAccessLead:
-      'Do Czarża można dojechać autobusem regionalnym lub PKS-em, szczególnie z Bydgoszczy i Chełmna. Przed podróżą najlepiej sprawdzić aktualny rozkład oraz najbliższy przystanek u przewoźnika.',
+      'Do Czarża można dojechać autobusem gminnym, regionalnym lub PKS-em. Najbliższy przystanek znajduje się kilka minut spacerem od obiektu.',
     airportsTitle: 'Dojazd z lotnisk',
     airportsLead:
       'Do Gerka Pool House można wygodnie dojechać z kilku lotnisk w regionie i największych portów lotniczych w Polsce. Najbliżej znajduje się Bydgoszcz, a Gdańsk, Poznań i Warszawa są dobrymi alternatywami dla gości przylatujących z dalszych kierunków.',

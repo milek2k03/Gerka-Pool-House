@@ -13,7 +13,7 @@ import type { SiteContent } from '../types/content'
 const socialPreviewImage = '/api/og-image?v=5'
 
 export const defaultSiteContent: SiteContent = {
-  version: 19,
+  version: 20,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -367,8 +367,8 @@ export const defaultSiteContent: SiteContent = {
         title: { pl: 'Autobus gminny w Czarżu', en: 'Municipal bus in Czarze' },
         distance: { pl: 'przystanek Czarże, Chełmińska 18/47', en: 'Czarze, Chelminska 18/47 stop' },
         description: {
-          pl: 'W Czarżu kursuje autobus gminny / lokalny obsługujący przejazdy przez miejscowość i połączenia z okolicą. Najbliższy przystanek znajduje się przy ul. Chełmińskiej, kilka minut spacerem od obiektu. Przed podróżą warto sprawdzić aktualne godziny odjazdów w rozkładzie online.',
-          en: 'A municipal / local bus serves Czarze and connects the village with the surrounding area. The nearest stop is on Chelminska Street, a few minutes on foot from the property. Before travelling, please check the current departure times in the online timetable.',
+          pl: 'Najbliższy przystanek znajduje się przy ul. Chełmińskiej, kilka minut spacerem od domu. Przed wyjazdem warto sprawdzić aktualne godziny w rozkładzie online.',
+          en: 'The nearest stop is on Chelminska Street, a few minutes on foot from the house. Please check the current timetable online before travelling.',
         },
         details: [
           { pl: 'autobus gminny', en: 'municipal bus' },
@@ -382,11 +382,11 @@ export const defaultSiteContent: SiteContent = {
       },
       {
         id: 'bus-bydgoszcz',
-        title: { pl: 'PKS / autobus regionalny z Bydgoszczy', en: 'PKS / regional bus from Bydgoszcz' },
-        distance: { pl: 'połączenie w kierunku Czarża', en: 'connection towards Czarze' },
+        title: { pl: 'Dojazd z Bydgoszczy', en: 'From Bydgoszcz' },
+        distance: { pl: 'kursy w kierunku Czarża', en: 'routes towards Czarze' },
         description: {
-          pl: 'Najwygodniej rozpocząć podróż z dworca autobusowego w Bydgoszczy i wybrać kurs jadący w kierunku Czarża, Chełmna lub okolicznych miejscowości. Autobus gminny / regionalny zatrzymuje się w Czarżu przy ul. Chełmińskiej, a dojście do obiektu przy numerze 41 zajmuje zwykle tylko kilka minut.',
-          en: 'The most convenient option is to start from the bus station in Bydgoszcz and choose a route towards Czarze, Chelmno or nearby villages. The municipal / regional bus stops in Czarze on Chelminska Street, and the walk to the property at number 41 usually takes only a few minutes.',
+          pl: 'Najwygodniej ruszyć z dworca autobusowego w Bydgoszczy i wybrać kurs w stronę Czarża lub Chełmna. Przystanek w Czarżu jest blisko obiektu.',
+          en: 'The easiest option is to start from the bus station in Bydgoszcz and choose a route towards Czarze or Chelmno. The stop in Czarze is close to the property.',
         },
         details: [
           { pl: 'z Bydgoszczy', en: 'from Bydgoszcz' },
@@ -396,11 +396,11 @@ export const defaultSiteContent: SiteContent = {
       },
       {
         id: 'bus-chelmno',
-        title: { pl: 'PKS / autobus regionalny z Chełmna', en: 'PKS / regional bus from Chelmno' },
+        title: { pl: 'Dojazd z Chełmna', en: 'From Chelmno' },
         distance: { pl: 'krótki dojazd do Czarża', en: 'short ride to Czarze' },
         description: {
-          pl: 'Z Chełmna można dojechać do Czarża autobusem gminnym / regionalnym lub PKS-em kursującym w stronę Bydgoszczy i okolicznych miejscowości. To wygodne rozwiązanie dla gości bez samochodu oraz osób planujących krótką wycieczkę do Chełmna w trakcie pobytu.',
-          en: 'From Chelmno, guests can reach Czarze by municipal / regional bus or PKS service travelling towards Bydgoszcz and nearby villages. It is a convenient option for guests without a car and for anyone planning a short trip to Chelmno during the stay.',
+          pl: 'Z Chełmna do Czarża można dojechać autobusem regionalnym lub PKS-em. To dobre rozwiązanie dla gości bez auta i osób planujących krótki wypad do Chełmna.',
+          en: 'From Chelmno, guests can reach Czarze by regional bus or PKS service. It is a good option without a car and for a short visit to Chelmno.',
         },
         details: [
           { pl: 'z Chełmna', en: 'from Chelmno' },
