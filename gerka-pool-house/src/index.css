@@ -165,6 +165,20 @@ input[type='date'].field::-webkit-calendar-picker-indicator {
     );
 }
 
+@keyframes loader-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  50% {
+    transform: translateX(70%);
+  }
+
+  100% {
+    transform: translateX(240%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
