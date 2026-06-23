@@ -7,13 +7,10 @@ import { AnchorButton } from '../components/ui/Button'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from '../utils/locale'
-import { applyGuestLimitToText, getEffectiveMaxGuests } from '../utils/pricing'
+import { applyGuestLimitToText } from '../utils/pricing'
 
 export function HeroSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
-  const poolHighlight = content.about.highlights.find((item) => item.id === 'private-pool')
-  const contactLine = content.contact.phone.trim() || content.contact.email
-  const maxGuests = getEffectiveMaxGuests(content.pricing)
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
@@ -57,11 +54,6 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
             </AnchorButton>
           </div>
         </motion.div>
-        <div className="grid gap-2 border-t border-[var(--color-border)] pt-4 text-sm text-white/78 sm:grid-cols-3">
-          <span>{t('pricing.maxGuests', { count: maxGuests })}</span>
-          <span>{poolHighlight ? localize(poolHighlight.title, locale) : localize(content.hero.eyebrow, locale)}</span>
-          <span>{contactLine}</span>
-        </div>
       </div>
     </section>
   )
