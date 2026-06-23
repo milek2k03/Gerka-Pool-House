@@ -13,7 +13,7 @@ import type { SiteContent } from '../types/content'
 const socialPreviewImage = '/api/og-image?v=5'
 
 export const defaultSiteContent: SiteContent = {
-  version: 20,
+  version: 21,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -74,11 +74,11 @@ export const defaultSiteContent: SiteContent = {
       },
       {
         id: 'quiet-garden',
-        icon: 'garden',
-        title: { pl: 'Ogród i prywatność', en: 'Garden and privacy' },
+        icon: 'firepit',
+        title: { pl: 'Palenisko', en: 'Firepit' },
         description: {
-          pl: 'Zielona przestrzeń do odpoczynku, rozmów i wspólnych posiłków.',
-          en: 'Green space for rest, conversation and shared meals.',
+          pl: 'Klimatyczne miejsce na wieczorne rozmowy, odpoczynek i wspólny czas przy ogniu.',
+          en: 'A cosy outdoor spot for evening conversations, relaxing and spending time together by the fire.',
         },
       },
     ],
@@ -204,17 +204,17 @@ export const defaultSiteContent: SiteContent = {
       icon: 'grill',
       title: { pl: 'Grill', en: 'Barbecue' },
       description: {
-        pl: 'Miejsce do wspólnego gotowania i długich wieczorów.',
-        en: 'A dedicated place for shared cooking and long evenings.',
+        pl: 'Wygodna strefa grillowa do przygotowywania posiłków i wspólnych letnich kolacji.',
+        en: 'A comfortable barbecue area for preparing meals and enjoying shared summer dinners.',
       },
     },
     {
       id: 'garden',
-      icon: 'garden',
-      title: { pl: 'Ogród', en: 'Garden' },
+      icon: 'firepit',
+      title: { pl: 'Palenisko', en: 'Firepit' },
       description: {
-        pl: 'Przestrzeń do zabawy, rozmów i odpoczynku na świeżym powietrzu.',
-        en: 'Outdoor space for play, conversation and unwinding.',
+        pl: 'Miejsce na wieczorne rozmowy, ciepły klimat i spokojny odpoczynek przy ogniu.',
+        en: 'A cosy place for evening conversations, a warm atmosphere and relaxing by the fire.',
       },
     },
     {

@@ -4,6 +4,7 @@ import type { LocalizedString } from './common'
 export type IconKey =
   | 'pool'
   | 'grill'
+  | 'firepit'
   | 'garden'
   | 'parking'
   | 'wifi'

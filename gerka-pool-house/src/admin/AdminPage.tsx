@@ -65,6 +65,7 @@ type ReservationAcceptanceConflict =
 const iconOptions: IconKey[] = [
   'pool',
   'grill',
+  'firepit',
   'garden',
   'parking',
   'wifi',

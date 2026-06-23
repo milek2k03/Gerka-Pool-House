@@ -1,5 +1,6 @@
 import {
   Car,
+  createLucideIcon,
   FlameKindling,
   Landmark,
   Leaf,
@@ -17,9 +18,19 @@ import {
 
 import type { IconKey } from '../../types/content'
 
+const BarbecueGrill = createLucideIcon('barbecue-grill', [
+  ['path', { d: 'M4 10h16', key: 'grill-rack' }],
+  ['path', { d: 'M6 10a6 6 0 0 0 12 0', key: 'grill-bowl' }],
+  ['path', { d: 'M12 16v5', key: 'grill-leg' }],
+  ['path', { d: 'M8 21h8', key: 'grill-base' }],
+  ['path', { d: 'M9 6c0-1 1-1.5 1-2.5', key: 'grill-smoke-left' }],
+  ['path', { d: 'M14 6c0-1 1-1.5 1-2.5', key: 'grill-smoke-right' }],
+])
+
 const icons: Record<IconKey, LucideIcon> = {
   pool: Waves,
-  grill: FlameKindling,
+  grill: BarbecueGrill,
+  firepit: FlameKindling,
   garden: Trees,
   parking: ParkingCircle,
   wifi: Wifi,

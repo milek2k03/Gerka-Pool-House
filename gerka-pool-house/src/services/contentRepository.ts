@@ -741,6 +741,48 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     })
   }
 
+  if (storedVersion < 21) {
+    content.version = defaultSiteContent.version
+
+    const defaultHighlight = cloneContent(defaultSiteContent).about.highlights.find(
+      (item) => item.id === 'quiet-garden',
+    )
+    const highlightIndex = content.about.highlights.findIndex((item) => item.id === 'quiet-garden')
+
+    if (defaultHighlight) {
+      if (highlightIndex === -1) {
+        content.about.highlights.push(defaultHighlight)
+      } else {
+        content.about.highlights[highlightIndex] = {
+          ...content.about.highlights[highlightIndex],
+          icon: defaultHighlight.icon,
+          title: defaultHighlight.title,
+          description: defaultHighlight.description,
+        }
+      }
+    }
+
+    const defaultAmenities = cloneContent(defaultSiteContent).amenities
+
+    for (const amenityId of ['grill', 'garden']) {
+      const defaultAmenity = defaultAmenities.find((item) => item.id === amenityId)
+      const amenityIndex = content.amenities.findIndex((item) => item.id === amenityId)
+
+      if (!defaultAmenity) continue
+
+      if (amenityIndex === -1) {
+        content.amenities.push(defaultAmenity)
+      } else {
+        content.amenities[amenityIndex] = {
+          ...content.amenities[amenityIndex],
+          icon: defaultAmenity.icon,
+          title: defaultAmenity.title,
+          description: defaultAmenity.description,
+        }
+      }
+    }
+  }
+
   return repairBundledAssetPaths(content)
 }
 
