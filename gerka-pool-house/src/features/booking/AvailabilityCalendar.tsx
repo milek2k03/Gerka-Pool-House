@@ -18,7 +18,12 @@ interface AvailabilityCalendarProps {
 }
 
 function getStatus(date: string, ranges: AvailabilityRange[]) {
-  return ranges.find((range) => isDateWithinRange(date, range.from, range.to))?.status ?? 'available'
+  const matchingRanges = ranges.filter((range) => isDateWithinRange(date, range.from, range.to))
+
+  if (matchingRanges.some((range) => range.status === 'booked')) return 'booked'
+  if (matchingRanges.some((range) => range.status === 'unavailable')) return 'unavailable'
+
+  return 'available'
 }
 
 export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSelectDate }: AvailabilityCalendarProps) {
