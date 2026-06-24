@@ -142,7 +142,7 @@ export const en = {
     booked: 'Booked',
     unavailable: 'Unavailable',
     pastDay: 'Past or current date',
-    pastDays: 'Past and today',
+    pastDays: 'Past',
     chooseDates: 'Choose dates to see the summary.',
     success: 'The inquiry has been saved.',
     emailSent: 'An automatic confirmation has been sent to the provided email address.',

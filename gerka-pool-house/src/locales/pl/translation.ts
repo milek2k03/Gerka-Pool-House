@@ -144,7 +144,7 @@ export const pl = {
     booked: 'Zajęte',
     unavailable: 'Niedostępne',
     pastDay: 'Miniony lub dzisiejszy dzień',
-    pastDays: 'Minione i dzisiaj',
+    pastDays: 'Minione',
     chooseDates: 'Wybierz daty, aby zobaczyć podsumowanie.',
     success: 'Zapytanie zostało zapisane.',
     emailSent: 'Automatyczne potwierdzenie zostało wysłane na podany adres e-mail.',
