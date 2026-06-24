@@ -94,9 +94,9 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           const disabled = displayStatus !== 'available' || isPast
           const statusLabel =
             displayStatus === 'booked'
-              ? t('booking.unavailable')
+              ? t('booking.booked')
               : displayStatus === 'unavailable'
-                ? t('booking.booked')
+                ? t('booking.unavailable')
                 : t('booking.available')
 
           return (
@@ -132,10 +132,10 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           <span className="size-3 rounded-sm bg-[var(--color-surface-2)]" /> {t('booking.available')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-3 rounded-sm bg-[#5c3030]/55 ring-1 ring-[#b87979]/25" /> {t('booking.unavailable')}
+          <span className="size-3 rounded-sm bg-[#5c3030]/55 ring-1 ring-[#b87979]/25" /> {t('booking.booked')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.booked')}
+          <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.unavailable')}
         </span>
       </div>
     </div>
