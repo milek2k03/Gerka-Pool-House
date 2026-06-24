@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { AvailabilityRange } from '../../types/booking'
 import { cn } from '../../utils/cn'
-import { isDateWithinRange, toISODate } from '../../utils/date'
+import { getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
 import { Button } from '../../components/ui/Button'
 import { getLocale } from '../../utils/locale'
 
@@ -30,6 +30,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const minMonth = useMemo(() => startOfMonth(new Date()), [])
+  const today = useMemo(() => getTodayISO(), [])
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const canGoPrevious = month > minMonth
 
@@ -93,10 +94,13 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           const isSelected = date === checkIn || date === checkOut
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
-          const displayStatus = status === 'available' && isPast ? 'unavailable' : status
+          const isPastDay = date < today
+          const displayStatus = isPastDay ? 'past' : status === 'available' && isPast ? 'unavailable' : status
           const disabled = displayStatus !== 'available' || isPast
           const statusLabel =
-            displayStatus === 'booked'
+            displayStatus === 'past'
+              ? t('booking.pastDay')
+              : displayStatus === 'booked'
               ? t('booking.booked')
               : displayStatus === 'unavailable'
                 ? t('booking.unavailable')
@@ -120,6 +124,8 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
                   'cursor-not-allowed border border-[#b87979]/25 bg-[#5c3030]/55 text-[#f3dddd]',
                 displayStatus === 'unavailable' &&
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
+                displayStatus === 'past' &&
+                  'cursor-not-allowed border border-white/[0.025] bg-white/[0.025] text-white/20',
                 isBetween && 'bg-[rgba(214,181,138,0.14)]',
                 isSelected && 'bg-[var(--color-brass)] text-[#111827]',
               )}
@@ -138,6 +144,9 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.unavailable')}
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span className="size-3 rounded-sm border border-white/[0.04] bg-white/[0.03]" /> {t('booking.pastDays')}
         </span>
       </div>
     </div>
