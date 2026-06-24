@@ -92,12 +92,23 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
           const disabled = displayStatus !== 'available' || isPast
+          const statusLabel =
+            displayStatus === 'booked'
+              ? t('booking.unavailable')
+              : displayStatus === 'unavailable'
+                ? t('booking.booked')
+                : t('booking.available')
 
           return (
             <button
               key={date}
               type="button"
               disabled={disabled}
+              aria-label={`${new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-US', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }).format(day)}: ${statusLabel}`}
               onClick={() => onSelectDate(date)}
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
@@ -121,10 +132,10 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           <span className="size-3 rounded-sm bg-[var(--color-surface-2)]" /> {t('booking.available')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="size-3 rounded-sm bg-[#5c3030]/55 ring-1 ring-[#b87979]/25" /> {t('booking.booked')}
+          <span className="size-3 rounded-sm bg-[#5c3030]/55 ring-1 ring-[#b87979]/25" /> {t('booking.unavailable')}
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.unavailable')}
+          <span className="calendar-unavailable size-3 rounded-sm ring-1 ring-sky-300/25" /> {t('booking.booked')}
         </span>
       </div>
     </div>
