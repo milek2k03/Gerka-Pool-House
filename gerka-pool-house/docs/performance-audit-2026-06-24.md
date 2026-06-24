@@ -110,18 +110,19 @@ urządzenia.
 | Pomiar | Przed | Po |
 | --- | ---: | ---: |
 | Lighthouse mobile Performance | 77 | 85 |
-| Mobile FCP | ok. 1,7-3,2 s | ok. 2,4 s |
-| Mobile LCP | ok. 6,2 s | ok. 3,9 s |
-| Mobile TBT | 30 ms | 20 ms |
+| Mobile FCP | ok. 1,7-3,2 s | ok. 2,0 s na produkcji |
+| Mobile LCP | ok. 6,2 s | ok. 4,1 s na produkcji |
+| Mobile TBT | 30 ms | 30 ms na produkcji |
 | Mobile CLS | 0 | 0,002 |
 | Lighthouse desktop | - | 100 / 100 / 100 / 100 |
 | Główny JS gzip | ok. 131 KB | ok. 82 KB |
 | Wspólny chunk UI/router gzip | ok. 24 KB | ok. 15,5 KB |
 | Podatności npm | wykryte w starszym toolchainie | 0 |
 
-Wynik mobilny po wdrożeniu może różnić się od lokalnego. Vercel dostarcza
-Brotli/CDN, natomiast zimny start funkcji Hero i cache obrazu wpływają na
-pojedyncze pomiary. Należy oceniać medianę minimum trzech testów produkcyjnych.
+Końcowy pomiar produkcyjny na `https://www.gerkapoolhouse.pl` uzyskał
+85 / 100 / 100 / 100. Vercel dostarcza Brotli/CDN, natomiast zimny start
+funkcji Hero i cache obrazu nadal wpływają na pojedyncze pomiary. Należy
+oceniać medianę minimum trzech testów produkcyjnych.
 
 ## Jednorazowe działania po wdrożeniu
 
