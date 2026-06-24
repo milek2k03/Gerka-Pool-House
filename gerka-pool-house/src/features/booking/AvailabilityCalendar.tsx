@@ -94,7 +94,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           const isSelected = date === checkIn || date === checkOut
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
-          const isPastDay = date < today
+          const isPastDay = date <= today
           const displayStatus = isPastDay ? 'past' : status === 'available' && isPast ? 'unavailable' : status
           const disabled = displayStatus !== 'available' || isPast
           const statusLabel =
