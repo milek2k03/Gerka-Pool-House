@@ -30,7 +30,12 @@ import { contentRepository } from '../services/contentRepository'
 import { reservationRepository } from '../services/reservationRepository'
 import type { Locale, LocalizedString } from '../types/common'
 import type { IconKey, ImageAsset, SiteContent } from '../types/content'
-import type { AvailabilityRange, ReservationRequest, ReservationStatus } from '../types/booking'
+import type {
+  AvailabilityRange,
+  AvailabilityStatus,
+  ReservationRequest,
+  ReservationStatus,
+} from '../types/booking'
 import { formatDate, formatMoney } from '../utils/format'
 import { getLocale, localize } from '../utils/locale'
 import { cn } from '../utils/cn'
@@ -1338,9 +1343,24 @@ export function AdminPage() {
                 ) : null}
                 {draft.availability.map((range, index) => (
                   <article key={range.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
-                    <div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(10rem,0.7fr)_1fr_1fr_auto] lg:items-end">
                       <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-                        {t('admin.fields.unavailableFrom')}
+                        {t('admin.fields.availabilityStatus')}
+                        <select
+                          className="field"
+                          value={range.status}
+                          onChange={(event) =>
+                            mutate((next) => {
+                              next.availability[index].status = event.target.value as AvailabilityStatus
+                            })
+                          }
+                        >
+                          <option value="unavailable">{t('booking.unavailable')}</option>
+                          <option value="booked">{t('booking.booked')}</option>
+                        </select>
+                      </label>
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.availabilityFrom')}
                         <input
                           className="field"
                           type="date"
@@ -1351,14 +1371,13 @@ export function AdminPage() {
                               const item = next.availability[index]
                               const currentInclusiveEnd = getInclusiveUnavailableEnd(item)
                               item.from = event.target.value
-                              item.status = 'unavailable'
                               item.to = getExclusiveUnavailableEnd(currentInclusiveEnd, item.from)
                             })
                           }
                         />
                       </label>
                       <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-                        {t('admin.fields.unavailableTo')}
+                        {t('admin.fields.availabilityTo')}
                         <input
                           className="field"
                           type="date"
@@ -1368,7 +1387,6 @@ export function AdminPage() {
                             mutate((next) => {
                               const item = next.availability[index]
                               item.to = getExclusiveUnavailableEnd(event.target.value, item.from)
-                              item.status = 'unavailable'
                             })
                           }
                         />
@@ -1382,8 +1400,18 @@ export function AdminPage() {
                         {t('common.remove')}
                       </Button>
                     </div>
-                    <p className="text-sm font-medium text-[var(--color-muted)]">
-                      {t('booking.unavailable')}: {range.from} - {getInclusiveUnavailableEnd(range)}
+                    <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-[var(--color-muted)]">
+                      <span
+                        className={cn(
+                          'size-2.5 rounded-full ring-4',
+                          range.status === 'booked'
+                            ? 'bg-red-500 ring-red-500/15'
+                            : 'bg-sky-400 ring-sky-400/15',
+                        )}
+                        aria-hidden="true"
+                      />
+                      {range.status === 'booked' ? t('booking.booked') : t('booking.unavailable')}:{' '}
+                      {range.from} - {getInclusiveUnavailableEnd(range)}
                     </p>
                   </article>
                 ))}
@@ -1392,7 +1420,7 @@ export function AdminPage() {
                   variant="secondary"
                   onClick={() => mutate((next) => void next.availability.push(createUnavailableRange()))}
                 >
-                  {t('admin.fields.addUnavailableRange')}
+                  {t('admin.fields.addAvailabilityRange')}
                 </Button>
               </div>
             ) : null}

@@ -8,7 +8,7 @@ function getInclusiveRangeEnd(range: AvailabilityRange) {
 }
 
 export function isExpiredManualAvailabilityRange(range: AvailabilityRange, today = getTodayISO()) {
-  return range.status === 'unavailable' && getInclusiveRangeEnd(range) <= today
+  return getInclusiveRangeEnd(range) <= today
 }
 
 export function removeExpiredManualAvailabilityRanges(
