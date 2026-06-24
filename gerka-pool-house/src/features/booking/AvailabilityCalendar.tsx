@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { AvailabilityRange } from '../../types/booking'
 import { cn } from '../../utils/cn'
-import { getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
+import { isDateWithinRange, toISODate } from '../../utils/date'
 import { Button } from '../../components/ui/Button'
 import { getLocale } from '../../utils/locale'
 
@@ -25,7 +25,6 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const minMonth = useMemo(() => startOfMonth(new Date()), [])
-  const today = useMemo(() => getTodayISO(), [])
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const canGoPrevious = month > minMonth
 
@@ -86,11 +85,10 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
 
           const date = toISODate(day)
           const status = getStatus(date, ranges)
-          const isTodayOrEarlier = date <= today
-          const displayStatus = isTodayOrEarlier ? 'booked' : status
           const isSelected = date === checkIn || date === checkOut
           const isBetween = Boolean(checkIn && checkOut && date > checkIn && date < checkOut)
           const isPast = date < minDate
+          const displayStatus = status === 'available' && isPast ? 'unavailable' : status
           const disabled = displayStatus !== 'available' || isPast
           const statusLabel =
             displayStatus === 'booked'
@@ -115,7 +113,6 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
                 displayStatus === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',
                 displayStatus === 'booked' &&
                   'cursor-not-allowed border border-[#b87979]/25 bg-[#5c3030]/55 text-[#f3dddd]',
-                isPast && displayStatus !== 'booked' && 'cursor-not-allowed bg-red-950/25 text-red-300/45',
                 displayStatus === 'unavailable' &&
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
                 isBetween && 'bg-[rgba(214,181,138,0.14)]',
