@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useCallback, useEffect, useRef, type TouchEvent } from 'react'
+import { useCallback, useEffect, useId, useRef, type TouchEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { GalleryItem } from '../../types/content'
@@ -19,6 +19,9 @@ interface LightboxProps {
 export function Lightbox({ items, activeIndex, locale, onClose, onChange }: LightboxProps) {
   const { t } = useTranslation()
   const activeItem = activeIndex === null ? null : items[activeIndex]
+  const captionId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const touchStart = useRef({ x: 0, y: 0 })
   const touchEnd = useRef({ x: 0, y: 0 })
 
@@ -63,17 +66,46 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
   useEffect(() => {
     if (activeIndex === null) return undefined
 
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const previousOverflow = document.body.style.overflow
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
       if (event.key === 'ArrowRight') showNext()
       if (event.key === 'ArrowLeft') showPrevious()
+
+      if (event.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), video[controls], [tabindex]:not([tabindex="-1"])',
+          ),
+        )
+        const first = focusable[0]
+        const last = focusable.at(-1)
+
+        if (!first || !last) {
+          event.preventDefault()
+          return
+        }
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault()
+          first.focus()
+        }
+      }
     }
 
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKeyDown)
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
+
     return () => {
-      document.body.style.overflow = ''
+      window.cancelAnimationFrame(focusFrame)
+      document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', onKeyDown)
+      previouslyFocused?.focus()
     }
   }, [activeIndex, onClose, showNext, showPrevious])
 
@@ -81,12 +113,18 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(15,23,42,0.88)] p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={localize(activeItem.title, locale)}
+      aria-describedby={captionId}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
     >
       <Button
+        ref={closeButtonRef}
         type="button"
         size="icon"
         variant="secondary"
@@ -130,7 +168,7 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
             sizes="90vw"
           />
         )}
-        <figcaption className="mt-4 text-center text-sm font-medium text-white">
+        <figcaption id={captionId} className="mt-4 text-center text-sm font-medium text-white">
           {localize(activeItem.title, locale)}
         </figcaption>
       </figure>

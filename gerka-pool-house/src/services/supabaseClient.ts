@@ -11,8 +11,20 @@ export const isSupabaseConfigured = Boolean(
     !String(supabaseAnonKey).includes('your-anon-key'),
 )
 
+export function hasSupabaseAuthSession() {
+  if (typeof window === 'undefined' || !supabaseUrl) return false
+
+  try {
+    const projectRef = new URL(supabaseUrl).hostname.split('.')[0]
+
+    return Boolean(window.localStorage.getItem(`sb-${projectRef}-auth-token`))
+  } catch {
+    return false
+  }
+}
+
 export async function getSupabaseClient() {
-  if (!isSupabaseConfigured) return null
+  if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null
 
   supabaseClientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
     createClient(supabaseUrl, supabaseAnonKey),

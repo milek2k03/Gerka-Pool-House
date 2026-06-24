@@ -8,7 +8,9 @@ import { initAnalytics } from '../services/analytics'
 
 export function App() {
   useEffect(() => {
-    initAnalytics()
+    const timer = window.setTimeout(initAnalytics, 5000)
+
+    return () => window.clearTimeout(timer)
   }, [])
 
   return (

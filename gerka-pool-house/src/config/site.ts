@@ -4,9 +4,14 @@ export const supportedLocales: Locale[] = ['pl', 'en']
 
 export const defaultLocale: Locale = 'pl'
 
-export const siteUrl = (import.meta.env.VITE_SITE_URL ?? 'https://gerkapoolhouse.pl').replace(
+const configuredSiteUrl = (import.meta.env.VITE_SITE_URL ?? 'https://www.gerkapoolhouse.pl').replace(
   /\/$/,
   '',
+)
+
+export const siteUrl = configuredSiteUrl.replace(
+  /^https:\/\/gerkapoolhouse\.pl$/i,
+  'https://www.gerkapoolhouse.pl',
 )
 
 export const googleSiteVerification = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION ?? ''

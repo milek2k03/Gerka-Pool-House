@@ -2,29 +2,95 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=2" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link
       rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      as="image"
+      href="/api/hero-image?variant=mobile"
+      media="(max-width: 639px)"
+      fetchpriority="high"
     />
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
-      media="print"
-      onload="this.media='all'"
+      rel="preload"
+      as="image"
+      href="/api/hero-image?variant=desktop"
+      media="(min-width: 640px)"
+      fetchpriority="high"
     />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
-      />
-    </noscript>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/inter-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/playfair-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <style>
+      html,
+      body,
+      #root {
+        min-height: 100%;
+        margin: 0;
+        background: #0f172a;
+      }
+
+      [data-initial-hero] {
+        position: relative;
+        min-height: 100svh;
+        overflow: hidden;
+        background: #0f172a;
+      }
+
+      [data-initial-hero] picture,
+      [data-initial-hero] img,
+      [data-initial-hero] [data-initial-hero-overlay] {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        width: 100%;
+        height: 58svh;
+      }
+
+      [data-initial-hero] picture {
+        display: block;
+        overflow: hidden;
+      }
+
+      [data-initial-hero] img {
+        object-fit: cover;
+        object-position: 63% 48%;
+      }
+
+      [data-initial-hero] [data-initial-hero-overlay] {
+        background: linear-gradient(rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0.08));
+      }
+
+      @media (min-width: 640px) {
+        [data-initial-hero] picture,
+        [data-initial-hero] img,
+        [data-initial-hero] [data-initial-hero-overlay] {
+          inset: 0;
+          height: 100%;
+        }
+
+        [data-initial-hero] img {
+          object-position: center;
+        }
+
+        [data-initial-hero] [data-initial-hero-overlay] {
+          background: linear-gradient(rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.35));
+        }
+      }
+    </style>
     <meta name="theme-color" content="#0F172A" />
     <meta
       name="description"
@@ -32,33 +98,102 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Gerka Pool House" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:url" content="https://www.gerkapoolhouse.pl/" />
     <meta property="og:title" content="Gerka Pool House | Prywatny wypoczynek z basenem" />
     <meta
       property="og:description"
       content="Nowoczesny obiekt noclegowy z prywatnym basenem, ogrodem, grillem i strefą relaksu."
     />
-    <meta property="og:image" content="%VITE_SITE_URL%/api/og-image?v=5" />
-    <meta property="og:image:secure_url" content="%VITE_SITE_URL%/api/og-image?v=5" />
+    <meta property="og:image" content="https://www.gerkapoolhouse.pl/api/og-image?v=5" />
+    <meta property="og:image:secure_url" content="https://www.gerkapoolhouse.pl/api/og-image?v=5" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Gerka Pool House - prywatny wypoczynek z basenem" />
-    <meta property="og:updated_time" content="2026-06-03T10:35:00Z" />
+    <meta property="og:updated_time" content="2026-06-24T00:00:00Z" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Gerka Pool House | Prywatny wypoczynek z basenem" />
     <meta
       name="twitter:description"
       content="Nowoczesny obiekt noclegowy z prywatnym basenem, ogrodem, grillem i strefą relaksu."
     />
-    <meta name="twitter:image" content="%VITE_SITE_URL%/api/og-image?v=5" />
+    <meta name="twitter:image" content="https://www.gerkapoolhouse.pl/api/og-image?v=5" />
     <meta name="twitter:image:alt" content="Gerka Pool House - prywatny wypoczynek z basenem" />
-    <meta name="thumbnail" content="%VITE_SITE_URL%/api/og-image?v=5" />
-    <link rel="image_src" href="%VITE_SITE_URL%/api/og-image?v=5" />
+    <meta name="thumbnail" content="https://www.gerkapoolhouse.pl/api/og-image?v=5" />
+    <link rel="image_src" href="https://www.gerkapoolhouse.pl/api/og-image?v=5" />
+    <link rel="canonical" href="https://www.gerkapoolhouse.pl/" />
+    <link rel="alternate" hreflang="pl" href="https://www.gerkapoolhouse.pl/" />
+    <link rel="alternate" hreflang="en" href="https://www.gerkapoolhouse.pl/?lng=en" />
+    <link rel="alternate" hreflang="x-default" href="https://www.gerkapoolhouse.pl/" />
     <link rel="manifest" href="/site.webmanifest" />
     <title>Gerka Pool House | Prywatny wypoczynek z basenem</title>
+    <script>
+      ;(() => {
+        const supabaseUrl = '%VITE_SUPABASE_URL%'
+        const supabaseKey = '%VITE_SUPABASE_ANON_KEY%'
+
+        if (
+          !supabaseUrl.startsWith('https://') ||
+          !supabaseKey ||
+          supabaseUrl.includes('your-project') ||
+          supabaseKey.includes('your-anon-key')
+        ) {
+          return
+        }
+
+        const controller = new AbortController()
+        const timeout = window.setTimeout(() => controller.abort(), 6000)
+        const contentPromise = fetch(
+          `${supabaseUrl.replace(/\/$/, '')}/rest/v1/site_content?id=eq.main&select=content`,
+          {
+            signal: controller.signal,
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+              Accept: 'application/json',
+            },
+          },
+        )
+          .then((response) => (response.ok ? response.json() : null))
+          .then((rows) => rows?.[0]?.content ?? null)
+          .catch(() => null)
+          .finally(() => window.clearTimeout(timeout))
+
+        window.__GERKA_SITE_CONTENT_PROMISE__ = contentPromise
+
+      })()
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <section
+        aria-hidden="true"
+        data-initial-hero
+        class="relative isolate min-h-[100svh] overflow-hidden bg-[var(--color-deep)] text-white"
+      >
+        <picture
+          class="absolute inset-x-0 top-0 -z-20 block h-[58svh] w-full overflow-hidden bg-[var(--color-deep)] sm:inset-0 sm:h-full"
+        >
+          <source
+            media="(max-width: 639px)"
+            srcset="/api/hero-image?variant=mobile"
+          />
+          <img
+            src="/api/hero-image?variant=desktop"
+            alt=""
+            class="h-full w-full object-cover object-[63%_48%] sm:object-center"
+            fetchpriority="high"
+            decoding="sync"
+          />
+        </picture>
+        <div
+          data-initial-hero-overlay
+          class="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.18),rgba(15,23,42,0.08))] sm:inset-0 sm:h-full sm:bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))]"
+        ></div>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

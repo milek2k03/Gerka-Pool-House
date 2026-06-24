@@ -6,6 +6,8 @@ const storageKey = 'gerka-pool-house:reservation-requests:v3'
 const legacyStorageKeys = ['gerka-pool-house:reservation-requests:v1', 'gerka-pool-house:reservation-requests:v2']
 export const reservationsChangedEventName = 'gerka:reservations:changed'
 const reservationsBroadcastChannelName = 'gerka-reservations'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 let legacyStorageCleaned = false
 
 interface ReservationRow {
@@ -25,6 +27,8 @@ interface ReservationRow {
   message: string | null
   status: ReservationStatus
 }
+
+type FetchOptions = NonNullable<Parameters<typeof fetch>[1]>
 
 function generateReservationNumber() {
   const date = new Date()
@@ -107,6 +111,28 @@ function write(items: ReservationRequest[]) {
   notifyReservationsChanged()
 }
 
+async function publicSupabaseRequest(path: string, init?: FetchOptions) {
+  if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null
+
+  const controller = new AbortController()
+  const timeout = globalThis.setTimeout(() => controller.abort(), 8000)
+
+  try {
+    return await fetch(`${supabaseUrl}/rest/v1/${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        Accept: 'application/json',
+        ...init?.headers,
+      },
+    })
+  } finally {
+    globalThis.clearTimeout(timeout)
+  }
+}
+
 async function listFromSupabase() {
   const supabase = await getSupabaseClient()
 
@@ -134,18 +160,22 @@ function asAvailability(items: Pick<ReservationRequest, 'checkIn' | 'checkOut' |
 }
 
 async function acceptedReservationsAsAvailability(): Promise<AvailabilityRange[]> {
-  const supabase = await getSupabaseClient()
+  if (isSupabaseConfigured) {
+    const response = await publicSupabaseRequest(
+      `${tableName}?select=id,check_in,check_out,status&status=eq.accepted&order=check_in.asc`,
+    )
 
-  if (supabase) {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('id,check_in,check_out,status')
-      .eq('status', 'accepted')
-      .order('check_in', { ascending: true })
+    if (!response?.ok) {
+      throw new Error(`Could not load availability (${response?.status ?? 'network error'})`)
+    }
 
-    if (error) throw error
+    const data = (await response.json()) as Array<{
+      id: string
+      check_in: string
+      check_out: string
+    }>
 
-    return (data ?? []).map((row) => ({
+    return data.map((row) => ({
       id: `reservation-${String(row.id)}`,
       from: String(row.check_in),
       to: String(row.check_out),
@@ -177,12 +207,19 @@ export const reservationRepository = {
       status: 'pending',
     }
 
-    const supabase = await getSupabaseClient()
+    if (isSupabaseConfigured) {
+      const response = await publicSupabaseRequest(tableName, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(toRow(next)),
+      })
 
-    if (supabase) {
-      const { error } = await supabase.from(tableName).insert(toRow(next))
-
-      if (error) throw error
+      if (!response?.ok) {
+        throw new Error(`Could not save reservation (${response?.status ?? 'network error'})`)
+      }
 
       notifyReservationsChanged()
       return next
@@ -212,7 +249,10 @@ export const reservationRepository = {
     return next
   },
 
-  subscribe(onChange: () => void | Promise<void>) {
+  subscribe(
+    onChange: () => void | Promise<void>,
+    options: { realtime?: boolean } = {},
+  ) {
     if (typeof window === 'undefined') return () => undefined
 
     const notify = () => {
@@ -221,6 +261,16 @@ export const reservationRepository = {
 
     window.addEventListener('storage', notify)
     window.addEventListener(reservationsChangedEventName, notify)
+    window.addEventListener('focus', notify)
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') notify()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    const pollingInterval = options.realtime
+      ? undefined
+      : window.setInterval(notify, 2 * 60 * 1000)
 
     const broadcastChannel = 'BroadcastChannel' in window ? new BroadcastChannel(reservationsBroadcastChannelName) : null
 
@@ -235,7 +285,7 @@ export const reservationRepository = {
     let active = true
     let cleanupSupabase: (() => void) | null = null
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && options.realtime) {
       void getSupabaseClient().then((supabaseClient) => {
         if (!active || !supabaseClient) return
 
@@ -254,6 +304,9 @@ export const reservationRepository = {
       active = false
       window.removeEventListener('storage', notify)
       window.removeEventListener(reservationsChangedEventName, notify)
+      window.removeEventListener('focus', notify)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (pollingInterval) window.clearInterval(pollingInterval)
       broadcastChannel?.close()
       cleanupSupabase?.()
     }

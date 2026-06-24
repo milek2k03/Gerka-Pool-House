@@ -471,7 +471,9 @@ export function AdminPage() {
     }
 
     void loadReservations()
-    const unsubscribe = reservationRepository.subscribe(loadReservations)
+    const unsubscribe = reservationRepository.subscribe(loadReservations, {
+      realtime: true,
+    })
 
     return () => {
       active = false

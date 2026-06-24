@@ -141,6 +141,8 @@ export const en = {
     available: 'Available',
     booked: 'Booked',
     unavailable: 'Unavailable',
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
     pastDay: 'Past or current date',
     pastDays: 'Past',
     chooseDates: 'Choose dates to see the summary.',

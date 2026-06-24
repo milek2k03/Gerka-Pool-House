@@ -10,12 +10,23 @@ import { applyGuestLimitToText } from '../utils/pricing'
 
 export function HeroSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
+  const heroImage = import.meta.env.PROD
+    ? { ...content.hero.image, src: '/api/hero-image?variant=desktop', avif: undefined, webp: undefined }
+    : content.hero.image
+  const mobileHeroImage = import.meta.env.PROD
+    ? {
+        ...(content.hero.mobileImage ?? content.hero.image),
+        src: '/api/hero-image?variant=mobile',
+        avif: undefined,
+        webp: undefined,
+      }
+    : content.hero.mobileImage
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
       <ResponsiveImage
-        image={content.hero.image}
-        mobileImage={content.hero.mobileImage}
+        image={heroImage}
+        mobileImage={mobileHeroImage}
         alt=""
         className="absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-0 sm:h-full"
         loading="eager"

@@ -19,9 +19,13 @@ function resolveUrl(value?: string) {
 }
 
 function upsertMeta(attribute: 'name' | 'property', key: string, content?: string) {
-  if (!content) return
-
   let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`)
+
+  if (!content) {
+    element?.remove()
+    return
+  }
+
   if (!element) {
     element = document.createElement('meta')
     element.setAttribute(attribute, key)
@@ -56,15 +60,18 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertMeta('name', 'robots', noindex ? 'noindex,nofollow' : 'index,follow')
     upsertMeta('property', 'og:title', title)
     upsertMeta('property', 'og:description', description)
+    upsertMeta('property', 'og:type', 'website')
+    upsertMeta('property', 'og:site_name', 'Gerka Pool House')
     upsertMeta('property', 'og:url', canonical)
     upsertMeta('property', 'og:locale', locale === 'pl' ? 'pl_PL' : 'en_US')
+    upsertMeta('property', 'og:locale:alternate', locale === 'pl' ? 'en_US' : 'pl_PL')
     upsertMeta('name', 'twitter:title', title)
     upsertMeta('name', 'twitter:description', description)
     upsertMeta('name', 'twitter:card', 'summary_large_image')
-    if (image) {
-      upsertMeta('property', 'og:image', image)
-      upsertMeta('name', 'twitter:image', image)
-    }
+    upsertMeta('property', 'og:image', image)
+    upsertMeta('property', 'og:image:alt', title)
+    upsertMeta('name', 'twitter:image', image)
+    upsertMeta('name', 'twitter:image:alt', title)
     if (googleSiteVerification) {
       upsertMeta('name', 'google-site-verification', googleSiteVerification)
     }
@@ -72,6 +79,7 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertLink('canonical', canonical)
     upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'pl')
     upsertLink('alternate', `${siteUrl}${settings.canonicalPath}?lng=en`, 'en')
+    upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'x-default')
 
     const scriptId = 'structured-data'
     document.getElementById(scriptId)?.remove()

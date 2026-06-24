@@ -28,9 +28,9 @@ function InfoCard({
       <p className={cn('font-semibold uppercase tracking-[0.12em] text-[var(--color-brass)]', compact ? 'text-[0.68rem]' : 'text-xs')}>
         {localize(item.distance, locale)}
       </p>
-      <h3 className={cn('font-semibold text-[var(--color-ink)]', compact ? 'mt-2 text-base' : 'mt-3 text-lg')}>
+      <h4 className={cn('font-semibold text-[var(--color-ink)]', compact ? 'mt-2 text-base' : 'mt-3 text-lg')}>
         {localize(item.title, locale)}
-      </h3>
+      </h4>
       <p className={cn('text-sm text-[var(--color-muted)]', compact ? 'mt-2 leading-5' : 'mt-3 leading-6')}>
         {localize(item.description, locale)}
       </p>
@@ -111,7 +111,7 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
           <div className="grid gap-4">
             <div className="flex items-center gap-3 text-[var(--color-brass)]">
               <Utensils aria-hidden="true" className="size-5" />
-              <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.restaurantsTitle')}</h2>
+              <h3 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.restaurantsTitle')}</h3>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {content.area.restaurants.map((item) => (
@@ -125,7 +125,7 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
           <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
             <div className="flex items-center gap-3 text-[var(--color-brass)]">
               <ShoppingBasket aria-hidden="true" className="size-5" />
-              <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.nearbyTitle')}</h2>
+              <h3 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.nearbyTitle')}</h3>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {content.area.nearby.map((item) => (
@@ -138,7 +138,7 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
             <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-5 shadow-[var(--shadow-soft)] sm:p-6">
               <div className="flex items-center gap-3 text-[var(--color-brass)]">
                 <BusFront aria-hidden="true" className="size-5" />
-                <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.busAccessTitle')}</h2>
+                <h3 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.busAccessTitle')}</h3>
               </div>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-muted)]">
                 {t('sections.busAccessLead')}
@@ -155,7 +155,7 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
             <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-3 text-[var(--color-brass)]">
                 <PlaneLanding aria-hidden="true" className="size-5" />
-                <h2 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.airportsTitle')}</h2>
+                <h3 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.airportsTitle')}</h3>
               </div>
               <p className="mt-4 max-w-4xl text-sm leading-6 text-[var(--color-muted)]">
                 {t('sections.airportsLead')}
@@ -171,9 +171,9 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
           <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
             <div className="flex items-center gap-3 text-[var(--color-brass)]">
               <Route aria-hidden="true" className="size-5" />
-              <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
+              <h3 className="text-2xl font-semibold text-[var(--color-ink)]">
                 {localize(content.area.bikeRoutes.title, locale)}
-              </h2>
+              </h3>
             </div>
             <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
               {localize(content.area.bikeRoutes.lead, locale)}

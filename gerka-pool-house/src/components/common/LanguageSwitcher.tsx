@@ -1,6 +1,7 @@
 import { Languages } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { changeAppLanguage } from '../../app/i18n'
 import { getLocale } from '../../utils/locale'
 import { Button } from '../ui/Button'
 
@@ -16,7 +17,7 @@ export function LanguageSwitcher() {
       variant="secondary"
       className="min-h-10 px-3 backdrop-blur-xl"
       aria-label={`${t('common.language')}: ${nextLocale.toUpperCase()}`}
-      onClick={() => void i18n.changeLanguage(nextLocale)}
+      onClick={() => void changeAppLanguage(nextLocale)}
     >
       <Languages aria-hidden="true" className="size-4" />
       {nextLocale.toUpperCase()}

@@ -39,7 +39,7 @@ function resolvePublicUrl(value?: string) {
   if (!value) return undefined
   if (value.startsWith('http://') || value.startsWith('https://')) return value
 
-  const siteUrl = (process.env.VITE_SITE_URL ?? 'https://gerka-pool-house.vercel.app').replace(/\/$/, '')
+  const siteUrl = (process.env.VITE_SITE_URL ?? 'https://www.gerkapoolhouse.pl').replace(/\/$/, '')
 
   return `${siteUrl}${value.startsWith('/') ? value : `/${value}`}`
 }
@@ -133,7 +133,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
   }
 
   response.setHeader('Content-Type', 'image/jpeg')
-  response.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=3600')
+  response.setHeader('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400')
 
   if (request.method === 'HEAD') {
     response.status(200).end()

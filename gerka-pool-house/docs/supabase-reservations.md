@@ -1,5 +1,10 @@
 # Supabase - zapytania rezerwacyjne
 
+Po utworzeniu tabel uruchom rowniez migracje
+`supabase/migrations/20260624000100_harden_admin_rls.sql`. Dodaje ona
+ograniczenie administratorow, indeks zaakceptowanych terminow i kontrole
+zgodnosci liczby nocy z datami.
+
 Uruchom ponizszy SQL w Supabase SQL Editor. Tworzy tabele `reservation_requests`,
 wlacza RLS i ustawia zasady:
 

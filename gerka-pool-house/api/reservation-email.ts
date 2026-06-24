@@ -11,6 +11,7 @@ interface ApiRequest {
   method?: string
   headers: {
     origin?: string
+    'x-forwarded-for'?: string | string[]
   }
   body: unknown
 }
@@ -23,31 +24,53 @@ interface ApiResponse {
   }
 }
 
-const requestSchema = z.object({
-  reservationNumber: z.string().min(6).max(64),
-  ownerEmail: z.string().email(),
-  clientEmail: z.string().email(),
-  ownerSubject: z.string().min(1).max(160),
-  clientSubject: z.string().min(1).max(160),
-  clientBody: z.string().min(1).max(4000),
-  propertyName: z.string().min(1).max(120),
-  currency: z.string().min(1).max(8).default('PLN'),
-  locale: z.enum(['pl', 'en']).default('pl'),
-  request: z.object({
+const requestSchema = z
+  .object({
     reservationNumber: z.string().min(6).max(64),
-    fullName: z.string().min(2).max(160),
-    email: z.string().email(),
-    phone: z.string().min(5).max(40),
-    guests: z.number().int().min(1).max(30),
-    checkIn: z.string().min(10).max(10),
-    checkOut: z.string().min(10).max(10),
-    nights: z.number().int().min(1).max(90),
-    roomsUsed: z.number().int().min(1).max(4),
-    nightlyPrice: z.number().min(0),
-    estimatedTotal: z.number().min(0),
-    message: z.string().max(1200).optional(),
-  }),
-})
+    ownerEmail: z.string().email(),
+    clientEmail: z.string().email(),
+    ownerSubject: z.string().min(1).max(160),
+    clientSubject: z.string().min(1).max(160),
+    clientBody: z.string().min(1).max(4000),
+    propertyName: z.string().min(1).max(120),
+    currency: z.string().min(1).max(8).default('PLN'),
+    locale: z.enum(['pl', 'en']).default('pl'),
+    request: z.object({
+      reservationNumber: z.string().min(6).max(64),
+      fullName: z.string().min(2).max(160),
+      email: z.string().email(),
+      phone: z.string().min(5).max(40),
+      guests: z.number().int().min(1).max(30),
+      checkIn: z.string().date(),
+      checkOut: z.string().date(),
+      nights: z.number().int().min(1).max(90),
+      roomsUsed: z.number().int().min(1).max(4),
+      nightlyPrice: z.number().min(0),
+      estimatedTotal: z.number().min(0),
+      message: z.string().max(1200).optional(),
+    }),
+  })
+  .superRefine((payload, context) => {
+    if (payload.reservationNumber !== payload.request.reservationNumber) {
+      context.addIssue({
+        code: 'custom',
+        path: ['reservationNumber'],
+        message: 'Reservation number mismatch',
+      })
+    }
+
+    if (payload.clientEmail.toLowerCase() !== payload.request.email.toLowerCase()) {
+      context.addIssue({
+        code: 'custom',
+        path: ['clientEmail'],
+        message: 'Client email mismatch',
+      })
+    }
+  })
+
+const rateLimitWindowMs = 10 * 60 * 1000
+const rateLimitMaxRequests = 5
+const requestLog = new Map<string, number[]>()
 
 function escapeHtml(value: string | number) {
   return String(value)
@@ -162,16 +185,73 @@ const emailCopy = {
   },
 } as const
 
+function getAllowedOrigins() {
+  const configuredOrigins = (process.env.ALLOWED_ORIGIN ?? '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean)
+
+  return Array.from(
+    new Set(
+      configuredOrigins.flatMap((origin) => {
+        if (origin === 'https://gerkapoolhouse.pl') {
+          return [origin, 'https://www.gerkapoolhouse.pl']
+        }
+        if (origin === 'https://www.gerkapoolhouse.pl') {
+          return [origin, 'https://gerkapoolhouse.pl']
+        }
+        return [origin]
+      }),
+    ),
+  )
+}
+
 function setCors(req: ApiRequest, res: ApiResponse) {
-  const allowedOrigin = process.env.ALLOWED_ORIGIN
+  const allowedOrigins = getAllowedOrigins()
   const origin = req.headers.origin
 
-  if (allowedOrigin && origin === allowedOrigin) {
-    res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+  if (origin && allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Vary', 'Origin')
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Cache-Control', 'no-store')
+}
+
+function isOriginAllowed(req: ApiRequest) {
+  const allowedOrigins = getAllowedOrigins()
+  const origin = req.headers.origin?.replace(/\/$/, '')
+
+  if (allowedOrigins.length === 0) {
+    return process.env.NODE_ENV !== 'production'
+  }
+
+  return Boolean(origin && allowedOrigins.includes(origin))
+}
+
+function getClientIp(req: ApiRequest) {
+  const forwardedFor = req.headers['x-forwarded-for']
+  const value = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor
+
+  return value?.split(',')[0]?.trim() || 'unknown'
+}
+
+function isRateLimited(req: ApiRequest) {
+  const now = Date.now()
+  const clientIp = getClientIp(req)
+  const recentRequests = (requestLog.get(clientIp) ?? []).filter(
+    (timestamp) => now - timestamp < rateLimitWindowMs,
+  )
+
+  if (recentRequests.length >= rateLimitMaxRequests) {
+    requestLog.set(clientIp, recentRequests)
+    return true
+  }
+
+  requestLog.set(clientIp, [...recentRequests, now])
+  return false
 }
 
 function getResendError(error: unknown) {
@@ -185,12 +265,21 @@ function getResendError(error: unknown) {
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCors(req, res)
 
+  if (!isOriginAllowed(req)) {
+    return res.status(403).json({ error: 'Origin is not allowed' })
+  }
+
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
   }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  if (isRateLimited(req)) {
+    res.setHeader('Retry-After', String(rateLimitWindowMs / 1000))
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' })
   }
 
   const resendApiKey = process.env.RESEND_API_KEY

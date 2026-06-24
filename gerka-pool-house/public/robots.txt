@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gerkapoolhouse.pl/sitemap.xml
+Sitemap: https://www.gerkapoolhouse.pl/sitemap.xml

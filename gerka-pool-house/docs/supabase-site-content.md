@@ -1,5 +1,9 @@
 # Supabase - treści strony i ustawienia panelu
 
+Po utworzeniu tabel uruchom rowniez migracje
+`supabase/migrations/20260624000100_harden_admin_rls.sql`. Ogranicza ona zapis
+do kont wpisanych w `public.admin_users`.
+
 Uruchom ponizszy SQL w Supabase SQL Editor. Tworzy tabele `site_content`,
 w ktorej panel administratora zapisuje:
 

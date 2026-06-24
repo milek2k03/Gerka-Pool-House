@@ -1,6 +1,6 @@
 import { eachDayOfInterval, endOfMonth, startOfMonth } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { AvailabilityRange } from '../../types/booking'
@@ -18,21 +18,38 @@ interface AvailabilityCalendarProps {
 }
 
 function getStatus(date: string, ranges: AvailabilityRange[]) {
-  const matchingRanges = ranges.filter((range) => isDateWithinRange(date, range.from, range.to))
-
-  if (matchingRanges.some((range) => range.status === 'booked')) return 'booked'
-  if (matchingRanges.some((range) => range.status === 'unavailable')) return 'unavailable'
+  if (ranges.some((range) => range.status === 'booked' && isDateWithinRange(date, range.from, range.to))) {
+    return 'booked'
+  }
+  if (ranges.some((range) => range.status === 'unavailable' && isDateWithinRange(date, range.from, range.to))) {
+    return 'unavailable'
+  }
 
   return 'available'
 }
 
-export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSelectDate }: AvailabilityCalendarProps) {
+export const AvailabilityCalendar = memo(function AvailabilityCalendar({
+  ranges,
+  checkIn,
+  checkOut,
+  minDate,
+  onSelectDate,
+}: AvailabilityCalendarProps) {
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const minMonth = useMemo(() => startOfMonth(new Date()), [])
   const today = useMemo(() => getTodayISO(), [])
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const canGoPrevious = month > minMonth
+  const dateLocale = locale === 'pl' ? 'pl-PL' : 'en-US'
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat(dateLocale, { month: 'long', year: 'numeric' }),
+    [dateLocale],
+  )
+  const dayFormatter = useMemo(
+    () => new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' }),
+    [dateLocale],
+  )
 
   const days = useMemo(() => {
     const start = startOfMonth(month)
@@ -51,7 +68,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           type="button"
           size="icon"
           variant="ghost"
-          aria-label="Previous month"
+          aria-label={t('booking.previousMonth')}
           disabled={!canGoPrevious}
           onClick={() => {
             if (!canGoPrevious) return
@@ -61,16 +78,13 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
           <ChevronLeft aria-hidden="true" className="size-5" />
         </Button>
         <h3 className="text-base font-semibold text-[var(--color-ink)]">
-          {new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-US', {
-            month: 'long',
-            year: 'numeric',
-          }).format(month)}
+          {monthFormatter.format(month)}
         </h3>
         <Button
           type="button"
           size="icon"
           variant="ghost"
-          aria-label="Next month"
+          aria-label={t('booking.nextMonth')}
           onClick={() => setMonth((value) => startOfMonth(new Date(value.getFullYear(), value.getMonth() + 1)))}
         >
           <ChevronRight aria-hidden="true" className="size-5" />
@@ -111,11 +125,7 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
               key={date}
               type="button"
               disabled={disabled}
-              aria-label={`${new Intl.DateTimeFormat(locale === 'pl' ? 'pl-PL' : 'en-US', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              }).format(day)}: ${statusLabel}`}
+              aria-label={`${dayFormatter.format(day)}: ${statusLabel}`}
               onClick={() => onSelectDate(date)}
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
@@ -151,4 +161,4 @@ export function AvailabilityCalendar({ ranges, checkIn, checkOut, minDate, onSel
       </div>
     </div>
   )
-}
+})

@@ -3,7 +3,6 @@ import { Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 import { z } from 'zod'
 
 import { Logo } from '../components/common/Logo'
@@ -56,9 +55,7 @@ export function AdminLogin({ isConfigured, onSignIn }: AdminLoginProps) {
       <Seo settings={content.seo.admin} locale={locale} noindex />
       <main className="grid min-h-screen bg-[var(--color-paper)] px-5 py-8">
         <div className="mx-auto grid w-full max-w-xl content-center gap-7">
-          <Link className="w-fit" to="/" aria-label={content.brandName}>
-            <Logo />
-          </Link>
+          <Logo />
 
           <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
             <div className="mb-8">

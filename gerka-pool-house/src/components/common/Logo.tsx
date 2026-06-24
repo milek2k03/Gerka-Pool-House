@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react'
 import { Link, useLocation } from 'react-router'
 
-import logoMark from '../../assets/images/gerka-logo.png'
+import logoMark from '../../assets/images/gerka-logo.webp'
 import { useSiteContent } from '../../hooks/useSiteContent'
 
 export function Logo({ to = '/' }: { to?: string }) {

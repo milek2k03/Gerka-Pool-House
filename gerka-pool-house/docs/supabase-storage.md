@@ -1,5 +1,9 @@
 # Supabase Storage dla galerii
 
+Po utworzeniu bucketu uruchom rowniez migracje
+`supabase/migrations/20260624000100_harden_admin_rls.sql`, aby operacje zapisu
+i usuwania byly dostepne tylko dla administratorow.
+
 Aplikacja wysyla pliki z panelu `/admin` do bucketu:
 
 ```env

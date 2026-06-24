@@ -1,14 +1,63 @@
 import { defaultSiteContent } from '../constants/defaultContent'
 import type { ImageAsset, SiteContent } from '../types/content'
 import { removeExpiredManualAvailabilityRanges } from '../utils/availability'
-import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient'
+import {
+  getSupabaseClient,
+  hasSupabaseAuthSession,
+  isSupabaseConfigured,
+} from './supabaseClient'
 
 const tableName = 'site_content'
 const contentId = 'main'
 const storageKey = 'gerka-pool-house:site-content:v1'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+let bootstrapContentConsumed = false
 
 function cloneContent(content: SiteContent): SiteContent {
   return structuredClone(content)
+}
+
+async function loadPublicContent(): Promise<Partial<SiteContent> | null> {
+  if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null
+
+  if (
+    !bootstrapContentConsumed &&
+    typeof window !== 'undefined' &&
+    window.__GERKA_SITE_CONTENT_PROMISE__
+  ) {
+    bootstrapContentConsumed = true
+    const content = await window.__GERKA_SITE_CONTENT_PROMISE__
+
+    return content && typeof content === 'object' ? (content as Partial<SiteContent>) : null
+  }
+
+  const controller = new AbortController()
+  const timeout = globalThis.setTimeout(() => controller.abort(), 6000)
+
+  try {
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/${tableName}?id=eq.${contentId}&select=content`,
+      {
+        signal: controller.signal,
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+          Accept: 'application/json',
+        },
+      },
+    )
+
+    if (!response.ok) return null
+
+    const rows = (await response.json()) as Array<{ content?: Partial<SiteContent> }>
+
+    return rows[0]?.content ?? null
+  } catch {
+    return null
+  } finally {
+    globalThis.clearTimeout(timeout)
+  }
 }
 
 function removeExpiredAvailability(content: SiteContent) {
@@ -794,12 +843,6 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
 }
 
 export const contentRepository = {
-  hasLocalContent(): boolean {
-    if (typeof window === 'undefined') return false
-
-    return Boolean(window.localStorage.getItem(storageKey))
-  },
-
   loadLocal(): SiteContent {
     if (typeof window === 'undefined') return cloneContent(defaultSiteContent)
 
@@ -826,23 +869,21 @@ export const contentRepository = {
   },
 
   async load(): Promise<SiteContent> {
-    const supabase = await getSupabaseClient()
+    if (isSupabaseConfigured) {
+      const parsed = await loadPublicContent()
 
-    if (supabase) {
-      const { data, error } = await supabase.from(tableName).select('content').eq('id', contentId).maybeSingle()
-
-      if (!error && data?.content) {
-        const parsed = data.content as Partial<SiteContent>
+      if (parsed) {
         const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
         const previousAvailabilityCount = parsed.availability?.length ?? 0
         const next = migrateContent(mergeDeep(cloneContent(defaultSiteContent), parsed), storedVersion)
 
-        if (next.availability.length !== previousAvailabilityCount) {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession()
+        if (
+          next.availability.length !== previousAvailabilityCount &&
+          hasSupabaseAuthSession()
+        ) {
+          const supabase = await getSupabaseClient()
 
-          if (session?.user) {
+          if (supabase) {
             try {
               return await this.save(next)
             } catch {
@@ -911,31 +952,27 @@ export const contentRepository = {
   },
 
   subscribe(onChange: () => void | Promise<void>) {
-    if (!isSupabaseConfigured) return () => undefined
+    if (!isSupabaseConfigured || typeof window === 'undefined') return () => undefined
 
     let active = true
-    let cleanup: (() => void) | null = null
 
     const notify = () => {
-      void onChange()
+      if (active) void onChange()
     }
 
-    void getSupabaseClient().then((supabaseClient) => {
-      if (!active || !supabaseClient) return
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') notify()
+    }
+    const interval = window.setInterval(notify, 5 * 60 * 1000)
 
-      const channel = supabaseClient
-        .channel('site-content-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: tableName, filter: `id=eq.${contentId}` }, notify)
-        .subscribe()
-
-      cleanup = () => {
-        void supabaseClient.removeChannel(channel)
-      }
-    })
+    window.addEventListener('focus', notify)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       active = false
-      cleanup?.()
+      window.clearInterval(interval)
+      window.removeEventListener('focus', notify)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   },
 }

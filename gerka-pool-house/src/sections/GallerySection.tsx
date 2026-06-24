@@ -1,5 +1,5 @@
 import { Maximize2, Play } from 'lucide-react'
-import { useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Lightbox } from '../components/common/Lightbox'
@@ -10,7 +10,7 @@ import type { GalleryItem, GallerySection as GallerySectionContent } from '../ty
 import { cn } from '../utils/cn'
 import { localize } from '../utils/locale'
 
-function GalleryMosaic({
+const GalleryMosaic = memo(function GalleryMosaic({
   items,
   locale,
   onOpen,
@@ -38,11 +38,7 @@ function GalleryMosaic({
               'lg:aspect-[4/5] lg:first:col-span-2 lg:first:row-span-2 lg:first:aspect-auto',
             )}
             onClick={() => onOpen(index)}
-            aria-label={
-              isMoreTrigger
-                ? `${t('gallery.viewMore')}. ${t('gallery.moreCount', { count: hiddenItemsCount })}`
-                : localize(item.title, locale)
-            }
+            aria-label={isMoreTrigger ? undefined : localize(item.title, locale)}
           >
             {item.image.type === 'video' ? (
               <video
@@ -51,15 +47,19 @@ function GalleryMosaic({
                 poster={item.image.poster}
                 muted
                 playsInline
-                preload="metadata"
+                preload="none"
                 aria-label={localize(item.alt, locale)}
               />
             ) : (
               <ResponsiveImage
                 image={item.image}
-                alt={localize(item.alt, locale)}
+                alt={isMoreTrigger ? '' : localize(item.alt, locale)}
                 className="h-full"
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 25vw, 50vw"
+                sizes={
+                  index === 0
+                    ? '(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 50vw'
+                    : '(min-width: 1024px) 25vw, 25vw'
+                }
               />
             )}
             <span className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.66)] via-[rgba(15,23,42,0.16)] to-transparent opacity-90" />
@@ -94,13 +94,50 @@ function GalleryMosaic({
       })}
     </div>
   )
-}
+})
+
+const GalleryArticle = memo(function GalleryArticle({
+  section,
+  sectionIndex,
+  locale,
+  onOpen,
+}: {
+  section: GallerySectionContent
+  sectionIndex: number
+  locale: Locale
+  onOpen: (sectionIndex: number, itemIndex: number) => void
+}) {
+  const openItem = useCallback(
+    (itemIndex: number) => onOpen(sectionIndex, itemIndex),
+    [onOpen, sectionIndex],
+  )
+
+  return (
+    <article className="grid gap-5">
+      <div className="grid gap-2 md:grid-cols-[minmax(0,0.48fr)_1fr] md:items-end">
+        <h3 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">
+          {localize(section.title, locale)}
+        </h3>
+        <p className="max-w-3xl text-sm leading-6 text-[var(--color-muted)] md:justify-self-end md:text-right">
+          {localize(section.lead, locale)}
+        </p>
+      </div>
+      {section.items.length > 0 ? (
+        <GalleryMosaic items={section.items} locale={locale} onOpen={openItem} />
+      ) : null}
+    </article>
+  )
+})
 
 export function GallerySection({ sections, locale }: { sections: GallerySectionContent[]; locale: Locale }) {
   const { t } = useTranslation()
   const [activeSectionIndex, setActiveSectionIndex] = useState<number | null>(null)
   const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null)
   const activeItems = activeSectionIndex === null ? [] : (sections[activeSectionIndex]?.items ?? [])
+  const openItem = useCallback((sectionIndex: number, itemIndex: number) => {
+    setActiveSectionIndex(sectionIndex)
+    setActiveItemIndex(itemIndex)
+  }, [])
 
   return (
     <section id="gallery" className="section-spacing bg-[var(--color-deep)] px-4 sm:px-8 lg:px-10">
@@ -113,26 +150,13 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
         />
         <div className="mt-10 grid gap-12 lg:gap-14">
           {sections.map((section, sectionIndex) => (
-            <article key={section.id} className="grid gap-5">
-              <div className="grid gap-2 md:grid-cols-[minmax(0,0.48fr)_1fr] md:items-end">
-                <h3 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">
-                  {localize(section.title, locale)}
-                </h3>
-                <p className="max-w-3xl text-sm leading-6 text-[var(--color-muted)] md:justify-self-end md:text-right">
-                  {localize(section.lead, locale)}
-                </p>
-              </div>
-              {section.items.length > 0 ? (
-                <GalleryMosaic
-                  items={section.items}
-                  locale={locale}
-                  onOpen={(itemIndex) => {
-                    setActiveSectionIndex(sectionIndex)
-                    setActiveItemIndex(itemIndex)
-                  }}
-                />
-              ) : null}
-            </article>
+            <GalleryArticle
+              key={section.id}
+              section={section}
+              sectionIndex={sectionIndex}
+              locale={locale}
+              onOpen={openItem}
+            />
           ))}
         </div>
       </div>

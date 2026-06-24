@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Send } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
@@ -110,7 +110,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
 
   const reasonKey = summaryReasonKey(summary.reason)
 
-  const onSelectCalendarDate = (date: string) => {
+  const onSelectCalendarDate = useCallback((date: string) => {
     if (date < earliestCheckIn) return
 
     if (!checkIn || (checkIn && checkOut)) {
@@ -125,7 +125,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     }
 
     setValue('checkOut', date, { shouldValidate: true })
-  }
+  }, [checkIn, checkOut, earliestCheckIn, setValue])
 
   const onSubmit = handleSubmit(async (values) => {
     setEmailFailed(null)

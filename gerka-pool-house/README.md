@@ -1,16 +1,46 @@
-# React + Vite
+# Gerka Pool House
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Produkcyjna aplikacja React + Vite + TypeScript dla obiektu Gerka Pool House.
+Strona publiczna, panel administratora, treści, galerie i rezerwacje są
+zintegrowane z Supabase, a wiadomości transakcyjne obsługuje Resend przez
+funkcję Vercel.
 
-Currently, two official plugins are available:
+## Uruchomienie lokalne
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Zmienne środowiskowe należy utworzyć na podstawie `.env.example`. Plik
+`.env.local` nie jest śledzony przez Git.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Kontrola jakości
 
-## Expanding the ESLint configuration
+```bash
+npm run check
+npm audit
+npx vercel build --yes
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`npm run check` uruchamia TypeScript strict mode, ESLint i produkcyjny build.
+
+## Wdrożenie
+
+1. Skonfiguruj zmienne z `.env.example` w Vercel dla Production i Preview.
+2. Uruchom skrypty z katalogu `docs` oraz migrację
+   `supabase/migrations/20260624000100_harden_admin_rls.sql` w Supabase SQL
+   Editor.
+3. Zweryfikuj domenę wysyłkową w Resend.
+4. Wdróż gałąź `main` przez integrację GitHub z Vercel.
+
+Główna domena kanoniczna: `https://www.gerkapoolhouse.pl`.
+
+## Dokumentacja
+
+- [Audyt produkcyjny](docs/performance-audit-2026-06-24.md)
+- [Bezpieczeństwo Supabase](docs/supabase-security.md)
+- [Rezerwacje Supabase](docs/supabase-reservations.md)
+- [Treści strony Supabase](docs/supabase-site-content.md)
+- [Storage Supabase](docs/supabase-storage.md)
+- [Integracja e-mail](docs/email-integrations.md)

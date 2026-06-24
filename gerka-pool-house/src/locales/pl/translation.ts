@@ -143,6 +143,8 @@ export const pl = {
     available: 'Wolne',
     booked: 'Zajęte',
     unavailable: 'Niedostępne',
+    previousMonth: 'Poprzedni miesiąc',
+    nextMonth: 'Następny miesiąc',
     pastDay: 'Miniony lub dzisiejszy dzień',
     pastDays: 'Minione',
     chooseDates: 'Wybierz daty, aby zobaczyć podsumowanie.',

@@ -68,22 +68,13 @@ export function GalleryItemMediaPicker({
         onChange={(event) => void uploadFile(event.target.files?.[0])}
       />
       <div
-        role="button"
-        tabIndex={isUploading ? -1 : 0}
-        aria-disabled={isUploading}
         className={cn(
-          'grid cursor-pointer gap-3 rounded-md border border-dashed border-[var(--color-border)] bg-[var(--color-deep)] p-3 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-water)] sm:grid-cols-[1fr_auto] sm:items-center',
+          'grid cursor-pointer gap-3 rounded-md border border-dashed border-[var(--color-border)] bg-[var(--color-deep)] p-3 text-sm transition sm:grid-cols-[1fr_auto] sm:items-center',
           isUploading && 'cursor-not-allowed opacity-70',
           isDragging && 'border-[var(--color-water)] bg-[var(--color-surface-2)]',
         )}
         onClick={() => {
           if (!isUploading) inputRef.current?.click()
-        }}
-        onKeyDown={(event) => {
-          if (!isUploading && (event.key === 'Enter' || event.key === ' ')) {
-            event.preventDefault()
-            inputRef.current?.click()
-          }
         }}
         onDragEnter={(event) => {
           event.preventDefault()

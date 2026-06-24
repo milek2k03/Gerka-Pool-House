@@ -3,8 +3,8 @@ import { cn } from '../../utils/cn'
 
 const supabasePublicObjectPath = '/storage/v1/object/public/'
 const supabaseImageRenderPath = '/storage/v1/render/image/public/'
-const responsiveWidths = [320, 480, 640, 768, 960, 1200, 1600, 1920]
-const mobileResponsiveWidths = [320, 480, 640, 768, 960]
+const responsiveWidths = [160, 240, 320, 480, 640, 768, 960, 1200, 1600, 1920]
+const mobileResponsiveWidths = [160, 240, 320, 480, 640, 768, 960]
 
 interface ResponsiveImageProps {
   image: ImageAsset
@@ -25,7 +25,7 @@ function getSupabaseImageUrl(src: string, width: number, format: 'origin' | 'web
 
     url.pathname = url.pathname.replace(supabasePublicObjectPath, supabaseImageRenderPath)
     url.searchParams.set('width', String(width))
-    url.searchParams.set('quality', '68')
+    url.searchParams.set('quality', '82')
     url.searchParams.set('resize', 'contain')
     url.searchParams.set('format', format)
 
@@ -89,9 +89,9 @@ export function ResponsiveImage({
       <img
         src={optimizedFallbackSrc}
         alt={alt}
-        className={cn('h-full w-full object-cover', imgClassName)}
+        className={cn('h-full w-full', imgClassName ?? 'object-cover')}
         loading={loading}
-        decoding="async"
+        decoding={loading === 'eager' ? 'sync' : 'async'}
         fetchPriority={fetchPriority}
       />
     </picture>
