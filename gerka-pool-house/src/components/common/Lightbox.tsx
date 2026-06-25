@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { GalleryItem } from '../../types/content'
 import type { Locale } from '../../types/common'
+import { getSupabaseImageUrl } from '../../utils/imageUrl'
 import { localize } from '../../utils/locale'
 import { Button } from '../ui/Button'
 import { ResponsiveImage } from './ResponsiveImage'
@@ -131,6 +132,28 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
     }
   }, [isOpen, onClose, showNext, showPrevious])
 
+  useEffect(() => {
+    if (!isOpen || activeIndex === null || items.length < 2) return
+
+    const neighborIndexes = [
+      (activeIndex - 1 + items.length) % items.length,
+      (activeIndex + 1) % items.length,
+    ]
+
+    for (const index of neighborIndexes) {
+      const neighbor = items[index]
+      if (!neighbor || neighbor.image.type === 'video') continue
+
+      const image = new Image()
+      image.decoding = 'async'
+      image.src =
+        getSupabaseImageUrl(neighbor.image.src, 1200, 'webp', 84) ??
+        neighbor.image.avif ??
+        neighbor.image.webp ??
+        neighbor.image.src
+    }
+  }, [activeIndex, isOpen, items])
+
   if (!activeItem || activeIndex === null) return null
 
   return createPortal(
@@ -192,6 +215,7 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
               imgClassName="object-contain"
               loading="eager"
               fetchPriority="high"
+              profile="fullscreen"
               sizes="90vw"
             />
           )}

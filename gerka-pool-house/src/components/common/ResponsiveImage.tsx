@@ -1,10 +1,29 @@
 import type { ImageAsset } from '../../types/content'
 import { cn } from '../../utils/cn'
+import { getSupabaseImageUrl } from '../../utils/imageUrl'
 
-const supabasePublicObjectPath = '/storage/v1/object/public/'
-const supabaseImageRenderPath = '/storage/v1/render/image/public/'
-const responsiveWidths = [160, 240, 320, 480, 640, 768, 960, 1200, 1600, 1920]
-const mobileResponsiveWidths = [160, 240, 320, 480, 640, 768, 960]
+const responsiveWidths = [320, 480, 640, 960, 1200, 1600, 1920]
+const mobileResponsiveWidths = [320, 480, 640, 768, 960]
+
+const imageProfiles = {
+  thumbnail: {
+    widths: [240, 320, 480, 640, 768],
+    quality: 78,
+    fallbackWidth: 768,
+  },
+  content: {
+    widths: responsiveWidths,
+    quality: 82,
+    fallbackWidth: 1600,
+  },
+  fullscreen: {
+    widths: [640, 960, 1200, 1600, 1920],
+    quality: 84,
+    fallbackWidth: 1920,
+  },
+} as const
+
+type ImageProfile = keyof typeof imageProfiles
 
 interface ResponsiveImageProps {
   image: ImageAsset
@@ -15,36 +34,20 @@ interface ResponsiveImageProps {
   loading?: 'lazy' | 'eager'
   fetchPriority?: 'high' | 'low' | 'auto'
   sizes?: string
-}
-
-function getSupabaseImageUrl(src: string, width: number, format: 'origin' | 'webp' = 'webp') {
-  if (!src.includes(supabasePublicObjectPath)) return null
-
-  try {
-    const url = new URL(src)
-
-    url.pathname = url.pathname.replace(supabasePublicObjectPath, supabaseImageRenderPath)
-    url.searchParams.set('width', String(width))
-    url.searchParams.set('quality', '82')
-    url.searchParams.set('resize', 'contain')
-    url.searchParams.set('format', format)
-
-    return url.toString()
-  } catch {
-    return null
-  }
+  profile?: ImageProfile
 }
 
 function getSupabaseSrcSet(
   image: ImageAsset,
   format: 'origin' | 'webp' = 'webp',
-  widths = responsiveWidths,
+  widths: readonly number[] = responsiveWidths,
+  quality = 82,
 ) {
   if (image.type === 'video') return null
 
   const entries = widths
     .map((width) => {
-      const url = getSupabaseImageUrl(image.src, width, format)
+      const url = getSupabaseImageUrl(image.src, width, format, quality)
       return url ? `${url} ${width}w` : null
     })
     .filter(Boolean)
@@ -61,13 +64,37 @@ export function ResponsiveImage({
   loading = 'lazy',
   fetchPriority = 'auto',
   sizes = '100vw',
+  profile = 'content',
 }: ResponsiveImageProps) {
-  const mobileSupabaseSrcSet = mobileImage ? getSupabaseSrcSet(mobileImage, 'webp', mobileResponsiveWidths) : null
-  const supabaseSrcSet = getSupabaseSrcSet(image)
-  const mobileOptimizedFallbackSrc = mobileImage
-    ? (getSupabaseImageUrl(mobileImage.src, 768, 'origin') ?? mobileImage.src)
+  const profileSettings = imageProfiles[profile]
+  const mobileWidths =
+    profile === 'thumbnail'
+      ? profileSettings.widths
+      : mobileResponsiveWidths
+  const mobileSupabaseSrcSet = mobileImage
+    ? getSupabaseSrcSet(mobileImage, 'webp', mobileWidths, profileSettings.quality)
     : null
-  const optimizedFallbackSrc = getSupabaseImageUrl(image.src, 1600, 'origin') ?? image.src
+  const supabaseSrcSet = getSupabaseSrcSet(
+    image,
+    'webp',
+    profileSettings.widths,
+    profileSettings.quality,
+  )
+  const mobileOptimizedFallbackSrc = mobileImage
+    ? (getSupabaseImageUrl(
+        mobileImage.src,
+        Math.min(768, profileSettings.fallbackWidth),
+        'origin',
+        profileSettings.quality,
+      ) ?? mobileImage.src)
+    : null
+  const optimizedFallbackSrc =
+    getSupabaseImageUrl(
+      image.src,
+      profileSettings.fallbackWidth,
+      'origin',
+      profileSettings.quality,
+    ) ?? image.src
 
   return (
     <picture className={cn('block overflow-hidden', className)}>

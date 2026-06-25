@@ -1,5 +1,5 @@
 import { Maximize2, Play } from 'lucide-react'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Lightbox } from '../components/common/Lightbox'
@@ -55,10 +55,12 @@ const GalleryMosaic = memo(function GalleryMosaic({
                 image={item.image}
                 alt={isMoreTrigger ? '' : localize(item.alt, locale)}
                 className="h-full"
+                fetchPriority="low"
+                profile="thumbnail"
                 sizes={
                   index === 0
-                    ? '(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 50vw'
-                    : '(min-width: 1024px) 25vw, 25vw'
+                    ? '(min-width: 1280px) 624px, (min-width: 1024px) 48vw, 50vw'
+                    : '(min-width: 1280px) 296px, (min-width: 1024px) 23vw, 25vw'
                 }
               />
             )}
@@ -96,6 +98,73 @@ const GalleryMosaic = memo(function GalleryMosaic({
   )
 })
 
+function GalleryMosaicPlaceholder() {
+  return (
+    <div
+      className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4"
+      aria-hidden="true"
+    >
+      {Array.from({ length: 5 }, (_, index) => (
+        <div
+          key={index}
+          className={cn(
+            'aspect-square animate-pulse rounded-[var(--radius-card)] bg-[var(--color-paper-2)]',
+            index === 0 && 'col-span-2 row-span-2',
+            'lg:aspect-[4/5] lg:first:col-span-2 lg:first:row-span-2 lg:first:aspect-auto',
+          )}
+        />
+      ))}
+    </div>
+  )
+}
+
+function DeferredGalleryMosaic({
+  items,
+  locale,
+  onOpen,
+}: {
+  items: GalleryItem[]
+  locale: Locale
+  onOpen: (index: number) => void
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (ready) return
+
+    const element = containerRef.current
+    if (!element || !('IntersectionObserver' in window)) {
+      setReady(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+
+        setReady(true)
+        observer.disconnect()
+      },
+      { rootMargin: '160px 0px' },
+    )
+
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [ready])
+
+  return (
+    <div ref={containerRef}>
+      {ready ? (
+        <GalleryMosaic items={items} locale={locale} onOpen={onOpen} />
+      ) : (
+        <GalleryMosaicPlaceholder />
+      )}
+    </div>
+  )
+}
+
 const GalleryArticle = memo(function GalleryArticle({
   section,
   sectionIndex,
@@ -113,7 +182,7 @@ const GalleryArticle = memo(function GalleryArticle({
   )
 
   return (
-    <article className="grid gap-5">
+    <article className="gallery-lazy-group grid gap-5">
       <div className="grid gap-2 md:grid-cols-[minmax(0,0.48fr)_1fr] md:items-end">
         <h3 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">
           {localize(section.title, locale)}
@@ -123,7 +192,7 @@ const GalleryArticle = memo(function GalleryArticle({
         </p>
       </div>
       {section.items.length > 0 ? (
-        <GalleryMosaic items={section.items} locale={locale} onOpen={openItem} />
+        <DeferredGalleryMosaic items={section.items} locale={locale} onOpen={openItem} />
       ) : null}
     </article>
   )

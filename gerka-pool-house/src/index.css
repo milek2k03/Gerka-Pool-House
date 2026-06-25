@@ -250,6 +250,11 @@ svg {
   gap: var(--section-spacing-mobile);
 }
 
+.gallery-lazy-group {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 34rem;
+}
+
 input[type='date'].field {
   min-inline-size: 0;
   inline-size: 100%;

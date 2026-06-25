@@ -131,6 +131,18 @@
     <title>Gerka Pool House | Prywatny wypoczynek z basenem</title>
     <script>
       ;(() => {
+        if ('scrollRestoration' in window.history) {
+          window.history.scrollRestoration = 'manual'
+        }
+        if (window.location.hash) {
+          window.history.replaceState(
+            window.history.state,
+            '',
+            `${window.location.pathname}${window.location.search}`,
+          )
+        }
+        window.scrollTo(0, 0)
+
         const supabaseUrl = '%VITE_SUPABASE_URL%'
         const supabaseKey = '%VITE_SUPABASE_ANON_KEY%'
 

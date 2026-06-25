@@ -108,7 +108,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
 
   response.setHeader(
     'Cache-Control',
-    'public, max-age=60, s-maxage=60, stale-while-revalidate=300',
+    'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
   )
   response.setHeader('Link', `<${location}>; rel=preload; as=image; fetchpriority=high`)
   response.setHeader('Location', location)
