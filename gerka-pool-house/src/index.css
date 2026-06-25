@@ -263,6 +263,12 @@ svg {
   }
 }
 
+@media (min-width: 1024px) {
+  .hero-content-desktop {
+    margin-inline-start: min(0px, calc((80rem - 100vw) / 2 + 4rem));
+  }
+}
+
 input[type='date'].field {
   min-inline-size: 0;
   inline-size: 100%;
