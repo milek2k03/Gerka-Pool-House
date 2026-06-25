@@ -9,6 +9,20 @@
     <link
       rel="preload"
       as="image"
+      href="/hero-preview-mobile.webp"
+      media="(max-width: 639px)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/hero-preview-desktop.webp"
+      media="(min-width: 640px)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
       href="/api/hero-image?variant=mobile"
       media="(max-width: 639px)"
       fetchpriority="high"
@@ -63,6 +77,9 @@
       [data-initial-hero] picture {
         display: block;
         overflow: hidden;
+        background-image: url('/hero-preview-mobile.webp');
+        background-position: 63% 48%;
+        background-size: cover;
       }
 
       [data-initial-hero] img {
@@ -84,6 +101,11 @@
 
         [data-initial-hero] img {
           object-position: center;
+        }
+
+        [data-initial-hero] picture {
+          background-image: url('/hero-preview-desktop.webp');
+          background-position: center;
         }
 
         [data-initial-hero] [data-initial-hero-overlay] {
@@ -190,10 +212,10 @@
         >
           <source
             media="(max-width: 639px)"
-            srcset="/api/hero-image?variant=mobile"
+            srcset="/hero-preview-mobile.webp"
           />
           <img
-            src="/api/hero-image?variant=desktop"
+            src="/hero-preview-desktop.webp"
             alt=""
             class="h-full w-full object-cover object-[63%_48%] sm:object-center"
             fetchpriority="high"

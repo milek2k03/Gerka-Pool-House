@@ -250,9 +250,17 @@ svg {
   gap: var(--section-spacing-mobile);
 }
 
-.gallery-lazy-group {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 34rem;
+.hero-image-shell {
+  background-image: url('/hero-preview-mobile.webp');
+  background-position: 63% 48%;
+  background-size: cover;
+}
+
+@media (min-width: 640px) {
+  .hero-image-shell {
+    background-image: url('/hero-preview-desktop.webp');
+    background-position: center;
+  }
 }
 
 input[type='date'].field {

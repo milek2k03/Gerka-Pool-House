@@ -105,6 +105,8 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
               image={content.area.image}
               alt={localize(content.area.title, locale)}
               className="mt-8 aspect-[4/3] rounded-[var(--radius-card)] shadow-[var(--shadow-soft)]"
+              loading="eager"
+              fetchPriority="low"
               sizes="(min-width: 1024px) 42vw, 100vw"
             />
           </div>

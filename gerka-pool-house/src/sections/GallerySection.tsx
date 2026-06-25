@@ -8,6 +8,7 @@ import { SectionHeading } from '../components/ui/SectionHeading'
 import type { Locale } from '../types/common'
 import type { GalleryItem, GallerySection as GallerySectionContent } from '../types/content'
 import { cn } from '../utils/cn'
+import { getSupabaseImageUrl } from '../utils/imageUrl'
 import { localize } from '../utils/locale'
 
 const GalleryMosaic = memo(function GalleryMosaic({
@@ -55,6 +56,7 @@ const GalleryMosaic = memo(function GalleryMosaic({
                 image={item.image}
                 alt={isMoreTrigger ? '' : localize(item.alt, locale)}
                 className="h-full"
+                loading="eager"
                 fetchPriority="low"
                 profile="thumbnail"
                 sizes={
@@ -98,73 +100,6 @@ const GalleryMosaic = memo(function GalleryMosaic({
   )
 })
 
-function GalleryMosaicPlaceholder() {
-  return (
-    <div
-      className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4"
-      aria-hidden="true"
-    >
-      {Array.from({ length: 5 }, (_, index) => (
-        <div
-          key={index}
-          className={cn(
-            'aspect-square animate-pulse rounded-[var(--radius-card)] bg-[var(--color-paper-2)]',
-            index === 0 && 'col-span-2 row-span-2',
-            'lg:aspect-[4/5] lg:first:col-span-2 lg:first:row-span-2 lg:first:aspect-auto',
-          )}
-        />
-      ))}
-    </div>
-  )
-}
-
-function DeferredGalleryMosaic({
-  items,
-  locale,
-  onOpen,
-}: {
-  items: GalleryItem[]
-  locale: Locale
-  onOpen: (index: number) => void
-}) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    if (ready) return
-
-    const element = containerRef.current
-    if (!element || !('IntersectionObserver' in window)) {
-      setReady(true)
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-
-        setReady(true)
-        observer.disconnect()
-      },
-      { rootMargin: '160px 0px' },
-    )
-
-    observer.observe(element)
-
-    return () => observer.disconnect()
-  }, [ready])
-
-  return (
-    <div ref={containerRef}>
-      {ready ? (
-        <GalleryMosaic items={items} locale={locale} onOpen={onOpen} />
-      ) : (
-        <GalleryMosaicPlaceholder />
-      )}
-    </div>
-  )
-}
-
 const GalleryArticle = memo(function GalleryArticle({
   section,
   sectionIndex,
@@ -182,7 +117,7 @@ const GalleryArticle = memo(function GalleryArticle({
   )
 
   return (
-    <article className="gallery-lazy-group grid gap-5">
+    <article className="grid gap-5">
       <div className="grid gap-2 md:grid-cols-[minmax(0,0.48fr)_1fr] md:items-end">
         <h3 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">
           {localize(section.title, locale)}
@@ -192,7 +127,7 @@ const GalleryArticle = memo(function GalleryArticle({
         </p>
       </div>
       {section.items.length > 0 ? (
-        <DeferredGalleryMosaic items={section.items} locale={locale} onOpen={openItem} />
+        <GalleryMosaic items={section.items} locale={locale} onOpen={openItem} />
       ) : null}
     </article>
   )
@@ -202,6 +137,7 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
   const { t } = useTranslation()
   const [activeSectionIndex, setActiveSectionIndex] = useState<number | null>(null)
   const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null)
+  const hiddenImagePreloads = useRef<HTMLImageElement[]>([])
   const activeItems = activeSectionIndex === null ? [] : (sections[activeSectionIndex]?.items ?? [])
   const openItem = useCallback((sectionIndex: number, itemIndex: number) => {
     setActiveSectionIndex(sectionIndex)
@@ -211,6 +147,31 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
     setActiveSectionIndex(null)
     setActiveItemIndex(null)
   }, [])
+
+  useEffect(() => {
+    const preloaders = sections.flatMap((section) =>
+      section.items.slice(5).flatMap((item) => {
+        if (item.image.type === 'video') return []
+
+        const image = new Image()
+        image.decoding = 'async'
+        image.fetchPriority = 'low'
+        image.src =
+          getSupabaseImageUrl(item.image.src, 768, 'webp', 78) ??
+          item.image.avif ??
+          item.image.webp ??
+          item.image.src
+
+        return [image]
+      }),
+    )
+
+    hiddenImagePreloads.current = preloaders
+
+    return () => {
+      hiddenImagePreloads.current = []
+    }
+  }, [sections])
 
   return (
     <section id="gallery" className="section-spacing bg-[var(--color-deep)] px-4 sm:px-8 lg:px-10">

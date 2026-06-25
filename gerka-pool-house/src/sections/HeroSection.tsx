@@ -28,9 +28,10 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         image={heroImage}
         mobileImage={mobileHeroImage}
         alt=""
-        className="absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-0 sm:h-full"
+        className="hero-image-shell absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-0 sm:h-full"
         loading="eager"
         fetchPriority="high"
+        hideOnError
         imgClassName="object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
       <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(rgba(15,23,42,0.18),rgba(15,23,42,0.08))] sm:inset-0 sm:h-full sm:bg-[linear-gradient(rgba(15,23,42,0.55),rgba(15,23,42,0.35))]" />
