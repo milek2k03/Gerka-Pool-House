@@ -839,6 +839,14 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     }
   }
 
+  if (storedVersion < 22) {
+    content.version = defaultSiteContent.version
+    content.pricing.discounts = (content.pricing.discounts ?? []).map((discount) => ({
+      ...discount,
+      type: discount.type ?? 'permanent',
+    }))
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 

@@ -29,7 +29,14 @@ import { useSiteContent } from '../hooks/useSiteContent'
 import { contentRepository } from '../services/contentRepository'
 import { reservationRepository } from '../services/reservationRepository'
 import type { Locale, LocalizedString } from '../types/common'
-import type { IconKey, ImageAsset, SiteContent } from '../types/content'
+import type {
+  DiscountCode,
+  DiscountCodeType,
+  DiscountWeekday,
+  IconKey,
+  ImageAsset,
+  SiteContent,
+} from '../types/content'
 import type {
   AvailabilityRange,
   AvailabilityStatus,
@@ -83,6 +90,7 @@ const iconOptions: IconKey[] = [
 ]
 
 const reservationStatuses: ReservationStatus[] = ['pending', 'accepted', 'rejected', 'cancelled']
+const discountWeekdays: DiscountWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const instructionSectionIds = [
   'start',
   'save',
@@ -227,6 +235,45 @@ function discountCodeValue(value: string) {
 
 function discountPercentValue(event: ChangeEvent<HTMLInputElement>) {
   return Math.min(100, Math.max(1, Number(event.target.value || 1)))
+}
+
+function setDiscountType(discount: DiscountCode, type: DiscountCodeType) {
+  discount.type = type
+
+  if (type === 'permanent') {
+    delete discount.validFrom
+    delete discount.validTo
+    delete discount.weekdays
+    return
+  }
+
+  if (type === 'dateRange') {
+    const defaultDate = getTomorrowISO()
+    const validFrom = discount.validFrom || defaultDate
+    discount.validFrom = validFrom
+    discount.validTo =
+      discount.validTo && discount.validTo >= validFrom
+        ? discount.validTo
+        : validFrom
+    delete discount.weekdays
+    return
+  }
+
+  discount.weekdays = discount.weekdays?.length ? discount.weekdays : [1, 2, 3, 4]
+  delete discount.validFrom
+  delete discount.validTo
+}
+
+function toggleDiscountWeekday(discount: DiscountCode, weekday: DiscountWeekday) {
+  const weekdays = new Set(discount.weekdays ?? [])
+
+  if (weekdays.has(weekday)) {
+    weekdays.delete(weekday)
+  } else {
+    weekdays.add(weekday)
+  }
+
+  discount.weekdays = Array.from(weekdays).sort((left, right) => left - right)
 }
 
 function nextDayISO(date: string) {
@@ -1271,45 +1318,143 @@ export function AdminPage() {
                   {draft.pricing.discounts.map((discount, index) => (
                     <article
                       key={discount.id}
-                      className="grid gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:grid-cols-[1fr_160px_auto] sm:items-end"
+                      className="grid gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
                     >
-                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-                        {t('admin.fields.discountCode')}
-                        <input
-                          className="field uppercase"
-                          value={discount.code}
-                          onChange={(event) =>
-                            mutate(
-                              (next) =>
-                                void (next.pricing.discounts[index].code = discountCodeValue(event.target.value)),
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-                        {t('admin.fields.discountPercent')}
-                        <input
-                          className="field"
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={discount.percent}
-                          onChange={(event) =>
-                            mutate(
-                              (next) =>
-                                void (next.pricing.discounts[index].percent = discountPercentValue(event)),
-                            )
-                          }
-                        />
-                      </label>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="danger"
-                        onClick={() => mutate((next) => void next.pricing.discounts.splice(index, 1))}
-                      >
-                        {t('common.remove')}
-                      </Button>
+                      <div className="grid gap-3 md:grid-cols-[minmax(12rem,1fr)_10rem_minmax(13rem,0.8fr)_auto] md:items-end">
+                        <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                          {t('admin.fields.discountCode')}
+                          <input
+                            className="field uppercase"
+                            value={discount.code}
+                            onChange={(event) =>
+                              mutate(
+                                (next) =>
+                                  void (next.pricing.discounts[index].code = discountCodeValue(event.target.value)),
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                          {t('admin.fields.discountPercent')}
+                          <input
+                            className="field"
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={discount.percent}
+                            onChange={(event) =>
+                              mutate(
+                                (next) =>
+                                  void (next.pricing.discounts[index].percent = discountPercentValue(event)),
+                              )
+                            }
+                          />
+                        </label>
+                        <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                          {t('admin.fields.discountType')}
+                          <select
+                            className="field"
+                            value={discount.type ?? 'permanent'}
+                            onChange={(event) =>
+                              mutate((next) => {
+                                setDiscountType(
+                                  next.pricing.discounts[index],
+                                  event.target.value as DiscountCodeType,
+                                )
+                              })
+                            }
+                          >
+                            <option value="permanent">{t('admin.fields.discountTypePermanent')}</option>
+                            <option value="dateRange">{t('admin.fields.discountTypeDateRange')}</option>
+                            <option value="recurring">{t('admin.fields.discountTypeRecurring')}</option>
+                          </select>
+                        </label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="danger"
+                          onClick={() => mutate((next) => void next.pricing.discounts.splice(index, 1))}
+                        >
+                          {t('common.remove')}
+                        </Button>
+                      </div>
+
+                      {(discount.type ?? 'permanent') === 'dateRange' ? (
+                        <div className="grid gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-3 sm:grid-cols-2">
+                          <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                            {t('admin.fields.discountValidFrom')}
+                            <input
+                              className="field"
+                              type="date"
+                              value={discount.validFrom ?? ''}
+                              onChange={(event) =>
+                                mutate((next) => {
+                                  const item = next.pricing.discounts[index]
+                                  item.validFrom = event.target.value
+                                  if (!item.validTo || item.validTo < item.validFrom) {
+                                    item.validTo = item.validFrom
+                                  }
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                            {t('admin.fields.discountValidTo')}
+                            <input
+                              className="field"
+                              type="date"
+                              min={discount.validFrom}
+                              value={discount.validTo ?? ''}
+                              onChange={(event) =>
+                                mutate((next) => {
+                                  next.pricing.discounts[index].validTo = event.target.value
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                      ) : null}
+
+                      {(discount.type ?? 'permanent') === 'recurring' ? (
+                        <fieldset className="grid gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-3">
+                          <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">
+                            {t('admin.fields.discountWeekdays')}
+                          </legend>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+                            {discountWeekdays.map((weekday) => (
+                              <label
+                                key={weekday}
+                                className={cn(
+                                  'flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+                                  discount.weekdays?.includes(weekday)
+                                    ? 'border-[var(--color-brass)] bg-[var(--color-brass)]/10 text-[var(--color-ink)]'
+                                    : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)]',
+                                )}
+                              >
+                                <input
+                                  className="size-4 accent-[var(--color-brass)]"
+                                  type="checkbox"
+                                  checked={discount.weekdays?.includes(weekday) ?? false}
+                                  onChange={() =>
+                                    mutate((next) => {
+                                      toggleDiscountWeekday(next.pricing.discounts[index], weekday)
+                                    })
+                                  }
+                                />
+                                {t(`admin.fields.discountWeekday${weekday}`)}
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                      ) : null}
+
+                      <p className="text-sm leading-6 text-[var(--color-muted)]">
+                        {(discount.type ?? 'permanent') === 'permanent'
+                          ? t('admin.fields.discountPermanentHelp')
+                          : discount.type === 'dateRange'
+                            ? t('admin.fields.discountDateRangeHelp')
+                            : t('admin.fields.discountRecurringHelp')}
+                      </p>
                     </article>
                   ))}
                   <Button
@@ -1321,6 +1466,7 @@ export function AdminPage() {
                           id: crypto.randomUUID(),
                           code: 'RABAT10',
                           percent: 10,
+                          type: 'permanent',
                         }),
                       )
                     }

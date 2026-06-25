@@ -1,23 +1,12 @@
 import type { AvailabilityRange, StaySummary } from '../../types/booking'
 import type { DiscountCode, PriceSettings } from '../../types/content'
 import { eachNight, getTomorrowISO, isDateWithinRange, nightsBetween } from '../../utils/date'
+import {
+  clampDiscountPercent,
+  findApplicableDiscount,
+  normalizeDiscountCode,
+} from '../../utils/discounts'
 import { getEffectiveMaxGuests, isApartment2Enabled } from '../../utils/pricing'
-
-export function normalizeDiscountCode(value?: string) {
-  return (value ?? '').trim().replace(/\s+/g, '').toUpperCase()
-}
-
-function findDiscountCode(discounts: DiscountCode[], value?: string) {
-  const normalized = normalizeDiscountCode(value)
-
-  if (!normalized) return undefined
-
-  return discounts.find((discount) => normalizeDiscountCode(discount.code) === normalized)
-}
-
-function clampDiscountPercent(value: number) {
-  return Math.min(100, Math.max(1, Math.round(value)))
-}
 
 function createDiscountedPrice(total: number, discount?: DiscountCode) {
   if (!discount) {
@@ -53,7 +42,7 @@ export function calculateStaySummary(
   const roomsUsed = room2Enabled && guests > pricing.room1Capacity ? 2 : 1
   const nightlyPrice = roomsUsed === 1 ? pricing.room1Nightly : pricing.room1Nightly + pricing.room2Nightly
   const baseTotal = nightlyPrice * nights
-  const discount = findDiscountCode(pricing.discounts ?? [], discountCode)
+  const discount = findApplicableDiscount(pricing.discounts ?? [], discountCode, checkIn, checkOut)
   const discountedPrice = createDiscountedPrice(baseTotal, discount)
   const roomLabels = roomsUsed === 1 ? ['room1'] : ['room1', 'room2']
   const selectedNights = eachNight(checkIn, checkOut)

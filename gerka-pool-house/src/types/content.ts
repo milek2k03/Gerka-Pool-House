@@ -88,7 +88,15 @@ export interface DiscountCode {
   id: string
   code: string
   percent: number
+  type: DiscountCodeType
+  validFrom?: string
+  validTo?: string
+  weekdays?: DiscountWeekday[]
 }
+
+export type DiscountCodeType = 'permanent' | 'dateRange' | 'recurring'
+
+export type DiscountWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export interface ContactSettings {
   phone: string

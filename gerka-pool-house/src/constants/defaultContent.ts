@@ -13,7 +13,7 @@ import type { SiteContent } from '../types/content'
 const socialPreviewImage = '/api/og-image?v=5'
 
 export const defaultSiteContent: SiteContent = {
-  version: 21,
+  version: 22,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
