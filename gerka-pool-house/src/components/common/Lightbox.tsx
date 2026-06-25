@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, type TouchEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 import type { GalleryItem } from '../../types/content'
@@ -24,6 +25,7 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const touchStart = useRef({ x: 0, y: 0 })
   const touchEnd = useRef({ x: 0, y: 0 })
+  const isOpen = activeIndex !== null && Boolean(activeItem)
 
   const showPrevious = useCallback(() => {
     if (activeIndex === null) return
@@ -64,10 +66,35 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
   }
 
   useEffect(() => {
-    if (activeIndex === null) return undefined
+    if (!isOpen) return undefined
 
     const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const scrollY = window.scrollY
+    const previousPosition = document.body.style.position
+    const previousTop = document.body.style.top
+    const previousWidth = document.body.style.width
     const previousOverflow = document.body.style.overflow
+
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    document.body.style.overflow = 'hidden'
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      document.body.style.position = previousPosition
+      document.body.style.top = previousTop
+      document.body.style.width = previousWidth
+      document.body.style.overflow = previousOverflow
+      window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' })
+      previouslyFocused?.focus({ preventScroll: true })
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
       if (event.key === 'ArrowRight') showNext()
@@ -97,24 +124,19 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
       }
     }
 
-    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKeyDown)
-    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus())
 
     return () => {
-      window.cancelAnimationFrame(focusFrame)
-      document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', onKeyDown)
-      previouslyFocused?.focus()
     }
-  }, [activeIndex, onClose, showNext, showPrevious])
+  }, [isOpen, onClose, showNext, showPrevious])
 
   if (!activeItem || activeIndex === null) return null
 
-  return (
+  return createPortal(
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(15,23,42,0.88)] p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] grid h-[100dvh] grid-rows-[minmax(0,1fr)] overflow-hidden bg-[rgba(15,23,42,0.94)] p-3 backdrop-blur-sm sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={localize(activeItem.title, locale)}
@@ -128,7 +150,7 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
         type="button"
         size="icon"
         variant="secondary"
-        className="absolute right-4 top-4"
+        className="absolute right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-20 sm:right-6 sm:top-6"
         aria-label={t('common.close')}
         onClick={onClose}
       >
@@ -138,37 +160,43 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
         type="button"
         size="icon"
         variant="secondary"
-        className="absolute left-4 top-1/2 hidden -translate-y-1/2 sm:inline-flex"
+        className="absolute left-3 top-1/2 z-20 -translate-y-1/2 sm:left-6"
         aria-label={t('common.previousImage')}
         onClick={showPrevious}
       >
         <ChevronLeft aria-hidden="true" className="size-5" />
       </Button>
       <figure
-        className="w-full max-w-6xl touch-pan-y select-none"
+        className="mx-auto grid h-full min-h-0 w-full max-w-6xl touch-pan-y select-none grid-rows-[minmax(0,1fr)_auto] items-center gap-3 px-12 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-12 sm:gap-4 sm:px-14 sm:pb-0 sm:pt-0"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {activeItem.image.type === 'video' ? (
-          <video
-            className="h-[70svh] w-full rounded-[var(--radius-card)] bg-[var(--color-paper)] object-contain shadow-[var(--shadow-premium)] sm:aspect-[16/10] sm:h-auto"
-            src={activeItem.image.src}
-            poster={activeItem.image.poster}
-            controls
-            playsInline
-            preload="metadata"
-          />
-        ) : (
-          <ResponsiveImage
-            image={activeItem.image}
-            alt={localize(activeItem.alt, locale)}
-            className="h-[70svh] rounded-[var(--radius-card)] bg-[var(--color-paper)] shadow-[var(--shadow-premium)] sm:aspect-[16/10] sm:h-auto"
-            imgClassName="object-contain"
-            sizes="90vw"
-          />
-        )}
-        <figcaption id={captionId} className="mt-4 text-center text-sm font-medium text-white">
+        <div className="grid h-full min-h-0 w-full place-items-center">
+          {activeItem.image.type === 'video' ? (
+            <video
+              key={activeItem.id}
+              className="h-full min-h-0 w-full rounded-[var(--radius-card)] bg-[var(--color-paper)] object-contain shadow-[var(--shadow-premium)]"
+              src={activeItem.image.src}
+              poster={activeItem.image.poster}
+              controls
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <ResponsiveImage
+              key={activeItem.id}
+              image={activeItem.image}
+              alt={localize(activeItem.alt, locale)}
+              className="h-full min-h-0 w-full rounded-[var(--radius-card)] bg-[var(--color-paper)] shadow-[var(--shadow-premium)]"
+              imgClassName="object-contain"
+              loading="eager"
+              fetchPriority="high"
+              sizes="90vw"
+            />
+          )}
+        </div>
+        <figcaption id={captionId} className="text-center text-sm font-medium text-white sm:text-base">
           {localize(activeItem.title, locale)}
         </figcaption>
       </figure>
@@ -176,20 +204,13 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
         type="button"
         size="icon"
         variant="secondary"
-        className="absolute right-4 top-1/2 hidden -translate-y-1/2 sm:inline-flex"
+        className="absolute right-3 top-1/2 z-20 -translate-y-1/2 sm:right-6"
         aria-label={t('common.nextImage')}
         onClick={showNext}
       >
         <ChevronRight aria-hidden="true" className="size-5" />
       </Button>
-      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-3 sm:hidden">
-        <Button type="button" size="icon" variant="secondary" aria-label={t('common.previousImage')} onClick={showPrevious}>
-          <ChevronLeft aria-hidden="true" className="size-5" />
-        </Button>
-        <Button type="button" size="icon" variant="secondary" aria-label={t('common.nextImage')} onClick={showNext}>
-          <ChevronRight aria-hidden="true" className="size-5" />
-        </Button>
-      </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

@@ -138,6 +138,10 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
     setActiveSectionIndex(sectionIndex)
     setActiveItemIndex(itemIndex)
   }, [])
+  const closeLightbox = useCallback(() => {
+    setActiveSectionIndex(null)
+    setActiveItemIndex(null)
+  }, [])
 
   return (
     <section id="gallery" className="section-spacing bg-[var(--color-deep)] px-4 sm:px-8 lg:px-10">
@@ -164,10 +168,7 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
         items={activeItems}
         locale={locale}
         activeIndex={activeItemIndex}
-        onClose={() => {
-          setActiveSectionIndex(null)
-          setActiveItemIndex(null)
-        }}
+        onClose={closeLightbox}
         onChange={setActiveItemIndex}
       />
     </section>
