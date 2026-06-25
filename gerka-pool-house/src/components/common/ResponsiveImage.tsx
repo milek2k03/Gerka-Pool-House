@@ -11,6 +11,11 @@ const imageProfiles = {
     quality: 78,
     fallbackWidth: 768,
   },
+  gallery: {
+    widths: [640],
+    quality: 78,
+    fallbackWidth: 640,
+  },
   content: {
     widths: responsiveWidths,
     quality: 82,
@@ -36,6 +41,7 @@ interface ResponsiveImageProps {
   sizes?: string
   profile?: ImageProfile
   hideOnError?: boolean
+  onLoad?: () => void
 }
 
 function getSupabaseSrcSet(
@@ -67,6 +73,7 @@ export function ResponsiveImage({
   sizes = '100vw',
   profile = 'content',
   hideOnError = false,
+  onLoad,
 }: ResponsiveImageProps) {
   const profileSettings = imageProfiles[profile]
   const mobileWidths =
@@ -122,6 +129,7 @@ export function ResponsiveImage({
         loading={loading}
         decoding={loading === 'eager' ? 'sync' : 'async'}
         fetchPriority={fetchPriority}
+        onLoad={onLoad}
         onError={
           hideOnError
             ? (event) => {

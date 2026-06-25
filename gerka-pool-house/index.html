@@ -197,6 +197,46 @@
 
         window.__GERKA_SITE_CONTENT_PROMISE__ = contentPromise
 
+        contentPromise.then((content) => {
+          const gallerySections = Array.isArray(content?.gallerySections)
+            ? content.gallerySections
+            : []
+          const preloaders = gallerySections.flatMap((section) =>
+            Array.isArray(section?.items)
+              ? section.items.flatMap((item) => {
+                  const asset = item?.image
+                  if (!asset?.src || asset.type === 'video') return []
+
+                  let source = asset.webp || asset.avif || asset.src
+
+                  if (asset.src.includes('/storage/v1/object/public/')) {
+                    try {
+                      const url = new URL(asset.src)
+                      url.pathname = url.pathname.replace(
+                        '/storage/v1/object/public/',
+                        '/storage/v1/render/image/public/',
+                      )
+                      url.searchParams.set('width', '640')
+                      url.searchParams.set('quality', '78')
+                      url.searchParams.set('resize', 'contain')
+                      url.searchParams.set('format', 'webp')
+                      source = url.toString()
+                    } catch {
+                      source = asset.webp || asset.avif || asset.src
+                    }
+                  }
+
+                  const image = new Image()
+                  image.decoding = 'async'
+                  image.fetchPriority = 'low'
+                  image.src = source
+                  return [image]
+                })
+              : [],
+          )
+
+          window.__GERKA_GALLERY_PRELOADS__ = preloaders
+        })
       })()
     </script>
   </head>

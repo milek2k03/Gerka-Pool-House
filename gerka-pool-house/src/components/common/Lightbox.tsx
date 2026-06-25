@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useCallback, useEffect, useId, useRef, type TouchEvent } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type TouchEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -16,6 +16,48 @@ interface LightboxProps {
   locale: Locale
   onClose: () => void
   onChange: (index: number) => void
+}
+
+function ProgressiveGalleryImage({
+  item,
+  locale,
+}: {
+  item: GalleryItem
+  locale: Locale
+}) {
+  const [fullImageLoaded, setFullImageLoaded] = useState(false)
+  const previewSrc =
+    getSupabaseImageUrl(item.image.src, 640, 'webp', 78) ??
+    item.image.avif ??
+    item.image.webp ??
+    item.image.src
+
+  return (
+    <div className="relative h-full min-h-0 w-full overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-paper)] shadow-[var(--shadow-premium)]">
+      <img
+        src={previewSrc}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-contain"
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+      />
+      <ResponsiveImage
+        image={item.image}
+        alt={localize(item.alt, locale)}
+        className="absolute inset-0 h-full min-h-0 w-full"
+        imgClassName={`object-contain transition-opacity duration-300 ${
+          fullImageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        loading="eager"
+        fetchPriority="high"
+        profile="fullscreen"
+        sizes="90vw"
+        onLoad={() => setFullImageLoaded(true)}
+      />
+    </div>
+  )
 }
 
 export function Lightbox({ items, activeIndex, locale, onClose, onChange }: LightboxProps) {
@@ -207,16 +249,10 @@ export function Lightbox({ items, activeIndex, locale, onClose, onChange }: Ligh
               preload="metadata"
             />
           ) : (
-            <ResponsiveImage
+            <ProgressiveGalleryImage
               key={activeItem.id}
-              image={activeItem.image}
-              alt={localize(activeItem.alt, locale)}
-              className="h-full min-h-0 w-full rounded-[var(--radius-card)] bg-[var(--color-paper)] shadow-[var(--shadow-premium)]"
-              imgClassName="object-contain"
-              loading="eager"
-              fetchPriority="high"
-              profile="fullscreen"
-              sizes="90vw"
+              item={activeItem}
+              locale={locale}
             />
           )}
         </div>

@@ -57,13 +57,9 @@ const GalleryMosaic = memo(function GalleryMosaic({
                 alt={isMoreTrigger ? '' : localize(item.alt, locale)}
                 className="h-full"
                 loading="eager"
-                fetchPriority="low"
-                profile="thumbnail"
-                sizes={
-                  index === 0
-                    ? '(min-width: 1280px) 624px, (min-width: 1024px) 48vw, 50vw'
-                    : '(min-width: 1280px) 296px, (min-width: 1024px) 23vw, 25vw'
-                }
+                fetchPriority="auto"
+                profile="gallery"
+                sizes="640px"
               />
             )}
             <span className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.66)] via-[rgba(15,23,42,0.16)] to-transparent opacity-90" />
@@ -150,17 +146,18 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
 
   useEffect(() => {
     const preloaders = sections.flatMap((section) =>
-      section.items.slice(5).flatMap((item) => {
+      section.items.flatMap((item) => {
         if (item.image.type === 'video') return []
 
         const image = new Image()
         image.decoding = 'async'
         image.fetchPriority = 'low'
         image.src =
-          getSupabaseImageUrl(item.image.src, 768, 'webp', 78) ??
+          getSupabaseImageUrl(item.image.src, 640, 'webp', 78) ??
           item.image.avif ??
           item.image.webp ??
           item.image.src
+        image.decode().catch(() => undefined)
 
         return [image]
       }),
