@@ -28,9 +28,8 @@ npx vercel build --yes
 ## Wdrożenie
 
 1. Skonfiguruj zmienne z `.env.example` w Vercel dla Production i Preview.
-2. Uruchom skrypty z katalogu `docs` oraz migrację
-   `supabase/migrations/20260624000100_harden_admin_rls.sql` w Supabase SQL
-   Editor.
+2. Utwórz użytkownika administratora w Supabase Auth, a następnie uruchom
+   `supabase/complete-setup.sql` w Supabase SQL Editor.
 3. Zweryfikuj domenę wysyłkową w Resend.
 4. Wdróż gałąź `main` przez integrację GitHub z Vercel.
 
@@ -38,6 +37,7 @@ Główna domena kanoniczna: `https://www.gerkapoolhouse.pl`.
 
 ## Dokumentacja
 
+- [Konfiguracja produkcyjna krok po kroku](docs/production-setup.md)
 - [Audyt produkcyjny](docs/performance-audit-2026-06-24.md)
 - [Bezpieczeństwo Supabase](docs/supabase-security.md)
 - [Rezerwacje Supabase](docs/supabase-reservations.md)
