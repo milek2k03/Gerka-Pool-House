@@ -141,6 +141,7 @@ export const pl = {
     selectedDates: 'Termin pobytu',
     reservationNumber: 'Numer zapytania',
     available: 'Wolne',
+    selected: 'Wybrane',
     booked: 'Zajęte',
     unavailable: 'Niedostępne',
     previousMonth: 'Poprzedni miesiąc',

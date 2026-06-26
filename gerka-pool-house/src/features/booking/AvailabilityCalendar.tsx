@@ -125,7 +125,8 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
               key={date}
               type="button"
               disabled={disabled}
-              aria-label={`${dayFormatter.format(day)}: ${statusLabel}`}
+              aria-label={`${dayFormatter.format(day)}: ${statusLabel}${isSelected ? `, ${t('booking.selected')}` : ''}`}
+              aria-pressed={isSelected || isBetween}
               onClick={() => onSelectDate(date)}
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
@@ -136,8 +137,8 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
                   'calendar-unavailable cursor-not-allowed border border-sky-300/25 text-sky-100',
                 displayStatus === 'past' &&
                   'cursor-not-allowed border border-white/[0.025] bg-white/[0.025] text-white/20',
-                isBetween && 'bg-[rgba(214,181,138,0.14)]',
-                isSelected && 'bg-[var(--color-brass)] text-[#111827]',
+                isBetween && 'calendar-in-range',
+                isSelected && 'calendar-selected',
               )}
             >
               {day.getDate()}

@@ -139,6 +139,7 @@ export const en = {
     selectedDates: 'Stay dates',
     reservationNumber: 'Inquiry number',
     available: 'Available',
+    selected: 'Selected',
     booked: 'Booked',
     unavailable: 'Unavailable',
     previousMonth: 'Previous month',
