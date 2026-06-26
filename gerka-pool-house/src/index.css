@@ -320,7 +320,7 @@ svg {
   }
 
   .hero-poster-copy {
-    max-width: calc(min(25.5rem, 31vw) + 100px);
+    max-width: calc(min(25.5rem, 31vw) + 200px);
     padding: 2.15rem 1.35rem 2.15rem 2.15rem;
   }
 
