@@ -265,8 +265,48 @@ svg {
 
 @media (min-width: 1024px) {
   .hero-content-desktop {
-    margin-inline-start: min(0px, calc((80rem - 100vw) / 2 + 4rem));
-    transform: translateY(-200px);
+    margin-inline-start: 0;
+    transform: none;
+  }
+}
+
+.hero-poster-copy {
+  position: relative;
+}
+
+.hero-contact-strip {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.hero-contact-item + .hero-contact-item {
+  border-top: 1px solid rgba(214, 181, 138, 0.24);
+}
+
+@media (min-width: 768px) {
+  .hero-contact-strip {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+
+  .hero-contact-item + .hero-contact-item {
+    border-top: 0;
+    border-left: 1px solid rgba(214, 181, 138, 0.34);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-poster-copy {
+    max-width: min(38rem, 45vw);
+    padding: 2rem 2rem 2rem 0;
+  }
+
+  .hero-poster-copy::before {
+    content: '';
+    position: absolute;
+    inset: -2rem -1rem -2rem -8rem;
+    z-index: -1;
+    border-radius: 0 2rem 2rem 0;
+    background: linear-gradient(90deg, rgba(4, 10, 21, 0.82), rgba(15, 23, 42, 0.58) 58%, transparent);
   }
 }
 
