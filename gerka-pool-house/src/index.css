@@ -303,33 +303,35 @@ svg {
 
 @media (min-width: 1024px) {
   .hero-poster-copy {
-    max-width: min(25.5rem, 31vw);
+    max-width: calc(min(25.5rem, 31vw) + 100px);
     padding: 2.15rem 1.35rem 2.15rem 2.15rem;
   }
 
   .hero-poster-copy::before {
     content: '';
     position: absolute;
-    inset: -16rem -26rem -16rem -6rem;
+    top: -22rem;
+    bottom: -18rem;
+    left: -10rem;
+    width: min(66vw, 58rem);
     z-index: -1;
     border-radius: 0;
+    pointer-events: none;
     background:
-      linear-gradient(
-        180deg,
-        rgba(4, 10, 21, 0.98) 0%,
-        rgba(7, 14, 29, 0.72) 18%,
-        rgba(7, 14, 29, 0.58) 68%,
-        rgba(4, 10, 21, 0.98) 100%
+      radial-gradient(
+        ellipse at 0% 50%,
+        rgba(15, 23, 42, 0.98) 0%,
+        rgba(15, 23, 42, 0.9) 32%,
+        rgba(15, 23, 42, 0.62) 58%,
+        rgba(15, 23, 42, 0.24) 78%,
+        rgba(15, 23, 42, 0) 100%
       ),
       linear-gradient(
-        90deg,
-        rgba(4, 10, 21, 0.99) 0%,
-        rgba(5, 11, 24, 0.97) 22%,
-        rgba(7, 14, 29, 0.8) 42%,
-        rgba(15, 23, 42, 0.48) 62%,
-        rgba(15, 23, 42, 0.2) 80%,
-        rgba(15, 23, 42, 0.06) 94%,
-        transparent 100%
+        180deg,
+        rgba(15, 23, 42, 0.92) 0%,
+        rgba(15, 23, 42, 0.18) 24%,
+        rgba(15, 23, 42, 0.14) 72%,
+        rgba(15, 23, 42, 0.9) 100%
       );
   }
 }

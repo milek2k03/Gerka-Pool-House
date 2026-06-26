@@ -74,10 +74,9 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         hideOnError
         imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
-      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.2))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_44%,rgba(15,23,42,0.02),rgba(15,23,42,0.28)_42%,rgba(5,11,24,0.76)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,rgba(4,10,21,0.99)_0%,rgba(5,11,24,0.98)_18%,rgba(7,14,29,0.9)_35%,rgba(15,23,42,0.58)_52%,rgba(15,23,42,0.22)_70%,rgba(15,23,42,0.06)_86%,rgba(15,23,42,0)_100%)] sm:block" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[48vw] bg-[linear-gradient(90deg,rgba(4,10,21,1)_0%,rgba(5,11,24,0.98)_42%,rgba(7,14,29,0.76)_66%,rgba(15,23,42,0.28)_86%,rgba(15,23,42,0)_100%)] sm:block" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-[linear-gradient(180deg,transparent,rgba(5,11,24,0.72))]" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.2)_46%,rgba(5,11,24,0.62)_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[68vw] bg-[linear-gradient(90deg,rgba(15,23,42,0.99)_0%,rgba(15,23,42,0.98)_20%,rgba(15,23,42,0.88)_38%,rgba(15,23,42,0.62)_58%,rgba(15,23,42,0.32)_76%,rgba(15,23,42,0.1)_91%,rgba(15,23,42,0)_100%)] sm:block" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-[linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,0.32)_48%,rgba(15,23,42,0.82))]" />
 
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-6 pt-[62svh] sm:px-8 sm:pb-8 sm:pt-28 lg:px-10">
         <div className="hero-content-desktop hero-poster-copy max-w-xl pb-8 sm:pb-10 lg:max-w-2xl">
