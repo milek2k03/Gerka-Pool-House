@@ -259,7 +259,14 @@ svg {
 @media (min-width: 640px) {
   .hero-image-shell {
     background-image: url('/hero-preview-desktop.webp');
-    background-position: 28% 50%;
+    background-position: calc(20% + 400px) 50%;
+  }
+
+  .hero-image-shell .hero-image-img {
+    width: calc(100% + 400px);
+    max-width: none;
+    transform: translateX(400px);
+    transform-origin: center;
   }
 }
 
@@ -303,7 +310,7 @@ svg {
   .hero-poster-copy::before {
     content: '';
     position: absolute;
-    inset: -12rem 4.75rem -12rem -5rem;
+    inset: -12rem 11rem -12rem -5rem;
     z-index: -1;
     border-radius: 0 2.25rem 2.25rem 0;
     background:
@@ -317,8 +324,9 @@ svg {
       linear-gradient(
         90deg,
         rgba(4, 10, 21, 0.94) 0%,
-        rgba(15, 23, 42, 0.78) 54%,
-        rgba(15, 23, 42, 0.35) 80%,
+        rgba(7, 14, 29, 0.88) 42%,
+        rgba(15, 23, 42, 0.52) 70%,
+        rgba(15, 23, 42, 0.18) 90%,
         transparent 100%
       );
   }
