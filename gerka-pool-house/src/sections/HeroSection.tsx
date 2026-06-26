@@ -70,18 +70,18 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         image={heroImage}
         mobileImage={mobileHeroImage}
         alt=""
-        className="hero-image-shell absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-y-0 sm:left-[10%] sm:right-0 sm:h-full sm:w-auto"
+        className="hero-image-shell hero-image-fade absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-y-0 sm:left-[10%] sm:right-0 sm:h-full sm:w-auto"
         loading="eager"
         fetchPriority="high"
         hideOnError
         imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
 
-      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.18)_44%,rgba(5,11,24,0.58)_100%)]" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.16)_44%,rgba(5,11,24,0.48)_100%)]" />
 
       <div className="hero-left-fade pointer-events-none absolute inset-y-0 left-0 -z-10 hidden sm:block" />
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-[linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,0.32)_48%,rgba(15,23,42,0.82))]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-[linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,0.26)_48%,rgba(15,23,42,0.72))]" />
 
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-6 pt-[62svh] sm:px-8 sm:pb-8 sm:pt-28 lg:px-10">
         <div className="hero-content-desktop hero-poster-copy max-w-xl pb-8 sm:pb-10 lg:max-w-2xl">
