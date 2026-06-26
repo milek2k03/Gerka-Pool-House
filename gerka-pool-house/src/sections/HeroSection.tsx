@@ -68,15 +68,15 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         image={heroImage}
         mobileImage={mobileHeroImage}
         alt=""
-        className="hero-image-shell absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-0 sm:h-full"
+        className="hero-image-shell absolute inset-x-0 top-0 -z-20 h-[58svh] w-full bg-[var(--color-deep)] sm:inset-y-0 sm:left-[10%] sm:right-0 sm:h-full sm:w-auto"
         loading="eager"
         fetchPriority="high"
         hideOnError
-        imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-[20%_50%]"
+        imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
       <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.2))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_44%,rgba(15,23,42,0.02),rgba(15,23,42,0.28)_42%,rgba(5,11,24,0.76)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,rgba(4,10,21,0.96)_0%,rgba(7,14,29,0.9)_20%,rgba(7,14,29,0.6)_38%,rgba(15,23,42,0.25)_62%,rgba(15,23,42,0)_100%)] sm:block" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[calc(48vw-200px)] bg-[linear-gradient(90deg,rgba(4,10,21,0.98)_0%,rgba(6,13,29,0.94)_56%,rgba(6,13,29,0.62)_78%,rgba(6,13,29,0)_100%)] sm:block" />
+      <div className="pointer-events-none absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,rgba(4,10,21,0.99)_0%,rgba(5,11,24,0.98)_18%,rgba(7,14,29,0.9)_35%,rgba(15,23,42,0.58)_52%,rgba(15,23,42,0.22)_70%,rgba(15,23,42,0.06)_86%,rgba(15,23,42,0)_100%)] sm:block" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[48vw] bg-[linear-gradient(90deg,rgba(4,10,21,1)_0%,rgba(5,11,24,0.98)_42%,rgba(7,14,29,0.76)_66%,rgba(15,23,42,0.28)_86%,rgba(15,23,42,0)_100%)] sm:block" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-[linear-gradient(180deg,transparent,rgba(5,11,24,0.72))]" />
 
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-6 pt-[62svh] sm:px-8 sm:pb-8 sm:pt-28 lg:px-10">
