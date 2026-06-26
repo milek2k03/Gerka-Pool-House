@@ -1,7 +1,8 @@
-import { ArrowDown, CalendarCheck, Globe2, Mail, MessageCircle } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ArrowDown, CalendarCheck, Mail, MessageCircle } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { FacebookIcon } from '../components/common/Icon'
 import { ResponsiveImage } from '../components/common/ResponsiveImage'
 import { AnchorButton } from '../components/ui/Button'
 import type { Locale } from '../types/common'
@@ -11,26 +12,26 @@ import { applyGuestLimitToText } from '../utils/pricing'
 
 interface HeroContactItem {
   href: string
-  icon: LucideIcon
+  icon: ComponentType<{ className?: string }>
   label: string
   value: string
 }
 
 export function HeroSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
-  const siteUrl =
-    (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/^https?:\/\//, '').replace(/\/$/, '') ??
-    'www.gerkapoolhouse.pl'
+  const facebookUrl = content.contact.facebookUrl.trim()
   const phone = content.contact.phone.trim()
   const email = content.contact.email.trim()
   const phoneDigits = phone.replace(/\D/g, '')
   const contactItems: HeroContactItem[] = [
-    {
-      href: `https://${siteUrl}`,
-      icon: Globe2,
-      label: 'WWW',
-      value: siteUrl,
-    },
+    facebookUrl
+      ? {
+          href: facebookUrl,
+          icon: FacebookIcon,
+          label: 'Facebook',
+          value: content.brandName,
+        }
+      : null,
     phone
       ? {
           href: phoneDigits ? `https://wa.me/${phoneDigits}` : `tel:${phone}`,

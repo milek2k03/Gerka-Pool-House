@@ -54,9 +54,9 @@ export function CarIcon() {
   return <Car aria-hidden="true" className="size-5" strokeWidth={1.8} />
 }
 
-export function FacebookIcon() {
+export function FacebookIcon({ className = 'size-5' }: { className?: string }) {
   return (
-    <svg aria-hidden="true" className="size-5" viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M14.5 8.2V6.9c0-.7.5-.9 1-.9h1.8V3h-2.5c-2.8 0-4.4 1.7-4.4 4.5v.7H8v3.1h2.4V21h4.1v-9.7h2.8l.4-3.1h-3.2Z" />
     </svg>
   )
