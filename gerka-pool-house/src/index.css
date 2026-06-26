@@ -275,42 +275,23 @@ svg {
 }
 
 .hero-left-fade {
-  width: 78vw;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(15, 23, 42, 0.99) 0%,
-      rgba(15, 23, 42, 0.98) 12%,
-      rgba(15, 23, 42, 0.94) 24%,
-      rgba(15, 23, 42, 0.84) 36%,
-      rgba(15, 23, 42, 0.68) 48%,
-      rgba(15, 23, 42, 0.48) 60%,
-      rgba(15, 23, 42, 0.28) 72%,
-      rgba(15, 23, 42, 0.13) 84%,
-      rgba(15, 23, 42, 0.04) 94%,
-      rgba(15, 23, 42, 0) 100%
-    );
-
-  -webkit-mask-image: linear-gradient(
+  width: min(92vw, 96rem);
+  background: linear-gradient(
     90deg,
-    #000 0%,
-    #000 58%,
-    rgba(0, 0, 0, 0.85) 68%,
-    rgba(0, 0, 0, 0.55) 78%,
-    rgba(0, 0, 0, 0.25) 88%,
-    rgba(0, 0, 0, 0.08) 96%,
-    transparent 100%
-  );
-
-  mask-image: linear-gradient(
-    90deg,
-    #000 0%,
-    #000 58%,
-    rgba(0, 0, 0, 0.85) 68%,
-    rgba(0, 0, 0, 0.55) 78%,
-    rgba(0, 0, 0, 0.25) 88%,
-    rgba(0, 0, 0, 0.08) 96%,
-    transparent 100%
+    rgba(15, 23, 42, 0.995) 0%,
+    rgba(15, 23, 42, 0.985) 10%,
+    rgba(15, 23, 42, 0.96) 20%,
+    rgba(15, 23, 42, 0.9) 30%,
+    rgba(15, 23, 42, 0.8) 40%,
+    rgba(15, 23, 42, 0.64) 50%,
+    rgba(15, 23, 42, 0.46) 58%,
+    rgba(15, 23, 42, 0.28) 65%,
+    rgba(15, 23, 42, 0.16) 70%,
+    rgba(15, 23, 42, 0.08) 74%,
+    rgba(15, 23, 42, 0.035) 78%,
+    rgba(15, 23, 42, 0.012) 81%,
+    rgba(15, 23, 42, 0) 84%,
+    rgba(15, 23, 42, 0) 100%
   );
 }
 
@@ -337,47 +318,14 @@ svg {
 @media (min-width: 1024px) {
   .hero-content-desktop {
     margin-inline-start: calc((min(100vw, 80rem) - 100vw) / 2);
-    transform: none;
+    transform: translateY(-72px);
   }
 
   .hero-poster-copy {
-    max-width: calc(min(25.5rem, 31vw) + 400px);
+    max-width: calc(min(25.5rem, 31vw) + 100px);
     padding: 2.15rem 1.35rem 2.15rem 2.15rem;
   }
-
-  .hero-poster-copy::before {
-    content: '';
-    position: absolute;
-    top: -22rem;
-    bottom: -18rem;
-    left: -10rem;
-    width: min(66vw, 58rem);
-    z-index: -1;
-    border-radius: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        ellipse at 0% 50%,
-        rgba(15, 23, 42, 0.98) 0%,
-        rgba(15, 23, 42, 0.94) 22%,
-        rgba(15, 23, 42, 0.82) 38%,
-        rgba(15, 23, 42, 0.62) 54%,
-        rgba(15, 23, 42, 0.38) 68%,
-        rgba(15, 23, 42, 0.18) 80%,
-        rgba(15, 23, 42, 0.07) 90%,
-        rgba(15, 23, 42, 0.02) 96%,
-        rgba(15, 23, 42, 0) 100%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(15, 23, 42, 0.9) 0%,
-        rgba(15, 23, 42, 0.32) 22%,
-        rgba(15, 23, 42, 0.16) 48%,
-        rgba(15, 23, 42, 0.22) 72%,
-        rgba(15, 23, 42, 0.88) 100%
-      );
-    }
-  }
+}
 
 input[type='date'].field {
   min-inline-size: 0;

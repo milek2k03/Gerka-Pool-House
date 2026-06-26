@@ -77,7 +77,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
 
-      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.2)_46%,rgba(5,11,24,0.62)_100%)]" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.18)_44%,rgba(5,11,24,0.58)_100%)]" />
 
       <div className="hero-left-fade pointer-events-none absolute inset-y-0 left-0 -z-10 hidden sm:block" />
 
