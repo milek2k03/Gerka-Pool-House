@@ -270,15 +270,27 @@ svg {
   }
 }
 
-@media (min-width: 1024px) {
-  .hero-content-desktop {
-    margin-inline-start: calc((min(100vw, 80rem) - 100vw) / 2);
-    transform: none;
-  }
-}
-
 .hero-poster-copy {
   position: relative;
+}
+
+.hero-left-fade {
+  width: 78vw;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.99) 0%,
+      rgba(15, 23, 42, 0.98) 14%,
+      rgba(15, 23, 42, 0.94) 26%,
+      rgba(15, 23, 42, 0.86) 38%,
+      rgba(15, 23, 42, 0.72) 50%,
+      rgba(15, 23, 42, 0.56) 62%,
+      rgba(15, 23, 42, 0.38) 74%,
+      rgba(15, 23, 42, 0.22) 84%,
+      rgba(15, 23, 42, 0.1) 92%,
+      rgba(15, 23, 42, 0.03) 97%,
+      rgba(15, 23, 42, 0) 100%
+    );
 }
 
 .hero-contact-strip {
@@ -302,6 +314,11 @@ svg {
 }
 
 @media (min-width: 1024px) {
+  .hero-content-desktop {
+    margin-inline-start: calc((min(100vw, 80rem) - 100vw) / 2);
+    transform: none;
+  }
+
   .hero-poster-copy {
     max-width: calc(min(25.5rem, 31vw) + 100px);
     padding: 2.15rem 1.35rem 2.15rem 2.15rem;
@@ -321,17 +338,22 @@ svg {
       radial-gradient(
         ellipse at 0% 50%,
         rgba(15, 23, 42, 0.98) 0%,
-        rgba(15, 23, 42, 0.9) 32%,
-        rgba(15, 23, 42, 0.62) 58%,
-        rgba(15, 23, 42, 0.24) 78%,
+        rgba(15, 23, 42, 0.94) 24%,
+        rgba(15, 23, 42, 0.84) 40%,
+        rgba(15, 23, 42, 0.66) 56%,
+        rgba(15, 23, 42, 0.44) 70%,
+        rgba(15, 23, 42, 0.24) 82%,
+        rgba(15, 23, 42, 0.1) 91%,
+        rgba(15, 23, 42, 0.03) 97%,
         rgba(15, 23, 42, 0) 100%
       ),
       linear-gradient(
         180deg,
-        rgba(15, 23, 42, 0.92) 0%,
-        rgba(15, 23, 42, 0.18) 24%,
-        rgba(15, 23, 42, 0.14) 72%,
-        rgba(15, 23, 42, 0.9) 100%
+        rgba(15, 23, 42, 0.9) 0%,
+        rgba(15, 23, 42, 0.32) 22%,
+        rgba(15, 23, 42, 0.16) 48%,
+        rgba(15, 23, 42, 0.22) 72%,
+        rgba(15, 23, 42, 0.88) 100%
       );
   }
 }

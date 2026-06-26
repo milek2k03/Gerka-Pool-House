@@ -23,6 +23,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   const phone = content.contact.phone.trim()
   const email = content.contact.email.trim()
   const phoneDigits = phone.replace(/\D/g, '')
+
   const contactItems: HeroContactItem[] = [
     facebookUrl
       ? {
@@ -53,6 +54,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   const heroImage = import.meta.env.PROD
     ? { ...content.hero.image, src: '/api/hero-image?variant=desktop', avif: undefined, webp: undefined }
     : content.hero.image
+
   const mobileHeroImage = import.meta.env.PROD
     ? {
         ...(content.hero.mobileImage ?? content.hero.image),
@@ -74,8 +76,11 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         hideOnError
         imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
       />
+
       <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.2)_46%,rgba(5,11,24,0.62)_100%)]" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[68vw] bg-[linear-gradient(90deg,rgba(15,23,42,0.99)_0%,rgba(15,23,42,0.98)_20%,rgba(15,23,42,0.88)_38%,rgba(15,23,42,0.62)_58%,rgba(15,23,42,0.32)_76%,rgba(15,23,42,0.1)_91%,rgba(15,23,42,0)_100%)] sm:block" />
+
+      <div className="hero-left-fade pointer-events-none absolute inset-y-0 left-0 -z-10 hidden sm:block" />
+
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-[linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,0.32)_48%,rgba(15,23,42,0.82))]" />
 
       <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-6 pt-[62svh] sm:px-8 sm:pb-8 sm:pt-28 lg:px-10">
@@ -83,21 +88,27 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.26em] text-[var(--color-brass)]">
             {localize(content.hero.eyebrow, locale)}
           </p>
+
           <h1 className="text-5xl font-semibold leading-[0.98] text-white drop-shadow-[0_10px_24px_rgba(0,0,0,0.36)] sm:text-6xl lg:text-7xl">
             {content.brandName}
           </h1>
+
           <p className="mt-5 max-w-xl text-xl leading-8 text-white/92 sm:text-2xl">
             {localize(content.hero.slogan, locale)}
           </p>
+
           <div className="my-6 h-px w-full max-w-sm bg-[linear-gradient(90deg,var(--color-brass),rgba(214,181,138,0.08))]" />
+
           <p className="max-w-xl text-base leading-7 text-white/78 sm:text-lg">
             {applyGuestLimitToText(localize(content.hero.lead, locale), content.pricing)}
           </p>
+
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <AnchorButton href="#booking" size="lg">
               <CalendarCheck aria-hidden="true" className="size-5" />
               {t('common.bookNow')}
             </AnchorButton>
+
             <AnchorButton href="#about" size="lg" variant="secondary">
               <ArrowDown aria-hidden="true" className="size-5" />
               {t('common.seeOffer')}
@@ -121,6 +132,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
                   <span className="grid size-11 shrink-0 place-items-center rounded-full border border-[rgba(214,181,138,0.72)] text-[var(--color-brass)] transition group-hover:border-[var(--color-brass)] group-hover:bg-[rgba(214,181,138,0.12)]">
                     <Icon aria-hidden="true" className="size-5" />
                   </span>
+
                   <span className="min-w-0">
                     <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-brass)]">
                       {item.label}
