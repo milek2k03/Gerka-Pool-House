@@ -248,7 +248,7 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
           )}
         </div>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
           {supportingParts.length > 0 ? (
             <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
               <RichParts parts={supportingParts} formatLine={(line) => applyGuestLimitToText(line, content.pricing)} />
