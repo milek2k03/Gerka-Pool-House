@@ -1,7 +1,7 @@
 export const en = {
   common: {
     bookNow: 'Book now',
-    seeOffer: 'View offer',
+    seeOffer: 'View details',
     openMenu: 'Open menu',
     closeMenu: 'Close menu',
     close: 'Close',
