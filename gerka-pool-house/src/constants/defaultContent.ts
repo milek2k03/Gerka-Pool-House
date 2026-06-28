@@ -1,5 +1,3 @@
-import heroAvif from '../assets/images/gerka-hero.avif'
-import heroWebp from '../assets/images/gerka-hero.webp'
 import diningAvif from '../assets/images/garden-dining.avif'
 import diningWebp from '../assets/images/garden-dining.webp'
 import roomAvif from '../assets/images/guest-room.avif'
@@ -11,9 +9,10 @@ import poolWebp from '../assets/images/pool-terrace.webp'
 import type { SiteContent } from '../types/content'
 
 const socialPreviewImage = '/api/og-image?v=5'
+const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
-  version: 22,
+  version: 23,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -30,14 +29,12 @@ export const defaultSiteContent: SiteContent = {
       en: 'A comfortable ground-floor apartment for up to 6 guests with a private pool area, garden, barbecue, parking and fast WiFi.',
     },
     image: {
-      src: heroWebp,
-      webp: heroWebp,
-      avif: heroAvif,
+      src: heroBackgroundImage,
+      webp: heroBackgroundImage,
     },
     mobileImage: {
-      src: heroWebp,
-      webp: heroWebp,
-      avif: heroAvif,
+      src: heroBackgroundImage,
+      webp: heroBackgroundImage,
     },
   },
   about: {

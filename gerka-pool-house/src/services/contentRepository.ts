@@ -12,6 +12,11 @@ const contentId = 'main'
 const storageKey = 'gerka-pool-house:site-content:v1'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const previousHeroImageMarkers = [
+  '69c00dcb-7289-4e5a-acb3-df5d32d1d9d6-img_3176.webp',
+  'f1c76e49-6bde-4c48-80bf-0dc02971ec96-img_3176-1-.webp',
+  'gerka-hero',
+]
 let bootstrapContentConsumed = false
 
 function cloneContent(content: SiteContent): SiteContent {
@@ -80,6 +85,10 @@ function isLegacyBundledAsset(value?: string) {
   const normalized = value.replace(/\\/g, '/')
 
   return normalized.startsWith('/src/assets/') || normalized.startsWith('src/assets/')
+}
+
+function isPreviousHeroImage(value?: string) {
+  return Boolean(value && previousHeroImageMarkers.some((marker) => value.includes(marker)))
 }
 
 const defaultGalleryImagesById = new Map(
@@ -847,6 +856,22 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     }))
   }
 
+  if (storedVersion < 23) {
+    content.version = defaultSiteContent.version
+
+    if (isPreviousHeroImage(content.hero.image.src)) {
+      content.hero.image = defaultSiteContent.hero.image
+    }
+
+    if (!content.hero.mobileImage || isPreviousHeroImage(content.hero.mobileImage.src)) {
+      content.hero.mobileImage = defaultSiteContent.hero.mobileImage
+    }
+
+    if (isPreviousHeroImage(content.seo.home.ogImage)) {
+      content.seo.home.ogImage = defaultSiteContent.seo.home.ogImage
+    }
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 
@@ -886,7 +911,7 @@ export const contentRepository = {
         const next = migrateContent(mergeDeep(cloneContent(defaultSiteContent), parsed), storedVersion)
 
         if (
-          next.availability.length !== previousAvailabilityCount &&
+          (storedVersion < defaultSiteContent.version || next.availability.length !== previousAvailabilityCount) &&
           hasSupabaseAuthSession()
         ) {
           const supabase = await getSupabaseClient()

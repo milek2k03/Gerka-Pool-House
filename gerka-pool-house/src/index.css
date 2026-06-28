@@ -251,7 +251,7 @@ svg {
 }
 
 .hero-image-shell {
-  background-image: var(--hero-placeholder-mobile, url('/hero-preview-mobile.webp'));
+  background-image: var(--hero-placeholder-mobile, url('/newBackground.webp'));
   background-position: 63% 48%;
   background-size: cover;
 }
@@ -302,7 +302,7 @@ svg {
 
 @media (min-width: 640px) {
   .hero-image-shell {
-    background-image: var(--hero-placeholder-desktop, url('/hero-preview-desktop.webp'));
+    background-image: var(--hero-placeholder-desktop, url('/newBackground.webp'));
     background-position: center;
   }
 

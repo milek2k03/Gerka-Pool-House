@@ -31,7 +31,16 @@ interface SiteContentRow {
   }
 }
 
-const fallbackImage = '/og-image-v3.jpg'
+const defaultHeroImage = '/newBackground.webp'
+const previousHeroImageMarkers = [
+  '69c00dcb-7289-4e5a-acb3-df5d32d1d9d6-img_3176.webp',
+  'f1c76e49-6bde-4c48-80bf-0dc02971ec96-img_3176-1-.webp',
+  'gerka-hero',
+]
+
+function isPreviousHeroImage(source?: string) {
+  return Boolean(source && previousHeroImageMarkers.some((marker) => source.includes(marker)))
+}
 
 function getVariant(request: ApiRequest) {
   const value = Array.isArray(request.query?.variant)
@@ -61,7 +70,7 @@ async function getCurrentHeroImage(variant: 'mobile' | 'desktop') {
   const supabaseUrl = process.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !supabaseAnonKey) return fallbackImage
+  if (!supabaseUrl || !supabaseAnonKey) return defaultHeroImage
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 4000)
@@ -79,7 +88,7 @@ async function getCurrentHeroImage(variant: 'mobile' | 'desktop') {
       },
     )
 
-    if (!response.ok) return fallbackImage
+    if (!response.ok) return defaultHeroImage
 
     const rows = (await response.json()) as SiteContentRow[]
     const hero = rows[0]?.content?.hero
@@ -88,9 +97,11 @@ async function getCurrentHeroImage(variant: 'mobile' | 'desktop') {
         ? hero?.mobileImage?.src ?? hero?.image?.src
         : hero?.image?.src
 
-    return source ? getRenderedImageUrl(source, variant) : fallbackImage
+    if (!source || isPreviousHeroImage(source)) return defaultHeroImage
+
+    return getRenderedImageUrl(source, variant)
   } catch {
-    return fallbackImage
+    return defaultHeroImage
   } finally {
     clearTimeout(timeout)
   }

@@ -34,6 +34,16 @@ const width = 1200
 const height = 630
 const fallbackImagePath = resolve(process.cwd(), 'public', 'og-image-v3.jpg')
 const logoPath = resolve(process.cwd(), 'public', 'social-logo.png')
+const defaultHeroImage = '/newBackground.webp'
+const previousHeroImageMarkers = [
+  '69c00dcb-7289-4e5a-acb3-df5d32d1d9d6-img_3176.webp',
+  'f1c76e49-6bde-4c48-80bf-0dc02971ec96-img_3176-1-.webp',
+  'gerka-hero',
+]
+
+function isPreviousHeroImage(source?: string) {
+  return Boolean(source && previousHeroImageMarkers.some((marker) => source.includes(marker)))
+}
 
 function resolvePublicUrl(value?: string) {
   if (!value) return undefined
@@ -104,7 +114,8 @@ function createOverlaySvg() {
 
 async function createOgImage() {
   const content = await loadSiteContent()
-  const heroImageUrl = resolvePublicUrl(content?.hero?.image?.src)
+  const heroSource = content?.hero?.image?.src
+  const heroImageUrl = resolvePublicUrl(isPreviousHeroImage(heroSource) ? defaultHeroImage : heroSource)
 
   if (!heroImageUrl) {
     return readFile(fallbackImagePath)
