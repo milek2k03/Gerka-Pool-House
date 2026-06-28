@@ -62,18 +62,8 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
     })
   }
 
-  const heroImage = import.meta.env.PROD
-    ? { ...content.hero.image, src: '/api/hero-image?variant=desktop', avif: undefined, webp: undefined }
-    : content.hero.image
-
-  const mobileHeroImage = import.meta.env.PROD
-    ? {
-        ...(content.hero.mobileImage ?? content.hero.image),
-        src: '/api/hero-image?variant=mobile',
-        avif: undefined,
-        webp: undefined,
-      }
-    : content.hero.mobileImage
+  const heroImage = content.hero.image
+  const mobileHeroImage = content.hero.mobileImage
   const heroPlaceholderStyle: HeroPlaceholderStyle = {
     '--hero-placeholder-mobile': cssBackgroundImageUrl((mobileHeroImage ?? heroImage).src),
     '--hero-placeholder-desktop': cssBackgroundImageUrl(heroImage.src),
