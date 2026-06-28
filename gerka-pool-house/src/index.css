@@ -362,7 +362,7 @@ svg {
 @media (min-width: 1024px) {
   .hero-content-desktop {
     margin-inline-start: calc((min(100vw, 80rem) - 100vw) / 2);
-    transform: translateY(-72px);
+    transform: translateY(clamp(-13rem, -17svh, -8rem));
   }
 
   .hero-poster-copy {
