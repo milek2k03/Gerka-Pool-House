@@ -24,32 +24,34 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   const email = content.contact.email.trim()
   const phoneDigits = phone.replace(/\D/g, '')
 
-  const contactItems: HeroContactItem[] = [
-    facebookUrl
-      ? {
-          href: facebookUrl,
-          icon: FacebookIcon,
-          label: 'Facebook',
-          value: content.brandName,
-        }
-      : null,
-    phone
-      ? {
-          href: phoneDigits ? `https://wa.me/${phoneDigits}` : `tel:${phone}`,
-          icon: MessageCircle,
-          label: 'WhatsApp',
-          value: phone,
-        }
-      : null,
-    email
-      ? {
-          href: `mailto:${email}`,
-          icon: Mail,
-          label: 'E-mail',
-          value: email,
-        }
-      : null,
-  ].filter((item): item is HeroContactItem => Boolean(item))
+  const contactItems: HeroContactItem[] = []
+
+  if (facebookUrl) {
+    contactItems.push({
+      href: facebookUrl,
+      icon: FacebookIcon,
+      label: 'Facebook',
+      value: content.brandName,
+    })
+  }
+
+  if (phone) {
+    contactItems.push({
+      href: phoneDigits ? `https://wa.me/${phoneDigits}` : `tel:${phone}`,
+      icon: MessageCircle,
+      label: 'WhatsApp',
+      value: phone,
+    })
+  }
+
+  if (email) {
+    contactItems.push({
+      href: `mailto:${email}`,
+      icon: Mail,
+      label: 'E-mail',
+      value: email,
+    })
+  }
 
   const heroImage = import.meta.env.PROD
     ? { ...content.hero.image, src: '/api/hero-image?variant=desktop', avif: undefined, webp: undefined }

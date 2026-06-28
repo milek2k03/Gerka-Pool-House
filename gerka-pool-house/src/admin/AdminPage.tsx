@@ -2,10 +2,13 @@ import {
   BadgeDollarSign,
   BookOpen,
   CalendarOff,
+  ArrowDown,
+  ArrowUp,
   ChevronDown,
   Download,
   FileText,
   GalleryHorizontalEnd,
+  GripVertical,
   HelpCircle,
   Inbox,
   LogOut,
@@ -15,7 +18,7 @@ import {
   Settings,
   Sparkles,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
@@ -71,6 +74,8 @@ type TabId =
 type ReservationSortOption = 'newest' | 'oldest' | 'checkInAsc' | 'checkInDesc' | 'priceDesc' | 'priceAsc'
 type ReservationStatusFilter = ReservationStatus | 'all'
 type AdminNotice = 'saved' | 'restored' | null
+type GalleryDragState = { sectionIndex: number; itemId: string } | null
+type GalleryDropTarget = { sectionIndex: number; itemId: string; position: 'before' | 'after' } | null
 type ReservationAcceptanceConflict =
   | { type: 'reservation'; reservation: ReservationRequest }
   | { type: 'availability'; range: AvailabilityRange }
@@ -419,6 +424,8 @@ export function AdminPage() {
   const [reservationStatusFilter, setReservationStatusFilter] = useState<ReservationStatusFilter>('all')
   const [reservationStatusError, setReservationStatusError] = useState('')
   const [reservationConflictMessage, setReservationConflictMessage] = useState('')
+  const [draggedGalleryItem, setDraggedGalleryItem] = useState<GalleryDragState>(null)
+  const [galleryDropTarget, setGalleryDropTarget] = useState<GalleryDropTarget>(null)
   const [openGallerySectionIds, setOpenGallerySectionIds] = useState<string[]>(() =>
     content.gallerySections.slice(0, 1).map((section) => section.id),
   )
@@ -556,6 +563,69 @@ export function AdminPage() {
     setIsDraftDirty(true)
     setNotice(null)
     setContentActionError('')
+  }
+
+  const moveGalleryItem = (sectionIndex: number, fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
+
+    mutate((next) => {
+      const items = next.gallerySections[sectionIndex]?.items
+
+      if (!items || fromIndex >= items.length || toIndex >= items.length) return
+
+      const [movedItem] = items.splice(fromIndex, 1)
+      items.splice(toIndex, 0, movedItem)
+    })
+  }
+
+  const finishGalleryItemDrop = (sectionIndex: number, targetItemId: string, position: 'before' | 'after') => {
+    if (!draggedGalleryItem || draggedGalleryItem.sectionIndex !== sectionIndex) return
+
+    const items = draft.gallerySections[sectionIndex]?.items ?? []
+    const fromIndex = items.findIndex((item) => item.id === draggedGalleryItem.itemId)
+    const targetIndex = items.findIndex((item) => item.id === targetItemId)
+    const insertionBoundary = targetIndex + (position === 'after' ? 1 : 0)
+    const toIndex = fromIndex < insertionBoundary ? insertionBoundary - 1 : insertionBoundary
+
+    moveGalleryItem(sectionIndex, fromIndex, toIndex)
+    setDraggedGalleryItem(null)
+    setGalleryDropTarget(null)
+  }
+
+  const handleGalleryItemDragStart = (
+    event: DragEvent<HTMLButtonElement>,
+    sectionIndex: number,
+    itemId: string,
+  ) => {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', itemId)
+    setDraggedGalleryItem({ sectionIndex, itemId })
+  }
+
+  const handleGalleryItemDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    sectionIndex: number,
+    itemId: string,
+  ) => {
+    if (!draggedGalleryItem || draggedGalleryItem.sectionIndex !== sectionIndex) return
+
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+
+    if (draggedGalleryItem.itemId === itemId) {
+      setGalleryDropTarget(null)
+      return
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const position = event.clientY < bounds.top + bounds.height / 2 ? 'before' : 'after'
+
+    setGalleryDropTarget({ sectionIndex, itemId, position })
+  }
+
+  const resetGalleryDrag = () => {
+    setDraggedGalleryItem(null)
+    setGalleryDropTarget(null)
   }
 
   const save = async () => {
@@ -1128,22 +1198,107 @@ export function AdminPage() {
                         />
                       </div>
                       <div className="grid gap-4">
+                        <p className="text-sm leading-6 text-[var(--color-muted)]">
+                          {t('admin.fields.galleryOrderHelp')}
+                        </p>
                         {section.items.map((item, itemIndex) => (
-                          <div key={item.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <h2 className="text-lg font-semibold text-[var(--color-ink)]">
-                                {localize(item.title, locale)}
-                              </h2>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="danger"
-                                onClick={() =>
-                                  mutate((next) => void next.gallerySections[sectionIndex].items.splice(itemIndex, 1))
-                                }
-                              >
-                                {t('common.remove')}
-                              </Button>
+                          <div
+                            key={item.id}
+                            className={cn(
+                              'relative grid gap-4 rounded-md border border-[var(--color-border)] p-4 transition duration-200',
+                              draggedGalleryItem?.itemId === item.id && 'scale-[0.99] opacity-60',
+                              galleryDropTarget?.sectionIndex === sectionIndex &&
+                                galleryDropTarget.itemId === item.id &&
+                                draggedGalleryItem?.itemId !== item.id &&
+                                'border-[var(--color-brass)] bg-[rgba(214,181,138,0.08)] shadow-[var(--shadow-soft)]',
+                            )}
+                            onDragOver={(event) => handleGalleryItemDragOver(event, sectionIndex, item.id)}
+                            onDragEnter={(event) => handleGalleryItemDragOver(event, sectionIndex, item.id)}
+                            onDragLeave={(event) => {
+                              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                                setGalleryDropTarget(null)
+                              }
+                            }}
+                            onDrop={(event) => {
+                              event.preventDefault()
+                              finishGalleryItemDrop(
+                                sectionIndex,
+                                item.id,
+                                galleryDropTarget?.sectionIndex === sectionIndex && galleryDropTarget.itemId === item.id
+                                  ? galleryDropTarget.position
+                                  : 'after',
+                              )
+                            }}
+                          >
+                            {galleryDropTarget?.sectionIndex === sectionIndex &&
+                            galleryDropTarget.itemId === item.id &&
+                            draggedGalleryItem?.itemId !== item.id ? (
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  'pointer-events-none absolute inset-x-4 h-1 rounded-full bg-[var(--color-brass)] shadow-[0_0_18px_rgba(214,181,138,0.55)]',
+                                  galleryDropTarget.position === 'before'
+                                    ? 'top-0 -translate-y-1/2'
+                                    : 'bottom-0 translate-y-1/2',
+                                )}
+                              />
+                            ) : null}
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="flex min-w-0 items-center gap-3">
+                                <button
+                                  type="button"
+                                  draggable
+                                  className="grid size-10 shrink-0 cursor-grab place-items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] transition hover:border-[var(--color-brass)] hover:text-[var(--color-ink)] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-water)]"
+                                  title={t('admin.fields.dragGalleryMedia')}
+                                  aria-label={t('admin.fields.dragGalleryMedia')}
+                                  onDragStart={(event) => handleGalleryItemDragStart(event, sectionIndex, item.id)}
+                                  onDragEnd={resetGalleryDrag}
+                                >
+                                  <GripVertical aria-hidden="true" className="size-5" />
+                                </button>
+                                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-brass)]">
+                                  {itemIndex + 1}
+                                </span>
+                                <h2 className="min-w-0 truncate text-lg font-semibold text-[var(--color-ink)]">
+                                  {localize(item.title, locale)}
+                                </h2>
+                              </div>
+                              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="px-2"
+                                  disabled={itemIndex === 0}
+                                  title={t('admin.fields.moveGalleryMediaUp')}
+                                  aria-label={t('admin.fields.moveGalleryMediaUp')}
+                                  onClick={() => moveGalleryItem(sectionIndex, itemIndex, itemIndex - 1)}
+                                >
+                                  <ArrowUp aria-hidden="true" className="size-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="px-2"
+                                  disabled={itemIndex === section.items.length - 1}
+                                  title={t('admin.fields.moveGalleryMediaDown')}
+                                  aria-label={t('admin.fields.moveGalleryMediaDown')}
+                                  onClick={() => moveGalleryItem(sectionIndex, itemIndex, itemIndex + 1)}
+                                >
+                                  <ArrowDown aria-hidden="true" className="size-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="danger"
+                                  onClick={() =>
+                                    mutate((next) => void next.gallerySections[sectionIndex].items.splice(itemIndex, 1))
+                                  }
+                                >
+                                  {t('common.remove')}
+                                </Button>
+                              </div>
                             </div>
                             <LocalizedField
                               label={t('admin.fields.title')}

@@ -25,7 +25,7 @@ const GalleryMosaic = memo(function GalleryMosaic({
   const hiddenItemsCount = Math.max(0, items.length - visibleItems.length)
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:aspect-[8/5] lg:grid-rows-2 lg:gap-4">
       {visibleItems.map((item, index) => {
         const isMoreTrigger = hiddenItemsCount > 0 && index === visibleItems.length - 1
 
@@ -34,9 +34,8 @@ const GalleryMosaic = memo(function GalleryMosaic({
             key={item.id}
             type="button"
             className={cn(
-              'group relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-paper-2)] text-left shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-premium)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
+              'group relative min-h-0 aspect-square overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-paper-2)] text-left shadow-[var(--shadow-soft)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-premium)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)] lg:aspect-auto',
               index === 0 && 'col-span-2 row-span-2',
-              'lg:aspect-[4/5] lg:first:col-span-2 lg:first:row-span-2 lg:first:aspect-auto',
             )}
             onClick={() => onOpen(index)}
             aria-label={isMoreTrigger ? undefined : localize(item.title, locale)}
@@ -56,6 +55,7 @@ const GalleryMosaic = memo(function GalleryMosaic({
                 image={item.image}
                 alt={isMoreTrigger ? '' : localize(item.alt, locale)}
                 className="h-full"
+                imgClassName="object-cover"
                 loading="eager"
                 fetchPriority="auto"
                 profile="gallery"
