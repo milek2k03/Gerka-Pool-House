@@ -177,7 +177,6 @@ export function GallerySection({ sections, locale }: { sections: GallerySectionC
           eyebrow={t('sections.galleryEyebrow')}
           title={t('sections.galleryTitle')}
           lead={t('sections.galleryLead')}
-          align="center"
         />
         <div className="mt-10 grid gap-12 lg:gap-14">
           {sections.map((section, sectionIndex) => (

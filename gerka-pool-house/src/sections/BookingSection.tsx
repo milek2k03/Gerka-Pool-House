@@ -16,7 +16,6 @@ export function BookingSection({ content, locale }: { content: SiteContent; loca
           eyebrow={t('sections.bookingEyebrow')}
           title={localize(content.booking.title, locale)}
           lead={localize(content.booking.lead, locale)}
-          align="center"
         />
         <div className="mt-10">
           <BookingForm content={content} locale={locale} />
