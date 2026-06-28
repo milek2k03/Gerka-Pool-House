@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import type { ImageAsset } from '../../types/content'
 import { cn } from '../../utils/cn'
 import { getSupabaseImageUrl } from '../../utils/imageUrl'
@@ -42,6 +44,7 @@ interface ResponsiveImageProps {
   profile?: ImageProfile
   hideOnError?: boolean
   onLoad?: () => void
+  style?: CSSProperties
 }
 
 function getSupabaseSrcSet(
@@ -74,6 +77,7 @@ export function ResponsiveImage({
   profile = 'content',
   hideOnError = false,
   onLoad,
+  style,
 }: ResponsiveImageProps) {
   const profileSettings = imageProfiles[profile]
   const mobileWidths =
@@ -106,7 +110,7 @@ export function ResponsiveImage({
     ) ?? image.src
 
   return (
-    <picture className={cn('block overflow-hidden', className)}>
+    <picture className={cn('block overflow-hidden', className)} style={style}>
       {mobileSupabaseSrcSet ? (
         <source media="(max-width: 639px)" srcSet={mobileSupabaseSrcSet} type="image/webp" sizes={sizes} />
       ) : null}

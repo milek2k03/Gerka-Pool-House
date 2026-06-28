@@ -1,5 +1,5 @@
 import { ArrowDown, CalendarCheck, Mail, MessageCircle } from 'lucide-react'
-import type { ComponentType } from 'react'
+import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { FacebookIcon } from '../components/common/Icon'
@@ -15,6 +15,15 @@ interface HeroContactItem {
   icon: ComponentType<{ className?: string }>
   label: string
   value: string
+}
+
+type HeroPlaceholderStyle = CSSProperties & {
+  '--hero-placeholder-mobile': string
+  '--hero-placeholder-desktop': string
+}
+
+function cssBackgroundImageUrl(src: string) {
+  return `url("${src.replace(/"/g, '%22')}")`
 }
 
 export function HeroSection({ content, locale }: { content: SiteContent; locale: Locale }) {
@@ -65,6 +74,10 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         webp: undefined,
       }
     : content.hero.mobileImage
+  const heroPlaceholderStyle: HeroPlaceholderStyle = {
+    '--hero-placeholder-mobile': cssBackgroundImageUrl((mobileHeroImage ?? heroImage).src),
+    '--hero-placeholder-desktop': cssBackgroundImageUrl(heroImage.src),
+  }
 
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
@@ -77,6 +90,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
         fetchPriority="high"
         hideOnError
         imgClassName="hero-image-img object-cover object-[63%_48%] sm:object-cover sm:object-center"
+        style={heroPlaceholderStyle}
       />
 
       <div className="absolute inset-x-0 top-0 -z-10 h-[58svh] bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.14))] sm:inset-0 sm:h-full sm:bg-[radial-gradient(circle_at_72%_46%,rgba(15,23,42,0.02),rgba(15,23,42,0.16)_44%,rgba(5,11,24,0.48)_100%)]" />
