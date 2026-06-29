@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
-      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-2 rounded-[1.5rem] border border-[var(--color-border)] bg-[rgba(15,23,42,0.75)] px-3 py-2.5 text-white shadow-[0_20px_55px_rgba(0,0,0,0.22)] backdrop-blur-[20px] sm:px-4">
+      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-1.5 rounded-[1.5rem] border border-[var(--color-border)] bg-[rgba(15,23,42,0.75)] px-2 py-2.5 text-white shadow-[0_20px_55px_rgba(0,0,0,0.22)] backdrop-blur-[20px] sm:gap-2 sm:px-4">
         <Logo />
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {navSections.map((item) => (
@@ -46,11 +46,17 @@ export function Header() {
             {t('common.bookNow')}
           </AnchorButton>
         </div>
+        <div className="flex shrink-0 items-center gap-1.5 md:hidden">
+          <LanguageSwitcher className="min-h-10 px-2 text-xs" />
+          <AnchorButton href="/#booking" size="sm" onClick={close} className="min-h-10 whitespace-nowrap px-2 text-xs">
+            {t('common.bookNow')}
+          </AnchorButton>
+        </div>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="shrink-0 text-white hover:bg-white/10 lg:hidden"
+          className="size-10 shrink-0 text-white hover:bg-white/10 sm:size-11 lg:hidden"
           aria-label={open ? t('common.closeMenu') : t('common.openMenu')}
           aria-expanded={open}
           aria-controls="mobile-navigation"
@@ -79,12 +85,6 @@ export function Header() {
             </a>
           ))}
         </nav>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <LanguageSwitcher />
-          <AnchorButton href="/#booking" onClick={close}>
-            {t('common.bookNow')}
-          </AnchorButton>
-        </div>
       </div>
     </header>
   )
