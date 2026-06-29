@@ -6,11 +6,9 @@ import { pl } from '../locales/pl/translation'
 import type { Locale } from '../types/common'
 import { getLocale } from '../utils/locale'
 
-const savedLanguage =
-  typeof window !== 'undefined' ? window.localStorage.getItem('gerka-pool-house:language') : undefined
 const queryLanguage =
   typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('lng') : undefined
-const initialLocale = getLocale(queryLanguage ?? savedLanguage ?? navigator.language)
+const initialLocale = getLocale(queryLanguage ?? defaultLocale)
 const resources: Record<string, { translation: Record<string, unknown> }> = {
   pl: { translation: pl },
 }

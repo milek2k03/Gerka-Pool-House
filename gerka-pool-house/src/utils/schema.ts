@@ -13,8 +13,12 @@ function absoluteUrl(path: string) {
 export function buildHomeSchema(content: SiteContent, locale: Locale) {
   const homeUrl = absoluteUrl(content.seo.home.canonicalPath)
   const image = absoluteUrl(content.seo.home.ogImage ?? content.hero.image.src)
+  const logo = absoluteUrl('/social-logo.png')
   const address = localize(content.contact.address, locale)
   const telephone = content.contact.phone.trim()
+  const sameAs = [content.contact.facebookUrl, content.contact.instagramUrl].filter(
+    (url): url is string => Boolean(url),
+  )
   const priceRange = isApartment2Enabled(content.pricing)
     ? `${content.pricing.room1Nightly}-${content.pricing.room1Nightly + content.pricing.room2Nightly} PLN`
     : `${content.pricing.room1Nightly} PLN`
@@ -27,7 +31,9 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
         '@id': `${homeUrl}#localbusiness`,
         name: content.brandName,
         image,
+        logo,
         url: homeUrl,
+        ...(sameAs.length ? { sameAs } : {}),
         ...(telephone ? { telephone } : {}),
         email: content.contact.email,
         address: {
@@ -41,7 +47,9 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
         '@id': `${homeUrl}#lodging`,
         name: content.brandName,
         image,
+        logo,
         url: homeUrl,
+        ...(sameAs.length ? { sameAs } : {}),
         ...(telephone ? { telephone } : {}),
         email: content.contact.email,
         priceRange,

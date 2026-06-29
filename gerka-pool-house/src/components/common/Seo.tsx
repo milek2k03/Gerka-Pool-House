@@ -69,9 +69,14 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertMeta('name', 'twitter:description', description)
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('property', 'og:image', image)
+    upsertMeta('property', 'og:image:secure_url', image)
+    upsertMeta('property', 'og:image:type', image ? 'image/jpeg' : undefined)
+    upsertMeta('property', 'og:image:width', image ? '1200' : undefined)
+    upsertMeta('property', 'og:image:height', image ? '630' : undefined)
     upsertMeta('property', 'og:image:alt', title)
     upsertMeta('name', 'twitter:image', image)
     upsertMeta('name', 'twitter:image:alt', title)
+    upsertMeta('name', 'thumbnail', image)
     if (googleSiteVerification) {
       upsertMeta('name', 'google-site-verification', googleSiteVerification)
     }
@@ -80,6 +85,9 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'pl')
     upsertLink('alternate', `${siteUrl}${settings.canonicalPath}?lng=en`, 'en')
     upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'x-default')
+    if (image) {
+      upsertLink('image_src', image)
+    }
 
     const scriptId = 'structured-data'
     document.getElementById(scriptId)?.remove()
