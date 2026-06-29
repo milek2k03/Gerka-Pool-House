@@ -62,6 +62,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       email: '',
       phone: '',
       message: '',
+      privacyConsent: false,
     },
   })
 
@@ -183,7 +184,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       setEmailFailed(t('booking.emailFailed'))
       setSuccess({ reservationNumber: saved.reservationNumber, provider: 'local' })
     }
-    reset({ ...values, discountCode: '', fullName: '', email: '', phone: '', message: '' })
+    reset({ ...values, discountCode: '', fullName: '', email: '', phone: '', message: '', privacyConsent: false })
   })
 
   const discountInvalid = Boolean(normalizedDiscountCode && !summary.discountCode)
@@ -339,6 +340,21 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
             <textarea className="field min-h-28 resize-y" {...register('message')} />
             <FieldError message={errors.message?.message} />
           </label>
+        </div>
+
+        <div className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-4">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 size-4 shrink-0 accent-[var(--color-brass)]"
+              {...register('privacyConsent')}
+            />
+            <span className="grid gap-2 text-sm leading-6 text-[var(--color-muted)]">
+              <span className="font-semibold text-[var(--color-ink)]">{t('booking.privacyConsentTitle')}</span>
+              <span>{t('booking.privacyConsentText')}</span>
+            </span>
+          </label>
+          <FieldError message={errors.privacyConsent?.message} />
         </div>
 
         {success ? (

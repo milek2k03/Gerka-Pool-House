@@ -124,6 +124,9 @@ export const pl = {
       'Zastosowany kod rabatowy: {{code}} (-{{percent}}%). Cena przed rabatem: {{before}}. Cena po rabacie: {{after}}.',
     clientMessagePrefix: 'Wiadomość klienta:',
     message: 'Wiadomość',
+    privacyConsentTitle: 'Informacja o danych osobowych i kontakcie',
+    privacyConsentText:
+      'Wysyłając formularz, wyrażasz zgodę na kontakt e-mailowy lub telefoniczny w celu obsługi zapytania rezerwacyjnego. Podane dane wykorzystujemy wyłącznie do sprawdzenia terminu, przygotowania odpowiedzi i ustalenia szczegółów pobytu.',
     send: 'Wyślij zapytanie rezerwacyjne',
     summary: 'Podsumowanie pobytu',
     nights: 'Liczba nocy',
@@ -450,6 +453,7 @@ export const pl = {
     minGuests: 'Podaj liczbę gości.',
     messageMax: 'Wiadomość jest za długa.',
     discountCodeMax: 'Kod rabatowy jest za długi.',
+    privacyConsent: 'Potwierdź zgodę na kontakt i zapoznanie się z informacją o danych osobowych.',
   },
   legal: {
     privacyTitle: 'Polityka prywatności',

@@ -9,6 +9,7 @@ export const bookingSchema = z.object({
   phone: z.string().trim().min(6, 'validation.phone'),
   discountCode: z.string().trim().max(40, 'validation.discountCodeMax').optional().default(''),
   message: z.string().trim().max(1000, 'validation.messageMax').optional().default(''),
+  privacyConsent: z.boolean().refine(Boolean, 'validation.privacyConsent'),
 })
 
 export type BookingFormInput = z.input<typeof bookingSchema>

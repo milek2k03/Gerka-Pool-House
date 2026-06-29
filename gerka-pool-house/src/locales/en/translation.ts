@@ -122,6 +122,9 @@ export const en = {
       'Discount code applied: {{code}} (-{{percent}}%). Price before discount: {{before}}. Price after discount: {{after}}.',
     clientMessagePrefix: 'Guest message:',
     message: 'Message',
+    privacyConsentTitle: 'Personal data and contact notice',
+    privacyConsentText:
+      'By sending this form, you agree to be contacted by email or phone so we can handle your booking inquiry. The provided data is used only to check availability, prepare a reply and arrange stay details.',
     send: 'Send booking inquiry',
     summary: 'Stay summary',
     nights: 'Nights',
@@ -448,6 +451,7 @@ export const en = {
     minGuests: 'Enter the number of guests.',
     messageMax: 'The message is too long.',
     discountCodeMax: 'The discount code is too long.',
+    privacyConsent: 'Confirm consent to contact and acknowledge the personal data notice.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',
