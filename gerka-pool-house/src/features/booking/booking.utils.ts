@@ -4,15 +4,39 @@ import { eachNight, getTomorrowISO, isDateWithinRange, nightsBetween } from '../
 import {
   clampDiscountPercent,
   findApplicableDiscount,
+  getDiscountValidationReason,
   normalizeDiscountCode,
 } from '../../utils/discounts'
 import { getEffectiveMaxGuests, isApartment2Enabled } from '../../utils/pricing'
 
-function createDiscountedPrice(total: number, discount?: DiscountCode) {
+function createDiscountedPrice(total: number, discount?: DiscountCode, guests?: number, checkIn?: string, checkOut?: string) {
   if (!discount) {
     return {
       priceBeforeDiscount: total,
       estimatedTotal: total,
+      discountCode: undefined,
+      discountPercent: undefined,
+      discountAmount: 0,
+      discountKind: undefined,
+      discountValidationReason: undefined,
+    }
+  }
+
+  const normalizedCode = normalizeDiscountCode(discount.code)
+
+  if (normalizedCode === 'WEEKSAVE' && guests && checkIn && checkOut) {
+    const weeksaveNightlyRate = 500 + Math.max(guests - 2, 0) * 200
+    const nights = nightsBetween(checkIn, checkOut)
+    const weeksaveTotal = weeksaveNightlyRate * nights
+
+    return {
+      priceBeforeDiscount: total,
+      estimatedTotal: weeksaveTotal,
+      discountCode: normalizedCode,
+      discountPercent: undefined,
+      discountAmount: Math.max(0, total - weeksaveTotal),
+      discountKind: 'weeksave' as const,
+      discountValidationReason: undefined,
     }
   }
 
@@ -22,9 +46,11 @@ function createDiscountedPrice(total: number, discount?: DiscountCode) {
   return {
     priceBeforeDiscount: total,
     estimatedTotal: Math.max(0, total - discountAmount),
-    discountCode: normalizeDiscountCode(discount.code),
+    discountCode: normalizedCode,
     discountPercent,
     discountAmount,
+    discountKind: 'percent' as const,
+    discountValidationReason: undefined,
   }
 }
 
@@ -42,8 +68,9 @@ export function calculateStaySummary(
   const roomsUsed = room2Enabled && guests > pricing.room1Capacity ? 2 : 1
   const nightlyPrice = roomsUsed === 1 ? pricing.room1Nightly : pricing.room1Nightly + pricing.room2Nightly
   const baseTotal = nightlyPrice * nights
-  const discount = findApplicableDiscount(pricing.discounts ?? [], discountCode, checkIn, checkOut)
-  const discountedPrice = createDiscountedPrice(baseTotal, discount)
+  const discount = findApplicableDiscount(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests)
+  const discountedPrice = createDiscountedPrice(baseTotal, discount, guests, checkIn, checkOut)
+  const discountValidationReason = getDiscountValidationReason(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests)
   const roomLabels = roomsUsed === 1 ? ['room1'] : ['room1', 'room2']
   const selectedNights = eachNight(checkIn, checkOut)
   const blockedRange = availability.find((range) =>
@@ -78,6 +105,7 @@ export function calculateStaySummary(
       roomLabels,
       nightlyPrice,
       ...discountedPrice,
+      discountValidationReason: undefined,
       isAvailable: true,
       isValid: false,
       reason: 'pastDate',
@@ -111,6 +139,7 @@ export function calculateStaySummary(
       roomLabels,
       nightlyPrice,
       ...discountedPrice,
+      discountValidationReason: undefined,
       isAvailable: true,
       isValid: false,
       reason: 'minStay',
@@ -127,6 +156,7 @@ export function calculateStaySummary(
       roomLabels,
       nightlyPrice,
       ...discountedPrice,
+      discountValidationReason: undefined,
       isAvailable: true,
       isValid: false,
       reason: 'guestLimit',
@@ -142,6 +172,7 @@ export function calculateStaySummary(
     roomLabels,
     nightlyPrice,
     ...discountedPrice,
+    discountValidationReason: discountValidationReason && (!discountedPrice.discountCode || discountValidationReason !== 'invalidCode') ? discountValidationReason : undefined,
     isAvailable: !blockedRange,
     isValid: !blockedRange,
     reason: blockedRange ? blockedRange.status : undefined,

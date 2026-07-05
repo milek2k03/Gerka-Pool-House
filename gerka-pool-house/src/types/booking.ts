@@ -40,6 +40,8 @@ export interface StaySummary {
   discountCode?: string
   discountPercent?: number
   discountAmount?: number
+  discountKind?: 'percent' | 'weeksave'
+  discountValidationReason?: string
   isAvailable: boolean
   isValid: boolean
   reason?: string

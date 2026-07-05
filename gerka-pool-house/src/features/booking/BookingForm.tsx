@@ -37,6 +37,23 @@ function summaryReasonKey(reason?: string) {
   return undefined
 }
 
+function getDiscountStatusMessage(t: ReturnType<typeof useTranslation>['t'], reason?: string) {
+  if (!reason) return undefined
+
+  switch (reason) {
+    case 'weeksaveWeekdays':
+      return t('booking.discountWeeksaveWeekdays')
+    case 'weeksaveMinNights':
+      return t('booking.discountWeeksaveMinNights')
+    case 'weeksaveMinGuests':
+      return t('booking.discountWeeksaveMinGuests')
+    case 'weeksaveMaxGuests':
+      return t('booking.discountWeeksaveMaxGuests')
+    default:
+      return t('booking.discountInvalid')
+  }
+}
+
 export function BookingForm({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
   const [success, setSuccess] = useState<{ reservationNumber: string; provider: EmailDeliveryProvider } | null>(null)
@@ -189,13 +206,15 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
 
   const discountInvalid = Boolean(normalizedDiscountCode && !summary.discountCode)
   const discountStatus =
-    discountInvalid
-      ? t('booking.discountInvalid')
-      : summary.discountCode && summary.discountPercent
-        ? t('booking.discountApplied', {
+    summary.discountCode && (summary.discountPercent || summary.discountKind === 'weeksave')
+      ? summary.discountKind === 'weeksave'
+        ? t('booking.discountAppliedWeeksave', { code: summary.discountCode })
+        : t('booking.discountApplied', {
             code: summary.discountCode,
             percent: summary.discountPercent,
           })
+      : discountInvalid
+        ? getDiscountStatusMessage(t, summary.discountValidationReason) ?? t('booking.discountInvalid')
         : ''
 
   return (
@@ -272,7 +291,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
                       : 'border-[var(--color-border)] bg-[var(--color-surface)]',
                   )}
                 >
-                  {summary.discountCode && summary.discountPercent ? (
+                  {summary.discountCode && (summary.discountPercent || summary.discountKind === 'weeksave') ? (
                     <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                       <div className="grid gap-1">
                         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
@@ -291,7 +310,9 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
                         </span>
                       </div>
                       <span className="inline-flex w-fit rounded-full border border-emerald-400/20 bg-emerald-950/45 px-3 py-1 text-xs font-semibold text-emerald-100 sm:col-span-2">
-                        -{summary.discountPercent}% {summary.discountCode}
+                        {summary.discountKind === 'weeksave'
+                          ? t('booking.weeksaveBadge', { code: summary.discountCode })
+                          : `-${summary.discountPercent}% ${summary.discountCode}`}
                       </span>
                     </div>
                   ) : (

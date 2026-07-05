@@ -93,8 +93,8 @@ export function HomeDeferredSections({ content, locale }: { content: SiteContent
       <AmenitiesSection items={content.amenities} locale={locale} />
       <AreaSection content={content} locale={locale} />
       <PricingSection pricing={content.pricing} locale={locale} />
-      <FaqSection items={content.faq} locale={locale} pricing={content.pricing} />
       <LazyBookingSection content={content} locale={locale} />
+      <FaqSection items={content.faq} locale={locale} pricing={content.pricing} />
       <ContactSection content={content} locale={locale} />
     </>
   )

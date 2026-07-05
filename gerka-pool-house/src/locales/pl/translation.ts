@@ -108,6 +108,9 @@ export const pl = {
     minStay_one: 'Pobyt już od jednej nocy',
     minStay_other: 'Pobyt już od {{count}} nocy',
     maxGuests: 'Maksymalnie {{count}} osób',
+    weeksaveTitle: 'Promocja WEEKSAVE',
+    weeksaveOffer:
+      'Promocja od poniedziałku do czwartku: z kodem WEEKSAVE cena za dobę wynosi 500 zł przy rezerwacji minimum 2 nocy dla minimum 2 osób. Każda kolejna osoba: +200 zł za noc. Maksymalnie 4 osoby.',
   },
   booking: {
     checkIn: 'Data przyjazdu',
@@ -120,6 +123,12 @@ export const pl = {
     discountCodePlaceholder: 'np. WEEKEND10',
     discountInvalid: 'Ten kod nie istnieje albo nie obowiązuje dla wybranego terminu pobytu.',
     discountApplied: 'Kod {{code}} obniża cenę o {{percent}}%.',
+    discountAppliedWeeksave: 'Kod {{code}} został zastosowany.',
+    discountWeeksaveWeekdays: 'Kod WEEKSAVE działa tylko od poniedziałku do czwartku.',
+    discountWeeksaveMinNights: 'Kod WEEKSAVE wymaga rezerwacji minimum 2 nocy.',
+    discountWeeksaveMinGuests: 'Kod WEEKSAVE wymaga minimum 2 osób.',
+    discountWeeksaveMaxGuests: 'Kod WEEKSAVE obowiązuje maksymalnie do 4 osób.',
+    weeksaveBadge: 'Promocja {{code}}',
     discountOwnerNote:
       'Zastosowany kod rabatowy: {{code}} (-{{percent}}%). Cena przed rabatem: {{before}}. Cena po rabacie: {{after}}.',
     clientMessagePrefix: 'Wiadomość klienta:',

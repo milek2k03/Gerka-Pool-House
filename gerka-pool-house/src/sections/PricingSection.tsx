@@ -78,6 +78,12 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
                 ) : null}
               </tbody>
             </table>
+            <div className="border-t border-[var(--color-border)] bg-[rgba(214,181,138,0.10)] p-4 text-sm leading-6 text-[var(--color-muted)] sm:p-5">
+              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-brass)]">
+                {t('pricing.weeksaveTitle')}
+              </span>
+              <p className="mt-2 text-white">{t('pricing.weeksaveOffer')}</p>
+            </div>
           </div>
 
           <aside className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)]">

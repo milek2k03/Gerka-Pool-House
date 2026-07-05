@@ -35,19 +35,115 @@ export function isDiscountEligible(discount: DiscountCode, checkIn: string, chec
   return nights.every((night) => weekdays.includes(getIsoWeekday(night)))
 }
 
+export function getDiscountApplication(
+  discounts: DiscountCode[],
+  value: string | undefined,
+  checkIn: string,
+  checkOut: string,
+  guests: number,
+) {
+  const normalized = normalizeDiscountCode(value)
+
+  if (!normalized) {
+    return {
+      discount: undefined,
+      isApplicable: false,
+      reason: undefined,
+    }
+  }
+
+  const discount = discounts.find((candidate) => normalizeDiscountCode(candidate.code) === normalized)
+
+  if (!discount) {
+    return {
+      discount: undefined,
+      isApplicable: false,
+      reason: 'invalidCode',
+    }
+  }
+
+  if (normalized === 'WEEKSAVE') {
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: undefined,
+      }
+    }
+
+    const nights = eachNight(checkIn, checkOut)
+    if (nights.length === 0) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: undefined,
+      }
+    }
+
+    if (nights.some((night) => [5, 6, 7].includes(getIsoWeekday(night)))) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: 'weeksaveWeekdays',
+      }
+    }
+
+    if (nights.length < 2) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: 'weeksaveMinNights',
+      }
+    }
+
+    if (guests < 2) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: 'weeksaveMinGuests',
+      }
+    }
+
+    if (guests > 4) {
+      return {
+        discount: undefined,
+        isApplicable: false,
+        reason: 'weeksaveMaxGuests',
+      }
+    }
+
+    return {
+      discount,
+      isApplicable: true,
+      reason: undefined,
+    }
+  }
+
+  const isApplicable = isDiscountEligible(discount, checkIn, checkOut)
+
+  return {
+    discount: isApplicable ? discount : undefined,
+    isApplicable,
+    reason: isApplicable ? undefined : 'invalidCode',
+  }
+}
+
 export function findApplicableDiscount(
   discounts: DiscountCode[],
   value: string | undefined,
   checkIn: string,
   checkOut: string,
+  guests?: number,
 ) {
-  const normalized = normalizeDiscountCode(value)
+  return getDiscountApplication(discounts, value, checkIn, checkOut, guests ?? 0).discount
+}
 
-  if (!normalized) return undefined
-
-  return discounts.find(
-    (discount) =>
-      normalizeDiscountCode(discount.code) === normalized &&
-      isDiscountEligible(discount, checkIn, checkOut),
-  )
+export function getDiscountValidationReason(
+  discounts: DiscountCode[],
+  value: string | undefined,
+  checkIn: string,
+  checkOut: string,
+  guests: number,
+) {
+  return getDiscountApplication(discounts, value, checkIn, checkOut, guests).reason
 }
