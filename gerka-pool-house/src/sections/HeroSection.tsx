@@ -57,9 +57,9 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   if (secondaryPhone) {
     const secondaryPhoneDigits = secondaryPhone.replace(/\D/g, '')
     contactItems.push({
-      href: secondaryPhoneDigits ? `https://wa.me/${secondaryPhoneDigits}` : `tel:${secondaryPhone}`,
+      href: secondaryPhoneDigits ? `sms:${secondaryPhoneDigits}` : `tel:${secondaryPhone}`,
       icon: MessageCircle,
-      label: 'WhatsApp',
+      label: 'SMS',
       value: secondaryPhone,
     })
   }
