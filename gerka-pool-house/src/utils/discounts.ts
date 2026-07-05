@@ -35,6 +35,36 @@ export function isDiscountEligible(discount: DiscountCode, checkIn: string, chec
   return nights.every((night) => weekdays.includes(getIsoWeekday(night)))
 }
 
+function getAutomaticWeeksaveDiscount(checkIn: string, checkOut: string, guests: number) {
+  if (!checkIn || !checkOut || checkOut <= checkIn) {
+    return undefined
+  }
+
+  const nights = eachNight(checkIn, checkOut)
+  if (nights.length === 0) {
+    return undefined
+  }
+
+  if (nights.some((night) => [5, 6, 7].includes(getIsoWeekday(night)))) {
+    return undefined
+  }
+
+  if (nights.length < 2) {
+    return undefined
+  }
+
+  if (guests < 2 || guests > 4) {
+    return undefined
+  }
+
+  return {
+    id: 'weeksave-auto',
+    code: 'WEEKSAVE',
+    percent: 0,
+    type: 'permanent' as const,
+  }
+}
+
 export function getDiscountApplication(
   discounts: DiscountCode[],
   value: string | undefined,
@@ -45,9 +75,11 @@ export function getDiscountApplication(
   const normalized = normalizeDiscountCode(value)
 
   if (!normalized) {
+    const autoDiscount = getAutomaticWeeksaveDiscount(checkIn, checkOut, guests)
+
     return {
-      discount: undefined,
-      isApplicable: false,
+      discount: autoDiscount,
+      isApplicable: Boolean(autoDiscount),
       reason: undefined,
     }
   }
