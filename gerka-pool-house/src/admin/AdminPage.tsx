@@ -2226,6 +2226,11 @@ export function AdminPage() {
                     onChange={(value) => mutate((next) => void (next.contact.phone = value))}
                   />
                   <TextInput
+                    label={t('admin.fields.secondaryPhone')}
+                    value={draft.contact.secondaryPhone ?? ''}
+                    onChange={(value) => mutate((next) => void (next.contact.secondaryPhone = value))}
+                  />
+                  <TextInput
                     label={t('admin.fields.email')}
                     value={draft.contact.email}
                     onChange={(value) => mutate((next) => void (next.contact.email = value))}

@@ -100,6 +100,7 @@ export type DiscountWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export interface ContactSettings {
   phone: string
+  secondaryPhone?: string
   email: string
   address: LocalizedString
   mapEmbedUrl: string

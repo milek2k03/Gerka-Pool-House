@@ -175,6 +175,7 @@ export const pl = {
   },
   contact: {
     phone: 'Telefon',
+    secondaryPhone: 'Telefon dodatkowy',
     email: 'E-mail',
     address: 'Adres',
     mapTitle: 'Mapa Gerka Pool House',
@@ -436,6 +437,7 @@ export const pl = {
       question: 'Pytanie',
       answer: 'Odpowiedź',
       phone: 'Telefon',
+      secondaryPhone: 'Telefon dodatkowy',
       email: 'E-mail',
       address: 'Adres',
       ownerEmail: 'Adres do powiadomień',

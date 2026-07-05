@@ -30,6 +30,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   const { t } = useTranslation()
   const facebookUrl = content.contact.facebookUrl.trim()
   const phone = content.contact.phone.trim()
+  const secondaryPhone = (content.contact.secondaryPhone ?? '').trim()
   const email = content.contact.email.trim()
   const phoneDigits = phone.replace(/\D/g, '')
 
@@ -50,6 +51,16 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
       icon: MessageCircle,
       label: 'WhatsApp',
       value: phone,
+    })
+  }
+
+  if (secondaryPhone) {
+    const secondaryPhoneDigits = secondaryPhone.replace(/\D/g, '')
+    contactItems.push({
+      href: secondaryPhoneDigits ? `https://wa.me/${secondaryPhoneDigits}` : `tel:${secondaryPhone}`,
+      icon: MessageCircle,
+      label: 'WhatsApp',
+      value: secondaryPhone,
     })
   }
 

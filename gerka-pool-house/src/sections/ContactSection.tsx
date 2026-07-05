@@ -10,6 +10,7 @@ export function ContactSection({ content, locale }: { content: SiteContent; loca
   const { t } = useTranslation()
   const hasMapEmbed = content.contact.mapEmbedUrl.includes('google.com/maps') && content.contact.mapEmbedUrl.includes('output=embed')
   const phone = content.contact.phone.trim()
+  const secondaryPhone = (content.contact.secondaryPhone ?? '').trim()
 
   return (
     <section id="contact" className="section-spacing bg-[var(--color-deep)] px-5 sm:px-8 lg:px-10">
@@ -32,6 +33,20 @@ export function ContactSection({ content, locale }: { content: SiteContent; loca
                     {t('contact.phone')}
                   </span>
                   {phone}
+                </span>
+              </a>
+            ) : null}
+            {secondaryPhone ? (
+              <a
+                className="flex items-center gap-3 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-[var(--color-ink)] shadow-[var(--shadow-soft)] transition hover:-translate-y-1 hover:border-[var(--color-brass)] hover:bg-[var(--color-surface-2)]"
+                href={`tel:${secondaryPhone.replace(/\s/g, '')}`}
+              >
+                <Phone aria-hidden="true" className="size-5 text-[var(--color-brass)]" />
+                <span>
+                  <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+                    {t('contact.secondaryPhone')}
+                  </span>
+                  {secondaryPhone}
                 </span>
               </a>
             ) : null}

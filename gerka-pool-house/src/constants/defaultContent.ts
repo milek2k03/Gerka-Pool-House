@@ -558,6 +558,7 @@ export const defaultSiteContent: SiteContent = {
   },
   contact: {
     phone: '',
+    secondaryPhone: '',
     email: 'rezerwacje@gerkapoolhouse.pl',
     address: {
       pl: 'ul. Chełmińska 41, Czarże, woj. kujawsko-pomorskie',

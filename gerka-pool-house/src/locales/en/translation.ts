@@ -173,6 +173,7 @@ export const en = {
   },
   contact: {
     phone: 'Phone',
+    secondaryPhone: 'Secondary phone',
     email: 'Email',
     address: 'Address',
     mapTitle: 'Gerka Pool House map',
@@ -434,6 +435,7 @@ export const en = {
       question: 'Question',
       answer: 'Answer',
       phone: 'Phone',
+      secondaryPhone: 'Secondary phone',
       email: 'Email',
       address: 'Address',
       ownerEmail: 'Notification email',
