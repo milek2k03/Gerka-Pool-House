@@ -49,20 +49,6 @@ function InfoCard({
           ))}
         </ul>
       ) : null}
-      {item.link?.href ? (
-        <a
-          href={item.link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full border border-[rgba(214,181,138,0.35)] font-semibold text-[var(--color-brass)] transition hover:border-[var(--color-brass)] hover:bg-[rgba(214,181,138,0.12)] hover:text-[var(--color-brass-hover)]',
-            compact ? 'mt-4 px-3 py-2 text-xs' : 'mt-5 px-4 py-2 text-sm',
-          )}
-        >
-          {localize(item.link.label, locale)}
-          <ExternalLink aria-hidden="true" className={compact ? 'size-3.5' : 'size-4'} />
-        </a>
-      ) : null}
     </article>
   )
 }
