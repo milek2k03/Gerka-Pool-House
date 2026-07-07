@@ -45,7 +45,7 @@ export function Header() {
 
         window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
 
-        window.setTimeout(() => {
+        const correctPosition = () => {
           const settledTarget = document.getElementById(id)
           if (!settledTarget) return
 
@@ -56,7 +56,9 @@ export function Header() {
           if (Math.abs(settledTop - window.scrollY) > 4) {
             window.scrollTo({ top: settledTop, behavior: 'auto' })
           }
-        }, 520)
+        }
+
+        ;[180, 420, 850, 1400, 2200].forEach((delay) => window.setTimeout(correctPosition, delay))
       }
 
       run()
