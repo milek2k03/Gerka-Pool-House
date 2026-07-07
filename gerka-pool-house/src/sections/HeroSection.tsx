@@ -80,7 +80,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
   }
 
   return (
-    <section className="relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
+    <section className="hero-section relative isolate overflow-hidden bg-[var(--color-deep)] text-white sm:min-h-[100svh]">
       <ResponsiveImage
         image={heroImage}
         mobileImage={mobileHeroImage}
@@ -99,7 +99,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-[linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,0.26)_48%,rgba(15,23,42,0.72))]" />
 
-      <div className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-6 pt-[62svh] sm:px-8 sm:pb-8 sm:pt-28 lg:px-10">
+      <div className="hero-layout-shell mx-auto flex max-w-7xl flex-col justify-end px-5 pb-6 sm:px-8 sm:pb-8 lg:px-10">
         <div className="hero-content-desktop hero-poster-copy max-w-xl pb-8 sm:pb-10 lg:max-w-2xl">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.26em] text-[var(--color-brass)]">
             {localize(content.hero.eyebrow, locale)}
