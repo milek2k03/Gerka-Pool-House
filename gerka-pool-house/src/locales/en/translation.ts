@@ -42,7 +42,7 @@ export const en = {
     amenitiesLead: 'Practical amenities and relaxation zones prepared for families and groups.',
     pricingTitle: 'A simple pricing model',
     pricingLead:
-      'The price is for the entire apartment per night and includes a stay for up to {{count}} guests. Within this limit, the guest count does not change the rate.',
+      'The weekend rate for the entire apartment is 1000 PLN per night. Within the apartment limit, the guest count does not change the rate.',
     pricingLeadExpanded:
       'The price is for the apartment per night. When the second apartment is enabled, the system supports larger groups according to the owner settings.',
     faqTitle: 'Frequently asked questions',
@@ -94,9 +94,9 @@ export const en = {
       'Apartment 2 will be available soon. The current maximum guest count is {{count}}.',
     unavailableNow: 'Unavailable',
     fixedTitle: 'Fixed apartment price',
-    fixedLead: 'The price applies to the entire apartment per night. The number of guests within the apartments maximum occupancy does not affect the rate. Final pricing and availability are subject to confirmation by the property owner.',
+    fixedLead: 'A fixed weekend rate applies to the entire apartment. It covers the nights from Friday to Saturday, Saturday to Sunday and Sunday to Monday. Final pricing and availability are subject to confirmation by the property owner.',
     fixedSamePrice:
-      'Whether 2, 4 or {{count}} guests arrive, the same apartment rate applies.',
+      'Within the stated limit, the guest count does not change the weekend apartment rate.',
     fixedIncluded: 'The price is for the whole apartment, not per person.',
     currentRate: 'Current rate',
     apartmentPerNight: '{{price}} / night',
@@ -106,6 +106,10 @@ export const en = {
     minStay_one: 'Stays from 1 night',
     minStay_other: 'Stays from {{count}} nights',
     maxGuests: 'Up to {{count}} guests',
+    weekendRateTitle: 'Fixed weekend rate',
+    weekendRateOffer:
+      'The {{price}} rate applies to Friday-to-Saturday, Saturday-to-Sunday and Sunday-to-Monday nights.',
+    hotelDay: 'Hotel day: check-in from 15:00, check-out by 12:00',
     weeksaveTitle: 'Monday to Thursday promotion',
     weeksaveOffer:
       'From Monday to Thursday, a lower rate applies: for stays of at least 2 nights for at least 2 guests, the nightly price is 500 zł. Each additional guest: +200 zł per night. Maximum 4 guests.',
@@ -145,7 +149,7 @@ export const en = {
     estimatedPrice: 'Estimated price',
     apartmentPrice: 'Apartment price',
     fixedApartmentPriceNote:
-      'The price is for the entire apartment per night and includes a stay for up to {{count}} guests. Within this limit, the guest count does not change the rate.',
+      'The weekend rate for the entire apartment is 1000 PLN per night. Within the apartment limit, the guest count does not change the rate.',
     priceBeforeDiscount: 'Before discount',
     priceAfterDiscount: 'After discount',
     selectedDates: 'Stay dates',
@@ -320,7 +324,7 @@ export const en = {
           title: 'Pricing and stay rules',
           step1: 'In the Pricing tab, set prices, maximum guest count and minimum stay length.',
           step2:
-            'The ground-floor apartment has a fixed nightly price for up to 6 guests. Apartment 2 remains in the system for future expansion.',
+            'The ground-floor apartment weekend rate is 1000 PLN per night. Apartment 2 remains in the system for future expansion.',
           step3: 'You can set the minimum stay to 1 night if you want to allow short bookings.',
         },
         content: {
@@ -393,7 +397,7 @@ export const en = {
       routeName: 'Route name',
       addRoute: 'Add route',
       addPlace: 'Add place',
-      room1Price: 'Ground-floor apartment nightly price',
+      room1Price: 'Ground-floor apartment weekend nightly price',
       room2Price: 'Apartment 2 price',
       room2Enabled: 'Apartment 2 active',
       room2EnabledHelp:

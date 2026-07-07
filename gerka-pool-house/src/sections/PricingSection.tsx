@@ -78,6 +78,12 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
                 ) : null}
               </tbody>
             </table>
+            <div className="border-t border-[var(--color-border)] bg-[rgba(214,181,138,0.14)] p-4 text-sm leading-6 text-[var(--color-muted)] sm:p-5">
+              <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-brass)]">
+                {t('pricing.weekendRateTitle')}
+              </span>
+              <p className="mt-2 text-white">{t('pricing.weekendRateOffer', { price: room1 })}</p>
+            </div>
             <div className="border-t border-[var(--color-border)] bg-[rgba(214,181,138,0.10)] p-4 text-sm leading-6 text-[var(--color-muted)] sm:p-5">
               <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-brass)]">
                 {t('pricing.weeksaveTitle')}
@@ -123,7 +129,7 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
             <div className="mt-6 flex items-start gap-3 rounded-[1.1rem] bg-[var(--color-surface-2)] p-4 text-sm leading-6 text-[var(--color-muted)]">
               <UsersRound aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--color-brass)]" />
               <p>
-                {t('pricing.maxGuests', { count: maxGuests })}. {t('pricing.minStay', { count: pricing.minStayNights })}.
+                {t('pricing.maxGuests', { count: maxGuests })}. {t('pricing.minStay', { count: pricing.minStayNights })}. {t('pricing.hotelDay')}.
                 {fixedApartmentPricing ? ` ${t('pricing.fixedIncluded', { count: maxGuests })}` : ` ${localize(pricing.extraInfo, locale)}`}
               </p>
             </div>

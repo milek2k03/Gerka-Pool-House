@@ -26,8 +26,8 @@ export function Header() {
   }, [open])
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
-      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-1.5 rounded-[1.5rem] border border-[var(--color-border)] bg-[rgba(15,23,42,0.75)] px-2 py-2.5 text-white shadow-[0_20px_55px_rgba(0,0,0,0.22)] backdrop-blur-[20px] sm:gap-2 sm:px-4">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 sm:px-6">
+      <div className="mx-auto flex min-w-0 max-w-7xl items-center justify-between gap-1.5 rounded-b-[1.5rem] rounded-t-none border border-t-0 border-[var(--color-border)] bg-[rgba(15,23,42,0.75)] px-2 py-2.5 text-white shadow-[0_20px_55px_rgba(0,0,0,0.22)] backdrop-blur-[20px] sm:gap-2 sm:px-4">
         <Logo />
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {navSections.map((item) => (

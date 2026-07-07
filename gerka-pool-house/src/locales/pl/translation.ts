@@ -42,7 +42,7 @@ export const pl = {
     amenitiesLead: 'Praktyczne udogodnienia i strefy wypoczynku przygotowane dla rodzin oraz grup.',
     pricingTitle: 'Prosty model cenowy',
     pricingLead:
-      'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie {{count}} osób. Liczba gości w tym limicie nie zmienia stawki.',
+      'Cena weekendowa za cały apartament wynosi 1000 zł za noc. Liczba gości w limicie apartamentu nie zmienia stawki.',
     pricingLeadExpanded:
       'Cena dotyczy apartamentu za dobę. Przy włączonym drugim apartamencie system obsługuje większe grupy zgodnie z ustawieniami właściciela.',
     faqTitle: 'Najczęstsze pytania',
@@ -96,9 +96,9 @@ export const pl = {
       'Apartament 2 będzie dostępny wkrótce. Obecnie maksymalna liczba gości wynosi {{count}} osób.',
     unavailableNow: 'Niedostępne',
     fixedTitle: 'Stała cena za apartament',
-    fixedLead: 'Cena dotyczy całego apartamentu za dobę. Liczba gości mieszcząca się w maksymalnym limicie apartamentu nie wpływa na wysokość stawki. Ostateczna cena oraz dostępność terminu wymagają potwierdzenia przez właściciela.',
+    fixedLead: 'W weekendy obowiązuje stała cena za cały apartament. Dotyczy nocy z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Ostateczna cena oraz dostępność terminu wymagają potwierdzenia przez właściciela.',
     fixedSamePrice:
-      'Niezależnie od tego, czy przyjeżdżają 2, 4 czy {{count}} osób, obowiązuje ta sama cena za apartament.',
+      'W podanym limicie liczba gości nie zmienia weekendowej stawki za apartament.',
     fixedIncluded: 'Cena dotyczy całego apartamentu, nie jednej osoby.',
     currentRate: 'Aktualna stawka',
     apartmentPerNight: '{{price}} / doba',
@@ -108,6 +108,10 @@ export const pl = {
     minStay_one: 'Pobyt już od jednej nocy',
     minStay_other: 'Pobyt już od {{count}} nocy',
     maxGuests: 'Maksymalnie {{count}} osób',
+    weekendRateTitle: 'Stała cena weekendowa',
+    weekendRateOffer:
+      'Cena {{price}} obowiązuje za noc z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek.',
+    hotelDay: 'Doba hotelowa: zameldowanie od 15:00, wymeldowanie do 12:00',
     weeksaveTitle: 'Promocja od poniedziałku do czwartku',
     weeksaveOffer:
       'Od poniedziałku do czwartku obowiązuje niższa cena: przy rezerwacji minimum 2 nocy dla minimum 2 osób cena za dobę wynosi 500 zł. Każda kolejna osoba: +200 zł za noc. Maksymalnie 4 osoby.',
@@ -147,7 +151,7 @@ export const pl = {
     estimatedPrice: 'Szacowana cena',
     apartmentPrice: 'Cena za apartament',
     fixedApartmentPriceNote:
-      'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie {{count}} osób. Liczba gości w tym limicie nie zmienia stawki.',
+      'Cena weekendowa za cały apartament wynosi 1000 zł za noc. Liczba gości w limicie apartamentu nie zmienia stawki.',
     priceBeforeDiscount: 'Przed rabatem',
     priceAfterDiscount: 'Po rabacie',
     selectedDates: 'Termin pobytu',
@@ -322,7 +326,7 @@ export const pl = {
           title: 'Cennik i zasady pobytu',
           step1: 'W zakładce Cennik ustaw ceny, maksymalną liczbę gości i minimalną długość pobytu.',
           step2:
-            'Cena apartamentu na parterze jest stała za dobę i obejmuje pobyt do 6 osób. Apartament 2 zostaje w systemie na przyszłość.',
+            'Cena weekendowa apartamentu na parterze wynosi 1000 zł za noc. Apartament 2 zostaje w systemie na przyszłość.',
           step3: 'Minimalny pobyt możesz ustawić na 1 noc, jeśli chcesz pozwolić na krótkie rezerwacje.',
         },
         content: {
@@ -395,7 +399,7 @@ export const pl = {
       routeName: 'Nazwa trasy',
       addRoute: 'Dodaj trasę',
       addPlace: 'Dodaj miejsce',
-      room1Price: 'Cena apartamentu na parterze za dobę',
+      room1Price: 'Cena weekendowa apartamentu za dobę',
       room2Price: 'Cena apartamentu 2',
       room2Enabled: 'Apartament 2 aktywny',
       room2EnabledHelp:

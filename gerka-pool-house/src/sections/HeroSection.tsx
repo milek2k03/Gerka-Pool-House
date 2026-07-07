@@ -8,7 +8,6 @@ import { AnchorButton } from '../components/ui/Button'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from '../utils/locale'
-import { applyGuestLimitToText } from '../utils/pricing'
 
 interface HeroContactItem {
   href: string
@@ -117,7 +116,7 @@ export function HeroSection({ content, locale }: { content: SiteContent; locale:
           <div className="my-6 h-px w-full max-w-sm bg-[linear-gradient(90deg,var(--color-brass),rgba(214,181,138,0.08))]" />
 
           <p className="max-w-xl text-base leading-7 text-white/78 sm:text-lg">
-            {applyGuestLimitToText(localize(content.hero.lead, locale), content.pricing)}
+            {localize(content.hero.lead, locale)}
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

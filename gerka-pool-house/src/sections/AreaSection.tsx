@@ -1,4 +1,4 @@
-import { BusFront, ExternalLink, PlaneLanding, Route, ShoppingBasket, Utensils } from 'lucide-react'
+import { BusFront, PlaneLanding, Route, ShoppingBasket, Utensils } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { FeatureIcon } from '../components/common/Icon'

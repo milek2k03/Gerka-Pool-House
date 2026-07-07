@@ -12,21 +12,21 @@ const socialPreviewImage = '/api/og-image?v=5'
 const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
-  version: 23,
+  version: 24,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
     eyebrow: {
-      pl: 'Prywatny dom z basenem',
-      en: 'Private pool house',
+      pl: 'Nocleg niedaleko Bydgoszczy',
+      en: 'Stay near Bydgoszcz',
     },
     slogan: {
-      pl: 'Spokojny wypoczynek dla rodzin i grup, z basenem tylko dla Was.',
-      en: 'A calm private stay for families and groups, with a pool reserved for you.',
+      pl: 'Prywatny wypoczynek w Czarżu, blisko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej.',
+      en: 'A private stay in Czarze, close to Bydgoszcz, Chelmno and Dabrowa Chelminska.',
     },
     lead: {
-      pl: 'Wygodny apartament na parterze do 6 osób z prywatną strefą basenową, ogrodem, grillem, parkingiem i szybkim WiFi.',
-      en: 'A comfortable ground-floor apartment for up to 6 guests with a private pool area, garden, barbecue, parking and fast WiFi.',
+      pl: 'Gerka Pool House w Czarżu to wygodny nocleg niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z prywatną strefą basenową, ogrodem, grillem, parkingiem i szybkim WiFi.',
+      en: 'Gerka Pool House in Czarze is a comfortable stay near Bydgoszcz, Chelmno and Dabrowa Chelminska, with a private pool area, garden, barbecue, parking and fast WiFi.',
     },
     image: {
       src: heroBackgroundImage,
@@ -43,8 +43,8 @@ export const defaultSiteContent: SiteContent = {
       en: 'Ground-floor apartment and a private pool area',
     },
     lead: {
-      pl: 'Aktualnie rezerwowany jest komfortowy apartament na parterze przeznaczony dla maksymalnie 6 osób.',
-      en: 'The currently available stay is a comfortable ground-floor apartment designed for up to 6 guests.',
+      pl: 'Aktualnie rezerwowany jest komfortowy apartament na parterze w Czarżu, niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej.',
+      en: 'The currently available stay is a comfortable ground-floor apartment in Czarze, near Bydgoszcz, Chelmno and Dabrowa Chelminska.',
     },
     body: {
       pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie 6 osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest podgrzewany prywatny basen z leżakami, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.',
@@ -248,8 +248,8 @@ export const defaultSiteContent: SiteContent = {
       en: 'Surroundings made for slow discovery',
     },
     lead: {
-      pl: 'W pobliżu są miejsca na spacer, rodzinny obiad, dzień nad wodą i krótkie wycieczki po okolicy.',
-      en: 'Nearby you will find places for walks, family meals, days by the water and short local trips.',
+      pl: 'Czarże, Bydgoszcz, Chełmno i Dąbrowa Chełmińska dają spokojną bazę na nocleg, spacery, rodzinny obiad, dzień nad wodą i krótkie wycieczki po okolicy.',
+      en: 'Czarze, Bydgoszcz, Chelmno and Dabrowa Chelminska make a calm base for a stay, walks, family meals, days by the water and short local trips.',
     },
     image: { src: lakeWebp, webp: lakeWebp, avif: lakeAvif },
     items: [
@@ -262,6 +262,16 @@ export const defaultSiteContent: SiteContent = {
           en: 'A historic palace and park complex with elegant architecture, greenery and peaceful walking alleys. It can be reached directly by regional PKS bus, with views of Vistula-side villages along the way.',
         },
         distance: { pl: 'ok. 11 km', en: 'approx. 11 km' },
+      },
+      {
+        id: 'dabrowa-chelminska',
+        icon: 'landmark',
+        title: { pl: 'Dąbrowa Chełmińska', en: 'Dabrowa Chelminska' },
+        description: {
+          pl: 'Gmina i lokalny punkt odniesienia dla pobytu w Czarżu. To wygodna okolica na nocleg blisko Bydgoszczy, z szybkim dojazdem do atrakcji Doliny Dolnej Wisły.',
+          en: 'A nearby municipality and local reference point for stays in Czarze, with convenient access to Bydgoszcz and the Lower Vistula Valley.',
+        },
+        distance: { pl: 'gmina obiektu', en: 'local municipality' },
       },
       {
         id: 'chelmno',
@@ -467,7 +477,7 @@ export const defaultSiteContent: SiteContent = {
     },
   },
   pricing: {
-    room1Nightly: 500,
+    room1Nightly: 1000,
     room2Nightly: 300,
     room2Enabled: false,
     room1Capacity: 6,
@@ -476,8 +486,8 @@ export const defaultSiteContent: SiteContent = {
     currency: 'PLN',
     discounts: [],
     extraInfo: {
-      pl: 'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie 6 osób. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
-      en: 'The price is for the entire apartment per night and includes a stay for up to 6 guests. The amount requires confirmation by the owner after checking availability.',
+      pl: 'Cena weekendowa wynosi 1000 zł za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Doba hotelowa trwa od 15:00, wymeldowanie do 12:00. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
+      en: 'The weekend rate is 1000 PLN per night: Friday to Saturday, Saturday to Sunday and Sunday to Monday. Check-in starts at 15:00 and check-out is by 12:00. The amount requires confirmation by the owner after checking availability.',
     },
   },
   faq: [
@@ -521,8 +531,19 @@ export const defaultSiteContent: SiteContent = {
         en: 'How is the stay price calculated?',
       },
       answer: {
-        pl: 'Cena dotyczy całego apartamentu za dobę i obejmuje pobyt maksymalnie 6 osób. Niezależnie od tego, czy przyjeżdżają 2, 4 czy 6 osób, obowiązuje ta sama cena za apartament.',
-        en: 'The price is for the entire apartment per night and includes a stay for up to 6 guests. Whether 2, 4 or 6 guests arrive, the same apartment rate applies.',
+        pl: 'W weekendy obowiązuje stała cena 1000 zł za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Od poniedziałku do czwartku może obowiązywać niższa cena promocyjna zgodnie z warunkami w cenniku.',
+        en: 'On weekends, a fixed rate of 1000 PLN per night applies: Friday to Saturday, Saturday to Sunday and Sunday to Monday. From Monday to Thursday, a lower promotional rate may apply according to the pricing terms.',
+      },
+    },
+    {
+      id: 'hotel-day',
+      question: {
+        pl: 'Jaka jest doba hotelowa?',
+        en: 'What are the check-in and check-out times?',
+      },
+      answer: {
+        pl: 'Zameldowanie jest możliwe od 15:00, a wymeldowanie do 12:00.',
+        en: 'Check-in is available from 15:00 and check-out is by 12:00.',
       },
     },
     {
@@ -573,12 +594,12 @@ export const defaultSiteContent: SiteContent = {
   seo: {
     home: {
       title: {
-        pl: 'Gerka Pool House | Prywatny wypoczynek z basenem',
-        en: 'Gerka Pool House | Private pool stay in Poland',
+        pl: 'Nocleg Bydgoszcz i okolice | Gerka Pool House Czarże',
+        en: 'Accommodation near Bydgoszcz | Gerka Pool House Czarze',
       },
       description: {
-        pl: 'Gerka Pool House to komfortowy apartament na parterze dla maksymalnie 6 osób, z prywatnym basenem, ogrodem, grillem i parkingiem.',
-        en: 'Gerka Pool House is a comfortable ground-floor apartment for up to 6 guests, with a private pool, garden, barbecue and parking.',
+        pl: 'Gerka Pool House w Czarżu to prywatny nocleg niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z basenem, ogrodem, grillem i parkingiem.',
+        en: 'Gerka Pool House in Czarze is private accommodation near Bydgoszcz, Chelmno and Dabrowa Chelminska, with a pool, garden, barbecue and parking.',
       },
       canonicalPath: '/',
       ogImage: socialPreviewImage,

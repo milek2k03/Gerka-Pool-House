@@ -872,6 +872,50 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     }
   }
 
+  if (storedVersion < 24) {
+    content.version = defaultSiteContent.version
+    content.hero.eyebrow = structuredClone(defaultSiteContent.hero.eyebrow)
+    content.hero.slogan = structuredClone(defaultSiteContent.hero.slogan)
+    content.hero.lead = structuredClone(defaultSiteContent.hero.lead)
+    content.about.lead = structuredClone(defaultSiteContent.about.lead)
+    content.area.lead = structuredClone(defaultSiteContent.area.lead)
+    content.pricing.room1Nightly = defaultSiteContent.pricing.room1Nightly
+    content.pricing.extraInfo = structuredClone(defaultSiteContent.pricing.extraInfo)
+    content.seo.home.title = structuredClone(defaultSiteContent.seo.home.title)
+    content.seo.home.description = structuredClone(defaultSiteContent.seo.home.description)
+
+    const defaultDabrowaItem = structuredClone(
+      defaultSiteContent.area.items.find((item) => item.id === 'dabrowa-chelminska'),
+    )
+
+    if (defaultDabrowaItem && !content.area.items.some((item) => item.id === defaultDabrowaItem.id)) {
+      const chelmnoIndex = content.area.items.findIndex((item) => item.id === 'chelmno')
+      content.area.items.splice(chelmnoIndex === -1 ? content.area.items.length : chelmnoIndex, 0, defaultDabrowaItem)
+    }
+
+    const upsertFaq = (item: SiteContent['faq'][number] | undefined) => {
+      if (!item) return
+
+      const nextItem = structuredClone(item)
+      const existingIndex = content.faq.findIndex((faqItem) => faqItem.id === nextItem.id)
+
+      if (existingIndex >= 0) {
+        content.faq[existingIndex] = nextItem
+        return
+      }
+
+      const bookingConfirmationIndex = content.faq.findIndex((faqItem) => faqItem.id === 'booking-confirmation')
+      content.faq.splice(
+        bookingConfirmationIndex === -1 ? content.faq.length : bookingConfirmationIndex,
+        0,
+        nextItem,
+      )
+    }
+
+    upsertFaq(defaultSiteContent.faq.find((item) => item.id === 'pricing'))
+    upsertFaq(defaultSiteContent.faq.find((item) => item.id === 'hotel-day'))
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 

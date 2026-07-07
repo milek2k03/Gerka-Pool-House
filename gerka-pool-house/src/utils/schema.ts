@@ -53,6 +53,8 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
         ...(telephone ? { telephone } : {}),
         email: content.contact.email,
         priceRange,
+        checkinTime: '15:00',
+        checkoutTime: '12:00',
         amenityFeature: content.amenities.map((amenity) => ({
           '@type': 'LocationFeatureSpecification',
           name: localize(amenity.title, locale),
