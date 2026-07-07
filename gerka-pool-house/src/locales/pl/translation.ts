@@ -100,7 +100,7 @@ export const pl = {
     fixedSamePrice:
       'W podanym limicie liczba gości nie zmienia weekendowej stawki za apartament.',
     fixedIncluded: 'Cena dotyczy całego apartamentu, nie jednej osoby.',
-    currentRate: 'Aktualna stawka',
+    currentRate: 'Aktualna stawka za weekend',
     apartmentPerNight: '{{price}} / doba',
     exampleTitle: 'Jak liczymy cenę',
     people: '{{count}} osób',

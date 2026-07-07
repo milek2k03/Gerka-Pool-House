@@ -98,7 +98,7 @@ export const en = {
     fixedSamePrice:
       'Within the stated limit, the guest count does not change the weekend apartment rate.',
     fixedIncluded: 'The price is for the whole apartment, not per person.',
-    currentRate: 'Current rate',
+    currentRate: 'Current weekend rate',
     apartmentPerNight: '{{price}} / night',
     exampleTitle: 'How the price is calculated',
     people: '{{count}} guests',
