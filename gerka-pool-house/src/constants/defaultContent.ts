@@ -8,7 +8,7 @@ import poolAvif from '../assets/images/pool-terrace.avif'
 import poolWebp from '../assets/images/pool-terrace.webp'
 import type { SiteContent } from '../types/content'
 
-const socialPreviewImage = '/api/og-image?v=5'
+const socialPreviewImage = '/og-image-v3.jpg?v=6'
 const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
