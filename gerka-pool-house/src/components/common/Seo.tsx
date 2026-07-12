@@ -51,7 +51,7 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     const title = localize(settings.title, locale)
     const description = localize(settings.description, locale)
     const canonical = resolveUrl(settings.canonicalPath) ?? siteUrl
-    const image = resolveUrl(settings.ogImage)
+    const image = resolveUrl('/URLimage.png?v=9')
 
     document.title = title
     document.documentElement.lang = locale
@@ -70,9 +70,9 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('property', 'og:image', image)
     upsertMeta('property', 'og:image:secure_url', image)
-    upsertMeta('property', 'og:image:type', image ? 'image/jpeg' : undefined)
-    upsertMeta('property', 'og:image:width', image ? '1200' : undefined)
-    upsertMeta('property', 'og:image:height', image ? '630' : undefined)
+    upsertMeta('property', 'og:image:type', image ? 'image/png' : undefined)
+    upsertMeta('property', 'og:image:width', image ? '2541' : undefined)
+    upsertMeta('property', 'og:image:height', image ? '1439' : undefined)
     upsertMeta('property', 'og:image:alt', title)
     upsertMeta('name', 'twitter:image', image)
     upsertMeta('name', 'twitter:image:alt', title)
