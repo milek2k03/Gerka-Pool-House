@@ -1,0 +1,56 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="left" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#091326" stop-opacity="0.98"/>
+      <stop offset="0.38" stop-color="#091326" stop-opacity="0.82"/>
+      <stop offset="0.68" stop-color="#091326" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#091326" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bottom" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#091326" stop-opacity="0.86"/>
+      <stop offset="0.3" stop-color="#091326" stop-opacity="0.22"/>
+      <stop offset="0.6" stop-color="#091326" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#left)"/>
+  <rect width="1200" height="630" fill="url(#bottom)"/>
+
+  <rect x="214" y="0" width="772" height="58" rx="0" fill="#101b30" fill-opacity="0.97"/>
+  <text x="395" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">O obiekcie</text>
+  <text x="470" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Galeria</text>
+  <text x="528" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Atrakcje</text>
+  <text x="586" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Okolica</text>
+  <text x="643" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Cennik</text>
+  <text x="696" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Rezerwacje</text>
+  <text x="767" y="34" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="10" font-weight="700">Kontakt</text>
+  <rect x="857" y="16" width="43" height="25" rx="10" fill="none" stroke="#d8b47b"/>
+  <text x="870" y="33" fill="#fff" font-family="Arial, sans-serif" font-size="10">EN</text>
+  <rect x="906" y="16" width="72" height="25" rx="10" fill="#dfbd87"/>
+  <text x="917" y="33" fill="#172033" font-family="Arial, sans-serif" font-size="9" font-weight="700">Rezerwuj teraz</text>
+
+  <text x="40" y="218" fill="#e5bc7d" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="3">NOCLEG NIEDALEKO BYDGOSZCZY</text>
+  <text x="40" y="270" fill="#fff" font-family="Georgia, serif" font-size="43">Gerka Pool House</text>
+  <text x="40" y="303" fill="#fff" font-family="Arial, sans-serif" font-size="16">Prywatny wypoczynek w Czarżu, blisko</text>
+  <text x="40" y="326" fill="#fff" font-family="Arial, sans-serif" font-size="16">Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej.</text>
+  <line x1="40" y1="347" x2="274" y2="347" stroke="#d8b47b" stroke-opacity="0.55"/>
+  <text x="40" y="375" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="12">Gerka Pool House w Czarżu to wygodny nocleg niedaleko</text>
+  <text x="40" y="394" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="12">Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z prywatną strefą</text>
+  <text x="40" y="413" fill="#f4f4f2" font-family="Arial, sans-serif" font-size="12">basenową, ogrodem, grillem, parkingiem i szybkim WiFi.</text>
+  <rect x="40" y="437" width="111" height="31" rx="9" fill="#dfbd87"/>
+  <text x="55" y="457" fill="#172033" font-family="Arial, sans-serif" font-size="10" font-weight="700">▣  Rezerwuj teraz</text>
+  <rect x="158" y="437" width="107" height="31" rx="9" fill="#101b30" stroke="#d8b47b"/>
+  <text x="173" y="457" fill="#fff" font-family="Arial, sans-serif" font-size="10" font-weight="700">↓  Zobacz ofertę</text>
+
+  <rect x="238" y="555" width="728" height="62" rx="18" fill="#0d1728" stroke="#d8b47b" stroke-opacity="0.4"/>
+  <text x="290" y="578" fill="#e5bc7d" font-family="Arial, sans-serif" font-size="8" font-weight="700" letter-spacing="1.5">FACEBOOK</text>
+  <text x="290" y="598" fill="#fff" font-family="Arial, sans-serif" font-size="11">Gerka Pool House</text>
+  <line x1="424" y1="565" x2="424" y2="607" stroke="#d8b47b" stroke-opacity="0.4"/>
+  <text x="468" y="578" fill="#e5bc7d" font-family="Arial, sans-serif" font-size="8" font-weight="700" letter-spacing="1.5">WHATSAPP</text>
+  <text x="468" y="598" fill="#fff" font-family="Arial, sans-serif" font-size="11">+44 7544 318063</text>
+  <line x1="603" y1="565" x2="603" y2="607" stroke="#d8b47b" stroke-opacity="0.4"/>
+  <text x="646" y="578" fill="#e5bc7d" font-family="Arial, sans-serif" font-size="8" font-weight="700" letter-spacing="1.5">SMS</text>
+  <text x="646" y="598" fill="#fff" font-family="Arial, sans-serif" font-size="11">+48 512 728 077</text>
+  <line x1="781" y1="565" x2="781" y2="607" stroke="#d8b47b" stroke-opacity="0.4"/>
+  <text x="824" y="578" fill="#e5bc7d" font-family="Arial, sans-serif" font-size="8" font-weight="700" letter-spacing="1.5">E-MAIL</text>
+  <text x="824" y="598" fill="#fff" font-family="Arial, sans-serif" font-size="10">gerkapoolhouse@gmail.com</text>
+</svg>
