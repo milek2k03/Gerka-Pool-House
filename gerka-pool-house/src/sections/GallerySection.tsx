@@ -38,7 +38,11 @@ const GalleryMosaic = memo(function GalleryMosaic({
               index === 0 && 'col-span-2 row-span-2',
             )}
             onClick={() => onOpen(index)}
-            aria-label={isMoreTrigger ? undefined : localize(item.title, locale)}
+            aria-label={
+              isMoreTrigger
+                ? `${t('gallery.viewMore')}: ${t('gallery.moreCount', { count: hiddenItemsCount })}`
+                : localize(item.title, locale)
+            }
           >
             {item.image.type === 'video' ? (
               <video
@@ -78,12 +82,15 @@ const GalleryMosaic = memo(function GalleryMosaic({
               </span>
             ) : null}
             {isMoreTrigger ? (
-              <span className="absolute inset-0 flex items-center justify-center bg-[rgba(15,23,42,0.58)] p-2 text-center backdrop-blur-[2px] transition group-hover:bg-[rgba(15,23,42,0.68)] sm:p-4">
-                <span className="grid min-h-16 w-full max-w-[9rem] place-items-center rounded-[1.1rem] border border-[var(--color-border)] bg-[rgba(214,181,138,0.18)] px-2 py-2 text-white shadow-[var(--shadow-soft)] backdrop-blur-md sm:max-w-[11rem] sm:px-4 sm:py-3 lg:max-w-[13rem] lg:px-5 lg:py-4">
-                  <span className="block text-[0.7rem] font-semibold leading-tight sm:text-sm lg:text-lg">
+              <span className="absolute inset-0 flex items-center justify-center bg-[rgba(15,23,42,0.62)] p-1.5 text-center backdrop-blur-[2px] transition group-hover:bg-[rgba(15,23,42,0.7)] sm:p-4">
+                <span className="flex w-full max-w-[7rem] flex-col items-center justify-center rounded-[0.9rem] border border-[var(--color-border)] bg-[rgba(214,181,138,0.18)] px-1.5 py-2 text-white shadow-[var(--shadow-soft)] backdrop-blur-md sm:min-h-16 sm:max-w-[11rem] sm:px-4 sm:py-3 lg:max-w-[13rem] lg:px-5 lg:py-4">
+                  <span className="block text-[0.68rem] font-semibold leading-[1.15] sm:text-sm lg:text-lg">
                     {t('gallery.viewMore')}
                   </span>
-                  <span className="mt-1 block text-[0.62rem] leading-tight text-white/82 sm:text-xs lg:text-sm">
+                  <span className="mt-1 block text-xs font-semibold leading-none text-white/90 sm:hidden">
+                    +{hiddenItemsCount}
+                  </span>
+                  <span className="mt-1 hidden text-xs leading-tight text-white/82 sm:block lg:text-sm">
                     {t('gallery.moreCount', { count: hiddenItemsCount })}
                   </span>
                 </span>
