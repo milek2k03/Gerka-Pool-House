@@ -73,6 +73,7 @@ type TabId =
 
 type ReservationSortOption = 'newest' | 'oldest' | 'checkInAsc' | 'checkInDesc' | 'priceDesc' | 'priceAsc'
 type ReservationStatusFilter = ReservationStatus | 'all'
+type AvailabilitySortOption = 'dateAsc' | 'dateDesc'
 type AdminNotice = 'saved' | 'restored' | null
 type GalleryDragState = { sectionIndex: number; itemId: string } | null
 type GalleryDropTarget = { sectionIndex: number; itemId: string; position: 'before' | 'after' } | null
@@ -95,6 +96,7 @@ const iconOptions: IconKey[] = [
 ]
 
 const reservationStatuses: ReservationStatus[] = ['pending', 'accepted', 'rejected', 'cancelled']
+const availabilityPageSize = 10
 const discountWeekdays: DiscountWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const instructionSectionIds = [
   'start',
@@ -424,6 +426,10 @@ export function AdminPage() {
   const [reservationStatusFilter, setReservationStatusFilter] = useState<ReservationStatusFilter>('all')
   const [reservationStatusError, setReservationStatusError] = useState('')
   const [reservationConflictMessage, setReservationConflictMessage] = useState('')
+  const [availabilityPage, setAvailabilityPage] = useState(1)
+  const [availabilitySort, setAvailabilitySort] = useState<AvailabilitySortOption>('dateAsc')
+  const [showBookedAvailability, setShowBookedAvailability] = useState(true)
+  const [showUnavailableAvailability, setShowUnavailableAvailability] = useState(true)
   const [draggedGalleryItem, setDraggedGalleryItem] = useState<GalleryDragState>(null)
   const [galleryDropTarget, setGalleryDropTarget] = useState<GalleryDropTarget>(null)
   const [openGallerySectionIds, setOpenGallerySectionIds] = useState<string[]>(() =>
@@ -487,6 +493,26 @@ export function AdminPage() {
 
   const visibleReservationStatuses = reservationStatusFilter === 'all' ? reservationStatuses : [reservationStatusFilter]
   const gallerySectionIds = useMemo(() => draft.gallerySections.map((section) => section.id), [draft.gallerySections])
+
+  const filteredAvailability = useMemo(() => {
+    const ranges = draft.availability
+      .map((range, index) => ({ range, index }))
+      .filter(({ range }) =>
+        range.status === 'booked' ? showBookedAvailability : showUnavailableAvailability,
+      )
+
+    return ranges.sort((left, right) => {
+      const result = left.range.from.localeCompare(right.range.from) || left.range.to.localeCompare(right.range.to)
+      return availabilitySort === 'dateAsc' ? result : -result
+    })
+  }, [availabilitySort, draft.availability, showBookedAvailability, showUnavailableAvailability])
+
+  const availabilityPageCount = Math.max(1, Math.ceil(filteredAvailability.length / availabilityPageSize))
+  const currentAvailabilityPage = Math.min(availabilityPage, availabilityPageCount)
+  const visibleAvailability = filteredAvailability.slice(
+    (currentAvailabilityPage - 1) * availabilityPageSize,
+    currentAvailabilityPage * availabilityPageSize,
+  )
 
   const instructionSections = useMemo(
     () =>
@@ -1639,12 +1665,64 @@ export function AdminPage() {
 
             {activeTab === 'availability' ? (
               <div className="grid gap-5">
+                <div className="flex flex-wrap items-end justify-between gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
+                  <fieldset className="flex flex-wrap gap-4">
+                    <legend className="mb-2 text-sm font-medium text-[var(--color-ink)]">
+                      {t('admin.fields.availabilityDisplay')}
+                    </legend>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--color-ink)]">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-[var(--color-brass)]"
+                        checked={showBookedAvailability}
+                        onChange={(event) => {
+                          setShowBookedAvailability(event.target.checked)
+                          setAvailabilityPage(1)
+                        }}
+                      />
+                      <span className="size-2.5 rounded-full bg-red-500 ring-4 ring-red-500/15" aria-hidden="true" />
+                      {t('booking.booked')}
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--color-ink)]">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-[var(--color-brass)]"
+                        checked={showUnavailableAvailability}
+                        onChange={(event) => {
+                          setShowUnavailableAvailability(event.target.checked)
+                          setAvailabilityPage(1)
+                        }}
+                      />
+                      <span className="size-2.5 rounded-full bg-sky-400 ring-4 ring-sky-400/15" aria-hidden="true" />
+                      {t('booking.unavailable')}
+                    </label>
+                  </fieldset>
+                  <label className="grid min-w-52 gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.availabilitySort')}
+                    <select
+                      className="field"
+                      value={availabilitySort}
+                      onChange={(event) => {
+                        setAvailabilitySort(event.target.value as AvailabilitySortOption)
+                        setAvailabilityPage(1)
+                      }}
+                    >
+                      <option value="dateAsc">{t('admin.fields.availabilitySortAsc')}</option>
+                      <option value="dateDesc">{t('admin.fields.availabilitySortDesc')}</option>
+                    </select>
+                  </label>
+                </div>
                 {draft.availability.length === 0 ? (
                   <p className="rounded-md bg-[var(--color-paper)] p-4 text-sm text-[var(--color-muted)]">
                     {t('admin.fields.availabilityEmpty')}
                   </p>
                 ) : null}
-                {draft.availability.map((range, index) => (
+                {draft.availability.length > 0 && filteredAvailability.length === 0 ? (
+                  <p className="rounded-md bg-[var(--color-paper)] p-4 text-sm text-[var(--color-muted)]">
+                    {t('admin.fields.availabilityFilteredEmpty')}
+                  </p>
+                ) : null}
+                {visibleAvailability.map(({ range, index }) => (
                   <article key={range.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(10rem,0.7fr)_1fr_1fr_auto] lg:items-end">
                       <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
@@ -1718,10 +1796,43 @@ export function AdminPage() {
                     </p>
                   </article>
                 ))}
+                {filteredAvailability.length > availabilityPageSize ? (
+                  <nav
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-3"
+                    aria-label={t('admin.fields.availabilityPagination')}
+                  >
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={currentAvailabilityPage === 1}
+                      onClick={() => setAvailabilityPage(Math.max(1, currentAvailabilityPage - 1))}
+                    >
+                      {t('admin.fields.previousPage')}
+                    </Button>
+                    <span className="text-sm font-medium text-[var(--color-muted)]" aria-live="polite">
+                      {t('admin.fields.pageOf', { page: currentAvailabilityPage, pages: availabilityPageCount })}
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={currentAvailabilityPage === availabilityPageCount}
+                      onClick={() => setAvailabilityPage(Math.min(availabilityPageCount, currentAvailabilityPage + 1))}
+                    >
+                      {t('admin.fields.nextPage')}
+                    </Button>
+                  </nav>
+                ) : null}
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => mutate((next) => void next.availability.push(createUnavailableRange()))}
+                  onClick={() => {
+                    mutate((next) => void next.availability.push(createUnavailableRange()))
+                    setShowUnavailableAvailability(true)
+                    setAvailabilitySort('dateDesc')
+                    setAvailabilityPage(1)
+                  }}
                 >
                   {t('admin.fields.addAvailabilityRange')}
                 </Button>
