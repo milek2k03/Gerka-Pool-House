@@ -96,7 +96,7 @@ const iconOptions: IconKey[] = [
 ]
 
 const reservationStatuses: ReservationStatus[] = ['pending', 'accepted', 'rejected', 'cancelled']
-const availabilityPageSize = 10
+const availabilityPageSize = 5
 const discountWeekdays: DiscountWeekday[] = [1, 2, 3, 4, 5, 6, 7]
 const instructionSectionIds = [
   'start',
