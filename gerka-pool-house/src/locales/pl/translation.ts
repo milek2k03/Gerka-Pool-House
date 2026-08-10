@@ -460,6 +460,8 @@ export const pl = {
       metaDescription: 'Opis w Google',
       availabilityEmpty: 'Brak ręcznie dodanych terminów.',
       addAvailabilityRange: 'Dodaj termin',
+      addBookedAvailabilityRange: 'Dodaj zajęty termin',
+      addUnavailableAvailabilityRange: 'Dodaj niedostępny termin',
     },
     reservationsEmpty: 'Brak zapisanych zapytań.',
     status: {

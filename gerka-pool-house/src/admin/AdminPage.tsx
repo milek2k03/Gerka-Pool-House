@@ -13,6 +13,7 @@ import {
   Inbox,
   LogOut,
   MapPin,
+  Plus,
   RotateCcw,
   Save as SaveIcon,
   Settings,
@@ -307,14 +308,14 @@ function getExclusiveUnavailableEnd(inclusiveEnd: string, from: string) {
   return nextDayISO(safeInclusiveEnd)
 }
 
-function createUnavailableRange(): AvailabilityRange {
+function createAvailabilityRange(status: AvailabilityStatus): AvailabilityRange {
   const from = getTomorrowISO()
 
   return {
     id: crypto.randomUUID(),
     from,
     to: nextDayISO(from),
-    status: 'unavailable',
+    status,
   }
 }
 
@@ -1730,11 +1731,17 @@ export function AdminPage() {
                         <select
                           className="field"
                           value={range.status}
-                          onChange={(event) =>
+                          onChange={(event) => {
+                            const status = event.target.value as AvailabilityStatus
                             mutate((next) => {
-                              next.availability[index].status = event.target.value as AvailabilityStatus
+                              next.availability[index].status = status
                             })
-                          }
+                            if (status === 'booked') {
+                              setShowBookedAvailability(true)
+                            } else {
+                              setShowUnavailableAvailability(true)
+                            }
+                          }}
                         >
                           <option value="unavailable">{t('booking.unavailable')}</option>
                           <option value="booked">{t('booking.booked')}</option>
@@ -1824,18 +1831,34 @@ export function AdminPage() {
                     </Button>
                   </nav>
                 ) : null}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    mutate((next) => void next.availability.push(createUnavailableRange()))
-                    setShowUnavailableAvailability(true)
-                    setAvailabilitySort('dateDesc')
-                    setAvailabilityPage(1)
-                  }}
-                >
-                  {t('admin.fields.addAvailabilityRange')}
-                </Button>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      mutate((next) => void next.availability.push(createAvailabilityRange('booked')))
+                      setShowBookedAvailability(true)
+                      setAvailabilitySort('dateDesc')
+                      setAvailabilityPage(1)
+                    }}
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    {t('admin.fields.addBookedAvailabilityRange')}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      mutate((next) => void next.availability.push(createAvailabilityRange('unavailable')))
+                      setShowUnavailableAvailability(true)
+                      setAvailabilitySort('dateDesc')
+                      setAvailabilityPage(1)
+                    }}
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    {t('admin.fields.addUnavailableAvailabilityRange')}
+                  </Button>
+                </div>
               </div>
             ) : null}
 

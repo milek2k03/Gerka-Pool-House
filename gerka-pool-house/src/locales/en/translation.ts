@@ -458,6 +458,8 @@ export const en = {
       metaDescription: 'Google description',
       availabilityEmpty: 'No manually added dates.',
       addAvailabilityRange: 'Add dates',
+      addBookedAvailabilityRange: 'Add booked dates',
+      addUnavailableAvailabilityRange: 'Add unavailable dates',
     },
     reservationsEmpty: 'No saved inquiries.',
     status: {
