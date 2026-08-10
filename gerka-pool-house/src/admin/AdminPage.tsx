@@ -2,6 +2,7 @@ import {
   BadgeDollarSign,
   BookOpen,
   CalendarOff,
+  Check,
   ArrowDown,
   ArrowUp,
   ChevronDown,
@@ -78,6 +79,7 @@ type AvailabilitySortOption = 'dateAsc' | 'dateDesc'
 type AdminNotice = 'saved' | 'restored' | null
 type GalleryDragState = { sectionIndex: number; itemId: string } | null
 type GalleryDropTarget = { sectionIndex: number; itemId: string; position: 'before' | 'after' } | null
+type AvailabilityDraft = Omit<AvailabilityRange, 'id'>
 type ReservationAcceptanceConflict =
   | { type: 'reservation'; reservation: ReservationRequest }
   | { type: 'availability'; range: AvailabilityRange }
@@ -296,7 +298,7 @@ function previousDayISO(date: string) {
   return toISODate(addDays(toDate(date), -1))
 }
 
-function getInclusiveUnavailableEnd(range: AvailabilityRange) {
+function getInclusiveUnavailableEnd(range: Pick<AvailabilityRange, 'from' | 'to'>) {
   if (!range.to || range.to <= range.from) return range.from
 
   return previousDayISO(range.to)
@@ -308,11 +310,10 @@ function getExclusiveUnavailableEnd(inclusiveEnd: string, from: string) {
   return nextDayISO(safeInclusiveEnd)
 }
 
-function createAvailabilityRange(status: AvailabilityStatus): AvailabilityRange {
+function createAvailabilityDraft(status: AvailabilityStatus = 'booked'): AvailabilityDraft {
   const from = getTomorrowISO()
 
   return {
-    id: crypto.randomUUID(),
     from,
     to: nextDayISO(from),
     status,
@@ -431,6 +432,7 @@ export function AdminPage() {
   const [availabilitySort, setAvailabilitySort] = useState<AvailabilitySortOption>('dateAsc')
   const [showBookedAvailability, setShowBookedAvailability] = useState(true)
   const [showUnavailableAvailability, setShowUnavailableAvailability] = useState(true)
+  const [newAvailabilityDraft, setNewAvailabilityDraft] = useState<AvailabilityDraft | null>(null)
   const [draggedGalleryItem, setDraggedGalleryItem] = useState<GalleryDragState>(null)
   const [galleryDropTarget, setGalleryDropTarget] = useState<GalleryDropTarget>(null)
   const [openGallerySectionIds, setOpenGallerySectionIds] = useState<string[]>(() =>
@@ -590,6 +592,35 @@ export function AdminPage() {
     setIsDraftDirty(true)
     setNotice(null)
     setContentActionError('')
+  }
+
+  const updateNewAvailabilityDraft = (updater: (next: AvailabilityDraft) => void) => {
+    setNewAvailabilityDraft((current) => {
+      const next = structuredClone(current ?? createAvailabilityDraft())
+      updater(next)
+      return next
+    })
+  }
+
+  const addNewAvailabilityDraft = () => {
+    const rangeDraft = newAvailabilityDraft ?? createAvailabilityDraft()
+
+    mutate((next) =>
+      void next.availability.push({
+        id: crypto.randomUUID(),
+        ...rangeDraft,
+      }),
+    )
+
+    if (rangeDraft.status === 'booked') {
+      setShowBookedAvailability(true)
+    } else {
+      setShowUnavailableAvailability(true)
+    }
+
+    setAvailabilitySort('dateDesc')
+    setAvailabilityPage(1)
+    setNewAvailabilityDraft(null)
   }
 
   const moveGalleryItem = (sectionIndex: number, fromIndex: number, toIndex: number) => {
@@ -1666,6 +1697,101 @@ export function AdminPage() {
 
             {activeTab === 'availability' ? (
               <div className="grid gap-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={newAvailabilityDraft !== null}
+                    onClick={() => setNewAvailabilityDraft(createAvailabilityDraft())}
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    {t('admin.fields.addAvailabilityRange')}
+                  </Button>
+                </div>
+                {newAvailabilityDraft ? (
+                  <article className="grid gap-4 rounded-md border border-[var(--color-brass)] bg-[rgba(214,181,138,0.10)] p-4 shadow-[0_18px_42px_rgba(0,0,0,0.18)]">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h3 className="text-base font-semibold text-[var(--color-ink)]">
+                        {t('admin.fields.newAvailabilityRange')}
+                      </h3>
+                      <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-[var(--color-muted)]">
+                        <span
+                          className={cn(
+                            'size-2.5 rounded-full ring-4',
+                            newAvailabilityDraft.status === 'booked'
+                              ? 'bg-red-500 ring-red-500/15'
+                              : 'bg-sky-400 ring-sky-400/15',
+                          )}
+                          aria-hidden="true"
+                        />
+                        {newAvailabilityDraft.status === 'booked' ? t('booking.booked') : t('booking.unavailable')}:{' '}
+                        {newAvailabilityDraft.from} - {getInclusiveUnavailableEnd(newAvailabilityDraft)}
+                      </p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(10rem,0.7fr)_1fr_1fr_auto] lg:items-end">
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.availabilityStatus')}
+                        <select
+                          className="field"
+                          value={newAvailabilityDraft.status}
+                          onChange={(event) => {
+                            const status = event.target.value as AvailabilityStatus
+                            updateNewAvailabilityDraft((next) => {
+                              next.status = status
+                            })
+                          }}
+                        >
+                          <option value="booked">{t('booking.booked')}</option>
+                          <option value="unavailable">{t('booking.unavailable')}</option>
+                        </select>
+                      </label>
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.availabilityFrom')}
+                        <input
+                          className="field"
+                          type="date"
+                          min={getTomorrowISO()}
+                          value={newAvailabilityDraft.from}
+                          onChange={(event) =>
+                            updateNewAvailabilityDraft((next) => {
+                              const currentInclusiveEnd = getInclusiveUnavailableEnd(next)
+                              next.from = event.target.value
+                              next.to = getExclusiveUnavailableEnd(currentInclusiveEnd, next.from)
+                            })
+                          }
+                        />
+                      </label>
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('admin.fields.availabilityTo')}
+                        <input
+                          className="field"
+                          type="date"
+                          min={newAvailabilityDraft.from}
+                          value={getInclusiveUnavailableEnd(newAvailabilityDraft)}
+                          onChange={(event) =>
+                            updateNewAvailabilityDraft((next) => {
+                              next.to = getExclusiveUnavailableEnd(event.target.value, next.from)
+                            })
+                          }
+                        />
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" onClick={addNewAvailabilityDraft}>
+                          <Check aria-hidden="true" className="size-4" />
+                          {t('admin.fields.confirmAddAvailabilityRange')}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setNewAvailabilityDraft(null)}
+                        >
+                          {t('common.cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                ) : null}
                 <div className="flex flex-wrap items-end justify-between gap-4 rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-4">
                   <fieldset className="flex flex-wrap gap-4">
                     <legend className="mb-2 text-sm font-medium text-[var(--color-ink)]">
@@ -1831,34 +1957,6 @@ export function AdminPage() {
                     </Button>
                   </nav>
                 ) : null}
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      mutate((next) => void next.availability.push(createAvailabilityRange('booked')))
-                      setShowBookedAvailability(true)
-                      setAvailabilitySort('dateDesc')
-                      setAvailabilityPage(1)
-                    }}
-                  >
-                    <Plus aria-hidden="true" className="size-4" />
-                    {t('admin.fields.addBookedAvailabilityRange')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      mutate((next) => void next.availability.push(createAvailabilityRange('unavailable')))
-                      setShowUnavailableAvailability(true)
-                      setAvailabilitySort('dateDesc')
-                      setAvailabilityPage(1)
-                    }}
-                  >
-                    <Plus aria-hidden="true" className="size-4" />
-                    {t('admin.fields.addUnavailableAvailabilityRange')}
-                  </Button>
-                </div>
               </div>
             ) : null}
 

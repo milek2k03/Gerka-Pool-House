@@ -8,6 +8,7 @@ export const pl = {
     previousImage: 'Poprzednie zdjęcie',
     nextImage: 'Następne zdjęcie',
     save: 'Zapisz',
+    cancel: 'Anuluj',
     reset: 'Przywróć domyślne',
     add: 'Dodaj',
     remove: 'Usuń',
@@ -460,8 +461,8 @@ export const pl = {
       metaDescription: 'Opis w Google',
       availabilityEmpty: 'Brak ręcznie dodanych terminów.',
       addAvailabilityRange: 'Dodaj termin',
-      addBookedAvailabilityRange: 'Dodaj zajęty termin',
-      addUnavailableAvailabilityRange: 'Dodaj niedostępny termin',
+      newAvailabilityRange: 'Nowy termin',
+      confirmAddAvailabilityRange: 'Dodaj do listy',
     },
     reservationsEmpty: 'Brak zapisanych zapytań.',
     status: {

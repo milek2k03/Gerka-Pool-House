@@ -8,6 +8,7 @@ export const en = {
     previousImage: 'Previous image',
     nextImage: 'Next image',
     save: 'Save',
+    cancel: 'Cancel',
     reset: 'Restore defaults',
     add: 'Add',
     remove: 'Remove',
@@ -458,8 +459,8 @@ export const en = {
       metaDescription: 'Google description',
       availabilityEmpty: 'No manually added dates.',
       addAvailabilityRange: 'Add dates',
-      addBookedAvailabilityRange: 'Add booked dates',
-      addUnavailableAvailabilityRange: 'Add unavailable dates',
+      newAvailabilityRange: 'New dates',
+      confirmAddAvailabilityRange: 'Add to list',
     },
     reservationsEmpty: 'No saved inquiries.',
     status: {
