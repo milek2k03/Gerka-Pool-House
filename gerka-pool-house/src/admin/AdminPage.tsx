@@ -1277,6 +1277,20 @@ export function AdminPage() {
                         <p className="text-sm leading-6 text-[var(--color-muted)]">
                           {t('admin.fields.galleryOrderHelp')}
                         </p>
+                        <GalleryItemMediaPicker
+                          multiple
+                          onFilesUploaded={(uploads) =>
+                            mutate((next) => {
+                              const target = next.gallerySections.find((group) => group.id === section.id)
+                              if (!target) return
+                              target.items.push(...uploads.map((upload) => ({
+                                ...createGalleryItem(upload.asset),
+                                title: { pl: upload.displayName, en: upload.displayName },
+                                alt: { pl: upload.displayName, en: upload.displayName },
+                              })))
+                            })
+                          }
+                        />
                         {section.items.map((item, itemIndex) => (
                           <div
                             key={item.id}
@@ -1413,7 +1427,9 @@ export function AdminPage() {
                                 <GalleryItemMediaPicker
                                   onUploaded={(upload) =>
                                     mutate((next) => {
-                                      next.gallerySections[sectionIndex].items[itemIndex].image = upload.asset
+                                      const target = next.gallerySections.find((group) => group.id === section.id)
+                                        ?.items.find((entry) => entry.id === item.id)
+                                      if (target) target.image = upload.asset
                                     })
                                   }
                                 />

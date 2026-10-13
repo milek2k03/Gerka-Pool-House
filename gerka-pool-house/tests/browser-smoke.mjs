@@ -25,6 +25,7 @@ let stamp = content.updatedAt
 const reservations = []
 let delivered = 0
 let adminAllowed = true
+const uploadedPaths = []
 const errors = []
 const user = { id: '00000000-0000-4000-8000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'admin@example.com' }
 const jwt = `${Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')}.${Buffer.from(JSON.stringify({ sub: user.id, role: 'authenticated', aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })).toString('base64url')}.test`
@@ -41,6 +42,12 @@ await context.route('**/*', async (route) => {
   const url = new URL(request.url())
   const reply = (data, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(data) })
   if (url.hostname === 'test-project.supabase.co') {
+    if (url.pathname.startsWith('/storage/v1/object/') && request.method() === 'POST') {
+      uploadedPaths.push(url.pathname)
+      await new Promise((resolve) => setTimeout(resolve, 250))
+      if (url.pathname.includes('failure')) return reply({ message: 'Upload fixture failed' }, 500)
+      return reply({ Key: url.pathname.replace('/storage/v1/object/', '') })
+    }
     if (url.pathname.startsWith('/auth/v1/token')) return reply({ access_token: jwt, refresh_token: 'test-refresh', expires_in: 3600, token_type: 'bearer', user })
     if (url.pathname.startsWith('/auth/v1/user')) return reply(user)
     if (url.pathname.startsWith('/auth/v1/logout')) return reply({})
@@ -137,6 +144,39 @@ try {
   await page.reload(); await page.locator('#pricing').waitFor()
   await page.getByText(/check-out.*10:30/i).first().waitFor()
 
+  // Desktop file drops add all successful files, preserve concurrent edits and reject duplicate batches.
+  await admin.getByRole('button', { name: pl.admin.tabs.gallery, exact: true }).click()
+  const galleryId = content.gallerySections[0].id
+  const galleryGroup = admin.locator(`#admin-gallery-${galleryId}`)
+  const originalCount = content.gallerySections[0].items.length
+  const dropzone = galleryGroup.getByRole('button', { name: pl.admin.mediaAddDropzone, exact: true })
+  const png = Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=', 'base64'))
+  const drop = () => dropzone.evaluate((element, bytes) => {
+    const transfer = new DataTransfer()
+    for (const name of ['first.png', 'second.png', 'failure.png']) {
+      transfer.items.add(new File([new Uint8Array(bytes)], name, { type: 'image/png' }))
+    }
+    transfer.items.add(new File(['unsupported'], 'notes.txt', { type: 'text/plain' }))
+    element.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer: transfer }))
+    element.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer }))
+  }, png)
+  await drop()
+  await drop()
+  await galleryGroup.locator('textarea').first().fill('Edited while uploading')
+  await galleryGroup.getByText(pl.admin.mediaAddSuccess.replace('{{count}}', '2'), { exact: true }).waitFor()
+  assert.equal(uploadedPaths.length, 3)
+  assert.ok((await galleryGroup.getByRole('alert').textContent()).includes('notes.txt'))
+  assert.ok((await galleryGroup.getByRole('alert').textContent()).includes('failure.png'))
+  await admin.getByRole('button', { name: pl.admin.saveChanges, exact: true }).click()
+  await admin.getByText(pl.admin.allChangesSaved, { exact: true }).waitFor()
+  assert.equal(content.gallerySections[0].items.length, originalCount + 2)
+  assert.equal(content.gallerySections[0].lead.pl, 'Edited while uploading')
+  assert.deepEqual(content.gallerySections[0].items.slice(-2).map((item) => item.title.pl), ['first', 'second'])
+  await admin.reload()
+  await admin.getByRole('button', { name: pl.admin.tabs.gallery, exact: true }).click()
+  assert.equal(await galleryGroup.locator('input[type=file][multiple]').count(), 1)
+  await admin.getByRole('button', { name: pl.admin.tabs.pricing, exact: true }).click()
+
   const second = await context.newPage(); capture(second)
   await second.goto(`${origin}/admin`)
   await second.getByRole('button', { name: pl.admin.tabs.pricing, exact: true }).click()
@@ -177,7 +217,7 @@ try {
   await admin.getByText('Administrator access required', { exact: true }).waitFor()
   assert.equal(await admin.getByRole('button', { name: pl.admin.saveChanges, exact: true }).count(), 0)
   assert.deepEqual(errors, [])
-  console.log('Browser checks passed: booking both, promotional price, email payload, PL/EN, mobile overflow, admin login, save, stale editor protection, separate calendars and manual block.')
+  console.log('Browser checks passed: booking both, promotional price, email payload, PL/EN, mobile overflow, admin login, gallery desktop batch drop with partial failures and persistence, save, stale editor protection, separate calendars and manual block.')
 } finally {
   await context.close(); await browser.close()
 }
