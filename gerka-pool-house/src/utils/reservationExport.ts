@@ -15,7 +15,7 @@ const exportCopy = {
     nights: 'Liczba nocy',
     guests: 'Liczba gości',
     roomsUsed: 'Wykorzystane apartamenty',
-    nightlyPrice: 'Cena za noc',
+    nightlyPrice: 'Cena bazowa za noc (przed rabatem)',
     estimatedTotal: 'Cena szacunkowa',
     message: 'Wiadomość',
     createdAt: 'Data zgłoszenia',
@@ -31,15 +31,16 @@ const exportCopy = {
     nights: 'Nights',
     guests: 'Guests',
     roomsUsed: 'Apartments used',
-    nightlyPrice: 'Price per night',
+    nightlyPrice: 'Base nightly price (before discount)',
     estimatedTotal: 'Estimated price',
     message: 'Message',
     createdAt: 'Created at',
   },
 } as const
 
-function escapeCsvCell(value: string | number) {
-  const normalized = String(value).replace(/\r?\n/g, ' ').trim()
+export function escapeCsvCell(value: string | number) {
+  const text = String(value).replace(/\r?\n/g, ' ').trim()
+  const normalized = /^[=+@-]/.test(text) ? `'${text}` : text
   return `"${normalized.replace(/"/g, '""')}"`
 }
 

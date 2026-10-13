@@ -1,5 +1,9 @@
+import { bookingLimits } from '../constants/bookingLimits'
+import { assertContentRevision, ContentValidationError, persistSiteContent } from './contentPersistence'
 import { defaultSiteContent } from '../constants/defaultContent'
 import type { ImageAsset, SiteContent } from '../types/content'
+import { normalizeDiscountCode } from '../utils/discounts'
+import { isISODate } from '../utils/date'
 import { removeExpiredManualAvailabilityRanges } from '../utils/availability'
 import {
   getSupabaseClient,
@@ -29,7 +33,7 @@ async function loadPublicContent(): Promise<Partial<SiteContent> | null> {
   if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) return null
 
   if (
-    !bootstrapContentConsumed &&
+    !bootstrapContentConsumed && !hasSupabaseAuthSession() &&
     typeof window !== 'undefined' &&
     window.__GERKA_SITE_CONTENT_PROMISE__
   ) {
@@ -44,7 +48,7 @@ async function loadPublicContent(): Promise<Partial<SiteContent> | null> {
 
   try {
     const response = await fetch(
-      `${supabaseUrl}/rest/v1/${tableName}?id=eq.${contentId}&select=content`,
+      `${supabaseUrl}/rest/v1/${tableName}?id=eq.${contentId}&select=content,updated_at`,
       {
         signal: controller.signal,
         headers: {
@@ -57,9 +61,9 @@ async function loadPublicContent(): Promise<Partial<SiteContent> | null> {
 
     if (!response.ok) return null
 
-    const rows = (await response.json()) as Array<{ content?: Partial<SiteContent> }>
+    const rows = (await response.json()) as Array<{ content?: Partial<SiteContent>; updated_at?: string }>
 
-    return rows[0]?.content ?? null
+    return rows[0]?.content ? { ...rows[0].content, updatedAt: rows[0].updated_at ?? rows[0].content.updatedAt } : null
   } catch {
     return null
   } finally {
@@ -1027,6 +1031,21 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     content = tokenizeBrand(content) as SiteContent
   }
 
+  if (storedVersion < 28) {
+    content.version = defaultSiteContent.version
+    for (const locale of ['pl', 'en'] as const) {
+      if (/^(Dwa apartamenty, prywatna|Two apartments, a private)/.test(content.about.title[locale])) {
+        content.about.title[locale] = defaultSiteContent.about.title[locale]
+      }
+      if (/^(Wybierz apartament na parterze|Choose the ground-floor apartment)/.test(content.about.lead[locale])) {
+        content.about.lead[locale] = defaultSiteContent.about.lead[locale]
+      }
+      if (/^(Cena weekendowa wynosi|The weekend rate is)/.test(content.pricing.extraInfo[locale])) {
+        content.pricing.extraInfo[locale] = defaultSiteContent.pricing.extraInfo[locale]
+      }
+    }
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 
@@ -1056,9 +1075,10 @@ export const contentRepository = {
     }
   },
 
-  async load(): Promise<SiteContent> {
+  async load(options: { requireRemote?: boolean } = {}): Promise<SiteContent> {
     if (isSupabaseConfigured) {
       const parsed = await loadPublicContent()
+      if (!parsed && options.requireRemote) throw new Error('Could not load current site settings')
 
       if (parsed) {
         const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
@@ -1098,34 +1118,66 @@ export const contentRepository = {
 
   async save(content: SiteContent) {
     const pricing = content.pricing
+    if (!content.brandName.trim() || content.brandName.trim().length > 120 || content.logoText.trim().length > 12) {
+      throw new ContentValidationError('admin.invalidBrand', 'Invalid brand name or logo abbreviation')
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (![content.contact.email, content.booking.ownerEmail].every((email) => emailPattern.test(email.trim()) && email.trim().length <= 254)) {
+      throw new ContentValidationError('admin.invalidContact', 'Invalid contact or reservation email')
+    }
+    for (const settings of Object.values(content.seo)) {
+      try {
+        const canonical = new URL(settings.canonicalPath || '/', 'https://example.com')
+        if (!['http:', 'https:'].includes(canonical.protocol)) throw new Error('protocol')
+      } catch { throw new ContentValidationError('admin.invalidSeo', 'Invalid canonical URL') }
+    }
+    if (content.availability.some((range) => !isISODate(range.from) || !isISODate(range.to) ||
+      range.to <= range.from || !['booked', 'unavailable'].includes(range.status) ||
+      (range.apartment !== undefined && !['ground', 'upper', 'both'].includes(range.apartment)))) {
+      throw new ContentValidationError('admin.invalidAvailability', 'Invalid availability range')
+    }
     if (!Number.isInteger(pricing.room1Capacity) || pricing.room1Capacity < 1 ||
-      !Number.isInteger(pricing.maxGuests) || pricing.maxGuests < pricing.room1Capacity ||
+      !Number.isInteger(pricing.maxGuests) || pricing.maxGuests > bookingLimits.maxGuests || pricing.maxGuests < pricing.room1Capacity ||
       (pricing.room2Enabled && pricing.maxGuests <= pricing.room1Capacity) ||
-      !Number.isInteger(pricing.minStayNights) || pricing.minStayNights < 1) {
-      throw new Error('Invalid apartment capacity or minimum stay')
+      !Number.isInteger(pricing.minStayNights) || pricing.minStayNights < 1 || pricing.minStayNights > bookingLimits.maxNights) {
+      throw new ContentValidationError('admin.invalidPricing', 'Invalid apartment capacity or minimum stay')
+    }
+    const discountCodes = new Set<string>()
+    for (const discount of pricing.discounts) {
+      const code = normalizeDiscountCode(discount.code)
+      if (!code || code.length > 40 || discountCodes.has(code) ||
+        !Number.isFinite(discount.percent) || discount.percent < 1 || discount.percent > 100 ||
+        (discount.type === 'dateRange' && (!isISODate(discount.validFrom ?? '') || !isISODate(discount.validTo ?? '') || discount.validTo! < discount.validFrom!)) ||
+        (discount.type === 'recurring' && (!discount.weekdays?.length || discount.weekdays.some((day) => !Number.isInteger(day) || day < 1 || day > 7)))) {
+        throw new ContentValidationError('admin.invalidDiscounts', 'Invalid or duplicate discount code')
+      }
+      discountCodes.add(code)
     }
     for (const time of [content.pricing.checkInTime, content.pricing.checkOutTime]) {
       if (time !== undefined && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
-        throw new Error('Invalid check-in or check-out time')
+        throw new ContentValidationError('admin.invalidTimes', 'Invalid check-in or check-out time')
       }
     }
     for (const price of [content.pricing.room1Nightly, content.pricing.room2Nightly,
       content.pricing.bothNightly, content.pricing.weeksaveBaseNightly, content.pricing.weeksaveExtraGuestNightly]) {
-      if (price !== undefined && (!Number.isFinite(price) || price < 0)) throw new Error('Invalid price')
+      if (price !== undefined && (!Number.isFinite(price) || price < 0 || price > bookingLimits.money)) throw new ContentValidationError('admin.invalidPricing', 'Invalid price')
     }
     const next = removeExpiredAvailability({
       ...content,
+      brandName: content.brandName.trim(),
+      logoText: content.logoText.trim(),
+      contact: { ...content.contact, email: content.contact.email.trim() },
+      booking: { ...content.booking, ownerEmail: content.booking.ownerEmail.trim() },
       version: defaultSiteContent.version,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(Math.max(Date.now(), (Date.parse(content.updatedAt) || 0) + 1)).toISOString(),
     })
     const supabase = await getSupabaseClient()
 
     if (supabase) {
-      const { error } = await supabase
-        .from(tableName)
-        .upsert({ id: contentId, content: next, updated_at: next.updatedAt }, { onConflict: 'id' })
-
-      if (error) throw error
+      await persistSiteContent(supabase, next, content.updatedAt)
+    } else if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem(storageKey)
+      if (stored) assertContentRevision(content.updatedAt, (JSON.parse(stored) as SiteContent).updatedAt)
     }
 
     this.saveLocal(next)
@@ -1144,10 +1196,10 @@ export const contentRepository = {
     const supabase = await getSupabaseClient()
     if (!supabase) return null
 
-    const { data, error } = await supabase.from(tableName).select('content').eq('id', contentId).maybeSingle()
+    const { data, error } = await supabase.from(tableName).select('content,updated_at').eq('id', contentId).maybeSingle()
     if (error || !data?.content) return null
 
-    const parsed = data.content as Partial<SiteContent>
+    const parsed = { ...data.content, updatedAt: data.updated_at } as Partial<SiteContent>
     const storedVersion = typeof parsed.version === 'number' ? parsed.version : 0
     const merged = mergeDeep(cloneContent(defaultSiteContent), parsed)
     const previousCount = merged.availability?.length ?? 0
@@ -1158,9 +1210,9 @@ export const contentRepository = {
     return this.save(next)
   },
 
-  async reset() {
-    const next = cloneContent(defaultSiteContent)
-
+  async reset(previous?: SiteContent) {
+    const current = previous ?? await this.load()
+    const next = { ...cloneContent(defaultSiteContent), updatedAt: current.updatedAt }
     return this.save(next)
   },
 

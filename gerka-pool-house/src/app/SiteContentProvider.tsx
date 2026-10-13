@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
+import { getTodayISO } from '../utils/date'
 import { contentRepository } from '../services/contentRepository'
 import { SiteContentContext, type SiteContentContextValue } from './siteContentContext'
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
+  const sequence = useRef(0)
   const [content, setContent] = useState(() => contentRepository.loadLocal())
 
   useEffect(() => {
@@ -12,10 +14,11 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
     let unsubscribe: () => void = () => {}
 
     const loadContent = async () => {
+      const request = ++sequence.current
       try {
         const next = await contentRepository.load()
 
-        if (active) {
+        if (active && request === sequence.current) {
           setContent(next)
         }
       } catch {
@@ -23,15 +26,14 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    let lastDay = getTodayISO()
     const scheduleMidnightRefresh = () => {
       if (!active) return
-
-      const now = new Date()
-      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1)
-
       midnightTimer = window.setTimeout(() => {
-        void loadContent().finally(scheduleMidnightRefresh)
-      }, nextMidnight.getTime() - now.getTime())
+        const day = getTodayISO()
+        if (day !== lastDay) { lastDay = day; void loadContent() }
+        scheduleMidnightRefresh()
+      }, 60_000)
     }
 
     void loadContent()
@@ -50,11 +52,19 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       content,
       async saveContent(nextContent) {
         const saved = await contentRepository.save(nextContent)
+        sequence.current++
         setContent(saved)
         return saved
       },
+      async refreshContent() {
+        const next = await contentRepository.load({ requireRemote: true })
+        sequence.current++
+        setContent(next)
+        return next
+      },
       async resetContent() {
-        const next = await contentRepository.reset()
+        const next = await contentRepository.reset(content)
+        sequence.current++
         setContent(next)
         return next
       },

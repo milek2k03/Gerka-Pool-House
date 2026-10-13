@@ -12,7 +12,7 @@ const socialPreviewImage = '/URLimage.png?v=9'
 const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
-  version: 27,
+  version: 28,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -40,12 +40,12 @@ export const defaultSiteContent: SiteContent = {
   },
   about: {
     title: {
-      pl: 'Dwa apartamenty, prywatna strefa basenowa i sauna',
-      en: 'Two apartments, a private pool area and a sauna',
+      pl: '{{apartmentsTitle}}',
+      en: '{{apartmentsTitle}}',
     },
     lead: {
-      pl: 'Wybierz apartament na parterze dla maksymalnie {{capacityGround}} osób, apartament na piętrze dla {{capacityUpper}} osób lub wynajmij całość dla maksymalnie {{maxGuests}} osób. W okolicy czekają Bydgoszcz, Toruń, Chełmno i Dąbrowa Chełmińska.',
-      en: 'Choose the ground-floor apartment for up to {{capacityGround}} guests, the upstairs apartment for {{capacityUpper}} guests, or rent both for up to {{maxGuests}} guests. Explore nearby Bydgoszcz, Torun, Chelmno and Dabrowa Chelminska.',
+      pl: '{{apartmentsOffer}} W okolicy czekają Bydgoszcz, Toruń, Chełmno i Dąbrowa Chełmińska.',
+      en: '{{apartmentsOffer}} Explore nearby Bydgoszcz, Torun, Chelmno and Dabrowa Chelminska.',
     },
     body: {
       pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie {{capacityGround}} osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest prywatny basen podgrzewany od 1 maja do 30 września, sauna, leżaki, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.\n\nImprezy okolicznościowe można organizować na zewnątrz, na tarasie, od maja do końca września, po wcześniejszym uzgodnieniu z właścicielem. Cena jest ustalana indywidualnie.',
@@ -501,8 +501,8 @@ export const defaultSiteContent: SiteContent = {
     currency: 'PLN',
     discounts: [],
     extraInfo: {
-      pl: 'Cena weekendowa wynosi {{priceGround}} za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Doba hotelowa trwa od {{checkInTime}}, wymeldowanie do {{checkOutTime}}. Apartament na piętrze dla {{capacityUpper}} osób: {{priceUpper}} za dobę. Wynajem całości (parter i piętro): {{priceBoth}} za dobę. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
-      en: 'The weekend rate is {{priceGround}} per night: Friday to Saturday, Saturday to Sunday and Sunday to Monday. Check-in starts at {{checkInTime}} and check-out is by {{checkOutTime}}. Upstairs apartment for {{capacityUpper}} guests: {{priceUpper}} per night. Both apartments together: {{priceBoth}} per night. The amount requires confirmation by the owner after checking availability.',
+      pl: '{{pricingSummary}} Doba hotelowa trwa od {{checkInTime}}, wymeldowanie do {{checkOutTime}}.',
+      en: '{{pricingSummary}} Check-in starts at {{checkInTime}} and check-out is by {{checkOutTime}}.',
     },
   },
   faq: [

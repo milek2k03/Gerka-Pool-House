@@ -1,37 +1,7 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
-import { registerHooks } from 'node:module'
-import { fileURLToPath } from 'node:url'
 import test from 'node:test'
-import ts from 'typescript'
 
-// Load the application's TypeScript directly without generated test artifacts.
-registerHooks({
-  resolve(specifier, context, nextResolve) {
-    if (specifier.startsWith('.') && context.parentURL) {
-      const url = new URL(specifier, context.parentURL)
-      if (url.pathname.endsWith('.js') && existsSync(fileURLToPath(url).slice(0, -3) + '.ts')) return nextResolve(url.href.slice(0, -3) + '.ts', context)
-      if (!existsSync(fileURLToPath(url))) {
-        for (const extension of ['.ts', '.tsx']) {
-          if (existsSync(fileURLToPath(url) + extension)) return nextResolve(url.href + extension, context)
-        }
-      }
-    }
-    return nextResolve(specifier, context)
-  },
-  load(url, context, nextLoad) {
-    if (/\.(webp|avif|png)$/.test(url)) {
-      return { format: 'module', shortCircuit: true, source: `export default ${JSON.stringify(url)}` }
-    }
-    if (/\.tsx?$/.test(url)) {
-      const source = readFileSync(fileURLToPath(url), 'utf8').replaceAll('import.meta.env', '({})')
-      return { format: 'module', shortCircuit: true, source: ts.transpileModule(source, {
-        compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-      }).outputText }
-    }
-    return nextLoad(url, context)
-  },
-})
+import './load-typescript.mjs'
 
 const { calculateStaySummary } = await import('../src/features/booking/booking.utils.ts')
 const { getReservationApartment, apartmentsOverlap } = await import('../src/utils/apartments.ts')
@@ -146,7 +116,7 @@ test('stored site content receives new rates and amenities while preserving manu
   } }
   try {
     const migrated = contentRepository.loadLocal()
-    assert.equal(migrated.version, 27)
+    assert.equal(migrated.version, 28)
     assert.equal(migrated.pricing.room2Nightly, 1600)
     assert.equal(migrated.pricing.bothNightly, 2500)
     assert.equal(migrated.pricing.room2Enabled, true)
@@ -221,15 +191,15 @@ test('admin changes update descriptions, pricing, FAQ and SEO in both languages 
     const singleMarkup = renderToStaticMarkup(React.createElement(PricingSection, { pricing: single.pricing, locale }))
     assert.ok(singleMarkup.includes(priceGround))
     assert.ok(!singleMarkup.includes('1000'))
-    assert.ok(!bookingMarkup.includes('1000'))
+    assert.ok(!bookingMarkup.includes(formatMoney(1000, locale, 'PLN')))
     raw.pricing.room2Enabled = true
   }
-  assert.match(raw.pricing.extraInfo.pl, /\{\{priceGround\}\}/)
+  assert.match(raw.pricing.extraInfo.pl, /\{\{pricingSummary\}\}/)
   assert.equal(raw.pricing.checkOutTime, '10:15')
 })
 
 test('weekday offer calculations use the same configurable rates as the displayed offer', () => {
-  const settings = { ...pricing, weeksaveBaseNightly: 650, weeksaveExtraGuestNightly: 175 }
+  const settings = { ...pricing, room1Nightly: 1000, weeksaveBaseNightly: 650, weeksaveExtraGuestNightly: 175 }
   // 2099-06-15 is Monday; every selected night is a weekday.
   const stay = calculateStaySummary('2099-06-15', '2099-06-17', 3, settings, [], '', 'ground')
   assert.equal(stay.discountKind, 'weeksave')
@@ -255,7 +225,7 @@ test('saving settings notifies another subscriber and preserves reusable templat
     await contentRepository.save(raw)
     assert.equal(changes, 1)
     assert.equal(contentRepository.loadLocal().pricing.checkOutTime, '09:45')
-    assert.match(contentRepository.loadLocal().pricing.extraInfo.pl, /\{\{priceGround\}\}/)
+    assert.match(contentRepository.loadLocal().pricing.extraInfo.pl, /\{\{pricingSummary\}\}/)
     window.dispatchEvent(Object.assign(new Event('storage'), { key: 'unrelated' }))
     assert.equal(changes, 1)
     window.dispatchEvent(Object.assign(new Event('storage'), { key: 'gerka-pool-house:site-content:v1' }))
@@ -455,4 +425,206 @@ test('SEO links support editable absolute canonicals, query parameters and a cle
   const lodging = schema['@graph'].find((item) => item['@type'] === 'LodgingBusiness')
   assert.equal(lodging.url, 'https://example.com/new-canonical')
   assert.equal(lodging.image, content.hero.image.src)
+})
+
+
+test('invalid calendar dates, excessive stays and fractional guest counts cannot be booked', async () => {
+  const { isISODate, nightsBetween } = await import('../src/utils/date.ts')
+  assert.equal(isISODate('2099-02-31'), false)
+  assert.equal(isISODate('2100-02-29'), false)
+  assert.equal(isISODate('2096-02-29'), true)
+  assert.equal(nightsBetween('broken', '2099-06-10'), 0)
+  assert.equal(summary('ground', [], 2, pricing, '2099-02-31', '2099-03-05').isValid, false)
+  assert.equal(summary('ground', [], 2, pricing, '2099-01-01', '2099-05-01').reason, 'maxStay')
+  assert.equal(summary('ground', [], 2.5).reason, 'guestLimit')
+})
+
+test('frontend input limits match the server limits and preserve cents', async () => {
+  const { bookingSchema } = await import('../src/features/booking/booking.schema.ts')
+  const { formatMoney } = await import('../src/utils/format.ts')
+  const valid = { apartment: 'ground', fullName: 'Example Guest', email: 'guest@example.com', phone: '123456789',
+    checkIn: '2099-06-10', checkOut: '2099-06-12', guests: 2, privacyConsent: true }
+  assert.equal(bookingSchema.safeParse(valid).success, true)
+  assert.equal(bookingSchema.safeParse({ ...valid, fullName: 'a'.repeat(161) }).success, false)
+  assert.equal(bookingSchema.safeParse({ ...valid, phone: '1'.repeat(41) }).success, false)
+  assert.equal(bookingSchema.safeParse({ ...valid, checkIn: '2099-02-31' }).success, false)
+  assert.match(formatMoney(1234.56, 'en', 'PLN'), /1,234\.56/)
+  const settings = { ...pricing, room1Nightly: 1234.56, discounts: [{ id: 'percent', code: 'SAVE', percent: 15, type: 'permanent' }] }
+  const stay = calculateStaySummary('2099-06-10', '2099-06-12', 2, settings, [], 'SAVE', 'ground')
+  assert.equal(stay.priceBeforeDiscount, 2469.12)
+  assert.equal(stay.discountAmount, 370.37)
+  assert.equal(Math.round(stay.estimatedTotal * 100), 209875)
+})
+
+test('whole-house weekday promotion is supported as requested', () => {
+  const settings = { ...pricing, room1Nightly: 1000, room2Nightly: 1600, bothNightly: 2500 }
+  const stay = calculateStaySummary('2099-06-15', '2099-06-17', 2, settings, [], '', 'both')
+  assert.equal(stay.estimatedTotal, 1000)
+  assert.equal(stay.nightlyPrice, 2500)
+  assert.equal(stay.discountKind, 'weeksave')
+})
+
+test('disabling upstairs updates stock titles, descriptions, FAQ and selectable capacity', async () => {
+  const { defaultSiteContent } = await import('../src/constants/defaultContent.ts')
+  const { resolveSiteContent } = await import('../src/utils/contentTemplates.ts')
+  const content = structuredClone(defaultSiteContent)
+  content.pricing.room2Enabled = false
+  const resolved = resolveSiteContent(content)
+  assert.ok(!resolved.about.title.en.includes('Two apartments'))
+  assert.ok(!resolved.about.lead.en.includes('rent both'))
+  assert.ok(!resolved.pricing.extraInfo.en.includes('Upstairs apartment'))
+  assert.ok(!resolved.faq.find((item) => item.id === 'pricing').answer.en.includes('Both apartments'))
+})
+
+test('concurrent local editors cannot overwrite a newer saved configuration', async () => {
+  const { defaultSiteContent } = await import('../src/constants/defaultContent.ts')
+  const { contentRepository } = await import('../src/services/contentRepository.ts')
+  const { ContentConflictError } = await import('../src/services/contentPersistence.ts')
+  const storage = new Map()
+  globalThis.window = Object.assign(new EventTarget(), { localStorage: {
+    getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) } })
+  try {
+    contentRepository.saveLocal(structuredClone(defaultSiteContent))
+    const first = contentRepository.loadLocal()
+    const second = contentRepository.loadLocal()
+    first.pricing.room1Nightly = 1500
+    const saved = await contentRepository.save(first)
+    second.pricing.room1Nightly = 1800
+    await assert.rejects(contentRepository.save(second), ContentConflictError)
+    assert.equal(contentRepository.loadLocal().pricing.room1Nightly, 1500)
+    assert.equal(saved.updatedAt, contentRepository.loadLocal().updatedAt)
+    const reset = await contentRepository.reset(saved)
+    assert.equal(reset.pricing.room1Nightly, defaultSiteContent.pricing.room1Nightly)
+  } finally { delete globalThis.window }
+})
+
+test('remote persistence checks revisions atomically and rejects a race after reading metadata', async () => {
+  const { persistSiteContent, ContentConflictError } = await import('../src/services/contentPersistence.ts')
+  const { defaultSiteContent } = await import('../src/constants/defaultContent.ts')
+  const expected = '2026-10-13T10:00:00.000Z'
+  const next = { ...structuredClone(defaultSiteContent), updatedAt: '2026-10-13T10:00:01.000Z' }
+  const state = { timestamp: expected, race: false, writes: 0 }
+  const client = { from() {
+    let update = false
+    let filter
+    return {
+      select() { return this },
+      eq(key, value) { if (key === 'updated_at') filter = value; return this },
+      update() { update = true; return this },
+      async maybeSingle() {
+        if (!update) {
+          const data = { updated_at: state.timestamp }
+          if (state.race) state.timestamp = '2026-10-13T10:00:02.000Z'
+          return { data, error: null }
+        }
+        if (filter !== state.timestamp) return { data: null, error: null }
+        state.writes++; state.timestamp = next.updatedAt
+        return { data: { id: 'main' }, error: null }
+      },
+    }
+  } }
+  await persistSiteContent(client, next, expected)
+  assert.equal(state.writes, 1)
+  await assert.rejects(persistSiteContent(client, next, expected), ContentConflictError)
+  state.timestamp = expected; state.race = true
+  await assert.rejects(persistSiteContent(client, next, expected), ContentConflictError)
+  assert.equal(state.writes, 1)
+})
+
+test('CSV output prevents spreadsheet formula execution in submitted guest data', async () => {
+  const { escapeCsvCell } = await import('../src/utils/reservationExport.ts')
+  assert.equal(escapeCsvCell('=HYPERLINK("https://example.com")').startsWith('"\''), true)
+  assert.equal(escapeCsvCell('+48123456789'), '"\'+48123456789"')
+  assert.equal(escapeCsvCell('A normal name'), '"A normal name"')
+})
+
+
+test('automatic weekday offer cannot increase the price above the ordinary rate', () => {
+  const settings = { ...pricing, weeksaveBaseNightly: 9000, weeksaveExtraGuestNightly: 9000 }
+  const stay = calculateStaySummary('2099-06-15', '2099-06-17', 2, settings, [], '', 'ground')
+  assert.equal(stay.estimatedTotal, pricing.room1Nightly * 2)
+  assert.equal(stay.discountCode, undefined)
+})
+
+test('invalid manual blocks and duplicate discount codes are rejected before saving', async () => {
+  const { defaultSiteContent } = await import('../src/constants/defaultContent.ts')
+  const { contentRepository } = await import('../src/services/contentRepository.ts')
+  const content = structuredClone(defaultSiteContent)
+  content.availability = [{ id: 'bad', from: '2099-02-31', to: '2099-03-10', apartment: 'upper', status: 'unavailable' }]
+  await assert.rejects(contentRepository.save(content), /Invalid availability/)
+  content.availability = []
+  content.pricing.discounts = [{ id: 'a', code: 'SAVE', percent: 20, type: 'permanent' }, { id: 'b', code: ' save ', percent: 30, type: 'permanent' }]
+  await assert.rejects(contentRepository.save(content), /duplicate discount/)
+  content.pricing.discounts = [{ id: 'a', code: 'SAVE', percent: 20, type: 'dateRange', validFrom: '2099-06-10', validTo: '2099-06-01' }]
+  await assert.rejects(contentRepository.save(content), /Invalid or duplicate discount/)
+})
+
+test('email API validates dates and sends escaped, idempotent owner/client messages using saved recipient', async () => {
+  const keys = ['VERCEL', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL', 'ALLOWED_ORIGIN', 'SUPABASE_URL', 'SUPABASE_ANON_KEY']
+  const saved = Object.fromEntries(keys.map((key) => [key, process.env[key]]))
+  const originalFetch = globalThis.fetch
+  const sent = []
+  try {
+    Object.assign(process.env, { VERCEL: '1', RESEND_API_KEY: 're_test_key', RESEND_FROM_EMAIL: 'test@example.com',
+      ALLOWED_ORIGIN: 'https://test.example.com', SUPABASE_URL: 'https://settings.example.com', SUPABASE_ANON_KEY: 'test-key' })
+    const { default: handler } = await import('../api/reservation-email.ts')
+    globalThis.fetch = async (url, options) => {
+      const address = String(url)
+      if (address.includes('/rest/v1/site_content')) return new Response(JSON.stringify([{ content: { booking: { ownerEmail: 'saved-owner@example.com' } } }]))
+      assert.ok(address.startsWith('https://api.resend.com/'))
+      sent.push({ body: JSON.parse(options.body), headers: Object.fromEntries(new Headers(options.headers)) })
+      return new Response(JSON.stringify({ id: `mail-${sent.length}` }), { headers: { 'Content-Type': 'application/json' } })
+    }
+    const body = { reservationNumber: 'GPH-20990615-TEST', ownerEmail: 'payload-owner@example.com', clientEmail: 'guest@example.com',
+      ownerSubject: 'Inquiry', clientSubject: 'Confirmation', clientBody: 'Thank you', propertyName: 'Test house', currency: 'PLN', locale: 'en',
+      request: { reservationNumber: 'GPH-20990615-TEST', fullName: '<script>test</script>', email: 'guest@example.com', phone: '123456789',
+        guests: 2, checkIn: '2099-06-15', checkOut: '2099-06-17', nights: 2, apartment: 'both', roomsUsed: 2, nightlyPrice: 2500, estimatedTotal: 1000, message: '<img src=x onerror=bad>' } }
+    const call = async (payload, method = 'POST') => {
+      let result
+      const response = { setHeader() {}, status(status) { return { json(data) { result = { status, data } }, end() { result = { status } } } } }
+      await handler({ method, headers: { origin: 'https://test.example.com', 'x-forwarded-for': '127.0.0.55' }, body: payload }, response)
+      return result
+    }
+    assert.equal((await call(body)).status, 200)
+    assert.equal(sent.length, 2)
+    assert.equal(sent[0].body.to, 'saved-owner@example.com')
+    assert.equal(sent[1].body.to, 'guest@example.com')
+    assert.equal(sent[0].headers['idempotency-key'], 'owner-GPH-20990615-TEST')
+    assert.ok(!sent[0].body.html.includes('<script>'))
+    assert.ok(sent[0].body.html.includes('&lt;script&gt;'))
+    assert.ok(sent[0].body.html.includes('before discount'))
+    assert.equal((await call({ ...body, request: { ...body.request, nights: 3 } })).status, 400)
+    assert.equal((await call({ ...body, request: { ...body.request, checkIn: '2099-02-31' } })).status, 400)
+    assert.equal((await call(body, 'GET')).status, 405)
+    assert.equal(sent.length, 2)
+  } finally {
+    globalThis.fetch = originalFetch
+    for (const key of keys) { if (saved[key] === undefined) delete process.env[key]; else process.env[key] = saved[key] }
+  }
+})
+
+
+test('booking today and tomorrow follow the property time zone rather than a visitor clock', async () => {
+  const { getTodayISO, getTomorrowISO } = await import('../src/utils/date.ts')
+  const OriginalDate = globalThis.Date
+  globalThis.Date = class extends OriginalDate {
+    constructor(...args) { if (args.length) super(...args); else super('2026-10-13T22:30:00Z') }
+  }
+  try {
+    assert.equal(getTodayISO(), '2026-10-14')
+    assert.equal(getTomorrowISO(), '2026-10-15')
+  } finally { globalThis.Date = OriginalDate }
+})
+
+
+test('patched image library supports the server resizing and compositing pipeline', async () => {
+  const { default: sharp } = await import('sharp')
+  const source = await sharp({ create: { width: 240, height: 120, channels: 3, background: '#112233' } }).png().toBuffer()
+  const overlay = Buffer.from('<svg width="1200" height="630"><rect width="40" height="40" fill="white"/></svg>')
+  const output = await sharp(source).rotate().resize(1200, 630, { fit: 'cover', position: 'center' })
+    .composite([{ input: overlay, left: 0, top: 0 }]).jpeg({ quality: 92, chromaSubsampling: '4:4:4' }).toBuffer()
+  const info = await sharp(output).metadata()
+  assert.equal(info.width, 1200)
+  assert.equal(info.height, 630)
+  assert.equal(info.format, 'jpeg')
 })

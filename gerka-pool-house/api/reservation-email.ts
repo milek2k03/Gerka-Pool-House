@@ -1,5 +1,7 @@
 /// <reference types="node" />
 
+import { nightsBetween } from '../src/utils/date.js'
+import { bookingLimits } from '../src/constants/bookingLimits.js'
 import { Resend } from 'resend'
 import { z } from 'zod'
 
@@ -31,29 +33,36 @@ const requestSchema = z
     reservationNumber: z.string().min(6).max(64),
     ownerEmail: z.string().email(),
     clientEmail: z.string().email(),
-    ownerSubject: z.string().min(1).max(160),
-    clientSubject: z.string().min(1).max(160),
+    ownerSubject: z.string().min(1).max(bookingLimits.fullName),
+    clientSubject: z.string().min(1).max(bookingLimits.fullName),
     clientBody: z.string().min(1).max(4000),
     propertyName: z.string().min(1).max(120),
     currency: z.string().min(1).max(8).default('PLN'),
     locale: z.enum(['pl', 'en']).default('pl'),
     request: z.object({
       reservationNumber: z.string().min(6).max(64),
-      fullName: z.string().min(2).max(160),
+      fullName: z.string().min(2).max(bookingLimits.fullName),
       email: z.string().email(),
-      phone: z.string().min(5).max(40),
-      guests: z.number().int().min(1).max(30),
+      phone: z.string().min(6).max(bookingLimits.phone),
+      guests: z.number().int().min(1).max(bookingLimits.maxGuests),
       checkIn: z.string().date(),
       checkOut: z.string().date(),
-      nights: z.number().int().min(1).max(90),
+      nights: z.number().int().min(1).max(bookingLimits.maxNights),
       apartment: z.enum(['ground', 'upper', 'both']).optional(),
       roomsUsed: z.number().int().min(1).max(4),
       nightlyPrice: z.number().min(0),
       estimatedTotal: z.number().min(0),
-      message: z.string().max(1200).optional(),
+      message: z.string().max(bookingLimits.emailMessage).optional(),
     }),
   })
   .superRefine((payload, context) => {
+    const stay = payload.request
+    if (stay.checkOut <= stay.checkIn || nightsBetween(stay.checkIn, stay.checkOut) !== stay.nights) {
+      context.addIssue({ code: 'custom', path: ['request', 'nights'], message: 'Invalid stay dates or night count' })
+    }
+    if (stay.roomsUsed !== (stay.apartment === 'both' ? 2 : stay.apartment ? 1 : stay.roomsUsed)) {
+      context.addIssue({ code: 'custom', path: ['request', 'roomsUsed'], message: 'Apartment allocation mismatch' })
+    }
     if (payload.reservationNumber !== payload.request.reservationNumber) {
       context.addIssue({
         code: 'custom',
@@ -160,7 +169,7 @@ const emailCopy = {
     nights: 'Liczba nocy',
     guests: 'Liczba gości',
     rooms: 'Wykorzystane apartamenty',
-    nightlyPrice: 'Cena za noc',
+    nightlyPrice: 'Cena bazowa za noc (przed rabatem)',
     estimatedTotal: 'Cena szacunkowa',
     clientMessage: 'Wiadomość klienta',
     message: 'Wiadomość',
@@ -180,7 +189,7 @@ const emailCopy = {
     nights: 'Number of nights',
     guests: 'Number of guests',
     rooms: 'Apartments used',
-    nightlyPrice: 'Price per night',
+    nightlyPrice: 'Base nightly price (before discount)',
     estimatedTotal: 'Estimated price',
     clientMessage: 'Guest message',
     message: 'Message',
@@ -368,7 +377,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         `${copy.message}: ${inquiry.message || '-'}`,
       ].join('\n'),
       tags: [{ name: 'reservation_number', value: tagValue }],
-    })
+    }, { idempotencyKey: `owner-${payload.reservationNumber}` })
     .catch((error: unknown) => ({ data: null, error: { message: getResendError(error) } }))
 
   if (ownerEmailResult.error) {
@@ -393,7 +402,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         `${copy.estimatedTotal}: ${inquiry.estimatedTotal} ${payload.currency}`,
       ].join('\n'),
       tags: [{ name: 'reservation_number', value: tagValue }],
-    })
+    }, { idempotencyKey: `client-${payload.reservationNumber}` })
     .catch((error: unknown) => ({ data: null, error: { message: getResendError(error) } }))
 
   if (clientEmailResult.error) {

@@ -31,6 +31,7 @@ import { Button } from '../components/ui/Button'
 import { supportedLocales } from '../config/site'
 import { useAdminAuth } from '../hooks/useAdminAuth'
 import { useSiteContent } from '../hooks/useSiteContent'
+import { ContentConflictError, ContentValidationError } from '../services/contentPersistence'
 import { contentRepository } from '../services/contentRepository'
 import { reservationRepository } from '../services/reservationRepository'
 import type { Locale, LocalizedString } from '../types/common'
@@ -425,6 +426,7 @@ export function AdminPage() {
   const [isDraftDirty, setIsDraftDirty] = useState(false)
   const draft = isDraftDirty ? draftOverride : content
   const [notice, setNotice] = useState<AdminNotice>(null)
+  const [isContentSaving, setIsContentSaving] = useState(false)
   const [contentActionError, setContentActionError] = useState('')
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [reservations, setReservations] = useState<ReservationRequest[]>([])
@@ -694,6 +696,8 @@ export function AdminPage() {
   }
 
   const save = async () => {
+    if (isContentSaving) return
+    setIsContentSaving(true)
     setContentActionError('')
 
     try {
@@ -702,8 +706,10 @@ export function AdminPage() {
       setDraft(savedContent)
       setIsDraftDirty(false)
       setNotice('saved')
-    } catch {
-      setContentActionError(t('admin.contentSaveFailed'))
+    } catch (error) {
+      setContentActionError(t(error instanceof ContentConflictError ? 'admin.contentSaveConflict' : error instanceof ContentValidationError ? error.translationKey : 'admin.contentSaveFailed'))
+    } finally {
+      setIsContentSaving(false)
     }
   }
 
@@ -834,7 +840,7 @@ export function AdminPage() {
                   size="sm"
                   variant="ghost"
                   className="text-white hover:bg-white/10"
-                  onClick={adminAuth.signOut}
+                  onClick={() => { void adminAuth.signOut().catch(() => setContentActionError(t('admin.auth.signOutFailed'))) }}
                 >
                   <LogOut aria-hidden="true" className="size-4" />
                   {t('admin.auth.signOut')}
@@ -855,6 +861,7 @@ export function AdminPage() {
                   type="button"
                   size="lg"
                   className="w-full shadow-lg shadow-black/20 sm:w-auto"
+                  disabled={isContentSaving || !isDraftDirty}
                   onClick={() => {
                     void save()
                   }}
@@ -867,6 +874,7 @@ export function AdminPage() {
                   size="md"
                   variant="ghost"
                   className="w-full text-white hover:bg-white/10 sm:w-auto"
+                  disabled={isContentSaving}
                   onClick={() => setIsResetConfirmOpen(true)}
                 >
                   <RotateCcw aria-hidden="true" className="size-4" />
@@ -919,7 +927,7 @@ export function AdminPage() {
             ) : null}
           </aside>
 
-          <section className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm sm:p-6">
+          <section inert={isContentSaving} aria-busy={isContentSaving} className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm sm:p-6">
             {activeTab === 'instructions' ? (
               <div className="grid gap-5">
                 <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-paper)] p-5">

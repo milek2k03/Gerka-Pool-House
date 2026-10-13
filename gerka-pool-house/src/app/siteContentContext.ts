@@ -5,6 +5,7 @@ import type { SiteContent } from '../types/content'
 export interface SiteContentContextValue {
   content: SiteContent
   saveContent: (content: SiteContent) => Promise<SiteContent>
+  refreshContent?: () => Promise<SiteContent>
   resetContent: () => Promise<SiteContent>
 }
 

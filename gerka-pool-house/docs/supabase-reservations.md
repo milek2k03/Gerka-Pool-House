@@ -1,3 +1,8 @@
+Przed wdrozeniem aktualizacji uruchom rowniez migracje
+`supabase/migrations/20261013000200_guard_manual_availability.sql` po migracji
+apartamentow. Dodaje zabezpieczenie konfliktow recznych blokad i zaakceptowanych
+rezerwacji po stronie bazy. Zostala sprawdzona na izolowanym PostgreSQL.
+
 # Osobne kalendarze apartamentow
 
 Dla istniejacej bazy uruchom w Supabase SQL Editor migracje

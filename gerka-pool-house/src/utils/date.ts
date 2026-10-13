@@ -1,5 +1,11 @@
 const dayMs = 24 * 60 * 60 * 1000
 
+export function isISODate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T12:00:00`)
+  return Number.isFinite(date.getTime()) && toISODate(date) === value
+}
+
 export function toDate(value: string) {
   return new Date(`${value}T12:00:00`)
 }
@@ -18,7 +24,7 @@ export function addDays(date: Date, days: number) {
 }
 
 export function nightsBetween(checkIn: string, checkOut: string) {
-  if (!checkIn || !checkOut) return 0
+  if (!isISODate(checkIn) || !isISODate(checkOut)) return 0
   const diff = toDate(checkOut).getTime() - toDate(checkIn).getTime()
   return Math.max(0, Math.round(diff / dayMs))
 }
@@ -33,9 +39,13 @@ export function isDateWithinRange(date: string, from: string, to: string) {
 }
 
 export function getTodayISO() {
-  return toISODate(new Date())
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Warsaw', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)!.value
+  return `${value('year')}-${value('month')}-${value('day')}`
 }
 
 export function getTomorrowISO() {
-  return toISODate(addDays(new Date(), 1))
+  return toISODate(addDays(toDate(getTodayISO()), 1))
 }

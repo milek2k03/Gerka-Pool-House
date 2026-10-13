@@ -16,26 +16,38 @@ export function useAdminAuth() {
 
     let active = true
     let unsubscribe: (() => void) | null = null
+    let requestSequence = 0
 
     void getSupabaseClient().then((supabase) => {
       if (!active || !supabase) return
 
-      supabase.auth.getSession().then(({ data }) => {
-        if (!active) return
-
-        setSession(data.session)
-        setStatus(data.session ? 'authenticated' : 'unauthenticated')
-      })
+      const verifySession = async (nextSession: Session | null) => {
+        const request = ++requestSequence
+        if (!nextSession) {
+          if (active) { setSession(null); setStatus('unauthenticated') }
+          return
+        }
+        try {
+          const { data, error } = await supabase.rpc('is_admin')
+          if (!active || request !== requestSequence) return
+          const allowed = !error && data === true
+          setSession(allowed ? nextSession : null)
+          setStatus(allowed ? 'authenticated' : 'unauthenticated')
+        } catch {
+          if (active && request === requestSequence) { setSession(null); setStatus('unauthenticated') }
+        }
+      }
+      void supabase.auth.getSession().then(({ data }) => verifySession(data.session)).catch(() => verifySession(null))
 
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-        setSession(nextSession)
-        setStatus(nextSession ? 'authenticated' : 'unauthenticated')
+        // Defer database calls until the auth callback releases its internal lock.
+        window.setTimeout(() => { if (active) void verifySession(nextSession) }, 0)
       })
 
       unsubscribe = () => subscription.unsubscribe()
-    })
+    }).catch(() => { if (active) setStatus('unauthenticated') })
 
     return () => {
       active = false
@@ -52,8 +64,11 @@ export function useAdminAuth() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      throw error
+    if (error) throw error
+    const { data: isAdmin, error: membershipError } = await supabase.rpc('is_admin')
+    if (membershipError || isAdmin !== true) {
+      await supabase.auth.signOut()
+      throw new Error('Administrator access required')
     }
   }, [])
 
@@ -62,7 +77,8 @@ export function useAdminAuth() {
 
     if (!supabase) return
 
-    await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
   }, [])
 
   return {

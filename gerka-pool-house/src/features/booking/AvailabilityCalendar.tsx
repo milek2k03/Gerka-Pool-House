@@ -3,9 +3,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { bookingLimits } from '../../constants/bookingLimits'
 import type { AvailabilityRange } from '../../types/booking'
 import { cn } from '../../utils/cn'
-import { eachNight, getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
+import { eachNight, getTodayISO, isDateWithinRange, nightsBetween, toDate, toISODate } from '../../utils/date'
 import { Button } from '../../components/ui/Button'
 import { getLocale } from '../../utils/locale'
 
@@ -37,9 +38,9 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
 }: AvailabilityCalendarProps) {
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
-  const minMonth = useMemo(() => startOfMonth(new Date()), [])
-  const today = useMemo(() => getTodayISO(), [])
-  const [month, setMonth] = useState(() => startOfMonth(new Date()))
+  const minMonth = startOfMonth(toDate(getTodayISO()))
+  const today = getTodayISO()
+  const [month, setMonth] = useState(() => startOfMonth(toDate(getTodayISO())))
   const canGoPrevious = month > minMonth
   const dateLocale = locale === 'pl' ? 'pl-PL' : 'en-US'
   const monthFormatter = useMemo(
@@ -110,7 +111,7 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
           const isPast = date < minDate
           const isPastDay = date <= today
           const displayStatus = isPastDay ? 'past' : status === 'available' && isPast ? 'unavailable' : status
-          const canCheckOut = Boolean(checkIn && !checkOut && date > checkIn &&
+          const canCheckOut = Boolean(checkIn && !checkOut && date > checkIn && nightsBetween(checkIn, date) <= bookingLimits.maxNights &&
             !eachNight(checkIn, date).some((night) => ranges.some((range) => isDateWithinRange(night, range.from, range.to))))
           const disabled = !onSelectDate || (displayStatus !== 'available' && !canCheckOut) || isPast
           const statusLabel =

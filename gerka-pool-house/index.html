@@ -177,7 +177,7 @@
         const controller = new AbortController()
         const timeout = window.setTimeout(() => controller.abort(), 6000)
         const contentPromise = fetch(
-          `${supabaseUrl.replace(/\/$/, '')}/rest/v1/site_content?id=eq.main&select=content`,
+          `${supabaseUrl.replace(/\/$/, '')}/rest/v1/site_content?id=eq.main&select=content,updated_at`,
           {
             signal: controller.signal,
             headers: {
@@ -188,7 +188,7 @@
           },
         )
           .then((response) => (response.ok ? response.json() : null))
-          .then((rows) => rows?.[0]?.content ?? null)
+          .then((rows) => rows?.[0]?.content ? { ...rows[0].content, updatedAt: rows[0].updated_at ?? rows[0].content.updatedAt } : null)
           .catch(() => null)
           .finally(() => window.clearTimeout(timeout))
 

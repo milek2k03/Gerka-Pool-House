@@ -1,3 +1,4 @@
+import { bookingLimits } from '../../constants/bookingLimits'
 import type { ApartmentSelection, AvailabilityRange, StaySummary } from '../../types/booking'
 import type { DiscountCode, PriceSettings } from '../../types/content'
 import { eachNight, getTomorrowISO, isDateWithinRange, nightsBetween } from '../../utils/date'
@@ -29,7 +30,8 @@ function createDiscountedPrice(total: number, pricing: PriceSettings, discount?:
     const rates = getWeeksaveRates(pricing)
     const weeksaveNightlyRate = rates.base + Math.max(guests - 2, 0) * rates.extraGuest
     const nights = nightsBetween(checkIn, checkOut)
-    const weeksaveTotal = weeksaveNightlyRate * nights
+    const weeksaveTotal = Math.round(weeksaveNightlyRate * nights * 100) / 100
+    if (weeksaveTotal >= total) return createDiscountedPrice(total, pricing)
 
     return {
       priceBeforeDiscount: total,
@@ -43,7 +45,7 @@ function createDiscountedPrice(total: number, pricing: PriceSettings, discount?:
   }
 
   const discountPercent = clampDiscountPercent(discount.percent)
-  const discountAmount = Math.round(total * (discountPercent / 100))
+  const discountAmount = Math.round(total * discountPercent) / 100
 
   return {
     priceBeforeDiscount: total,
@@ -70,12 +72,12 @@ export function calculateStaySummary(
   const maxGuests = getApartmentCapacity(pricing, apartment)
   const roomsUsed = apartment === 'both' ? 2 : 1
   const nightlyPrice = apartment === 'both' ? getBothApartmentsNightly(pricing) : apartment === 'upper' ? pricing.room2Nightly : pricing.room1Nightly
-  const baseTotal = nightlyPrice * nights
-  const discount = findApplicableDiscount(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests)
+  const baseTotal = Math.round(nightlyPrice * nights * 100) / 100
+  const discount = nights > 0 && nights <= bookingLimits.maxNights ? findApplicableDiscount(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests) : undefined
   const discountedPrice = createDiscountedPrice(baseTotal, pricing, discount, guests, checkIn, checkOut)
-  const discountValidationReason = getDiscountValidationReason(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests)
+  const discountValidationReason = nights <= bookingLimits.maxNights ? getDiscountValidationReason(pricing.discounts ?? [], discountCode, checkIn, checkOut, guests) : undefined
   const roomLabels = apartment === 'both' ? ['groundApartment', 'upperApartment'] : [apartment === 'upper' ? 'upperApartment' : 'groundApartment']
-  const selectedNights = eachNight(checkIn, checkOut)
+  const selectedNights = nights <= bookingLimits.maxNights ? eachNight(checkIn, checkOut) : []
   const blockedRange = availability.find((range) =>
     apartmentsOverlap(apartment, range.apartment) && selectedNights.some((night) => isDateWithinRange(night, range.from, range.to)),
   )
@@ -97,6 +99,12 @@ export function calculateStaySummary(
       isValid: false,
       reason: 'invalidDates',
     }
+  }
+
+  if (nights > bookingLimits.maxNights || !Number.isFinite(baseTotal) || baseTotal > bookingLimits.money) {
+    return { checkIn, checkOut, guests, nights, apartment, roomsUsed, roomLabels,
+      nightlyPrice, priceBeforeDiscount: baseTotal, estimatedTotal: 0,
+      isAvailable: false, isValid: false, reason: nights > bookingLimits.maxNights ? 'maxStay' : 'priceLimit' }
   }
 
   if (checkIn < earliestCheckIn) {
@@ -153,7 +161,7 @@ export function calculateStaySummary(
     }
   }
 
-  if (guests < 1 || guests > maxGuests || (!room2Enabled && apartment !== 'ground')) {
+  if (guests < 1 || guests > maxGuests || !Number.isInteger(guests) || guests > bookingLimits.maxGuests || (!room2Enabled && apartment !== 'ground')) {
     return {
       checkIn,
       checkOut,

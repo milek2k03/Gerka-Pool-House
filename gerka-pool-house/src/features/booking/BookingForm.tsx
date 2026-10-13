@@ -4,9 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
+import { bookingLimits } from '../../constants/bookingLimits'
 import { Button } from '../../components/ui/Button'
 import type { EmailDeliveryProvider } from '../../services/emailService'
 import { emailService } from '../../services/emailService'
+import { contentRepository } from '../../services/contentRepository'
+import { resolveSiteContent } from '../../utils/contentTemplates'
 import { reservationRepository } from '../../services/reservationRepository'
 import type { Locale } from '../../types/common'
 import type { AvailabilityRange } from '../../types/booking'
@@ -31,6 +34,8 @@ function FieldError({ message }: { message?: string }) {
 function summaryReasonKey(reason?: string) {
   if (reason === 'invalidDates') return 'booking.invalidDates'
   if (reason === 'pastDate') return 'booking.pastDate'
+  if (reason === 'maxStay') return 'booking.maxStay'
+  if (reason === 'priceLimit') return 'booking.priceLimit'
   if (reason === 'minStay') return 'booking.minStay'
   if (reason === 'minGuests') return 'booking.minGuests'
   if (reason === 'guestLimit') return 'booking.guestLimit'
@@ -55,7 +60,7 @@ function getDiscountStatusMessage(t: ReturnType<typeof useTranslation>['t'], rea
   }
 }
 
-export function BookingForm({ content, locale }: { content: SiteContent; locale: Locale }) {
+export function BookingForm({ content, locale, refreshContent }: { content: SiteContent; locale: Locale; refreshContent?: () => Promise<SiteContent> }) {
   const { t } = useTranslation()
   const [success, setSuccess] = useState<{ reservationNumber: string; provider: EmailDeliveryProvider } | null>(null)
   const [emailFailed, setEmailFailed] = useState<string | null>(null)
@@ -155,25 +160,37 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
   }, [checkIn, checkOut, earliestCheckIn, setValue])
 
   const onSubmit = handleSubmit(async (values) => {
+    setSuccess(null)
     setEmailFailed(null)
     setSubmissionFailed('')
     let latestAvailability: AvailabilityRange[]
+    let latestContent: SiteContent
     try {
-      latestAvailability = await reservationRepository.listAcceptedAvailability()
+      const [currentContent, currentAvailability] = await Promise.all([
+        refreshContent ? refreshContent() : contentRepository.load({ requireRemote: true }),
+        reservationRepository.listAcceptedAvailability(),
+      ])
+      latestContent = resolveSiteContent(currentContent)
+      latestAvailability = currentAvailability
       setReservationAvailability(latestAvailability)
       setAvailabilityFailed(false)
     } catch {
       setAvailabilityFailed(true)
       return
     }
+    if (!isApartment2Enabled(latestContent.pricing) && values.apartment !== 'ground') {
+      setValue('apartment', 'ground', { shouldValidate: true })
+      setSubmissionFailed(t('booking.apartmentDisabled'))
+      return
+    }
     const nextSummary = calculateStaySummary(
       values.checkIn,
       values.checkOut,
       Number(values.guests),
-      content.pricing,
-      [...content.availability, ...latestAvailability],
+      latestContent.pricing,
+      [...latestContent.availability, ...latestAvailability],
       values.discountCode,
-      room2Enabled ? values.apartment : 'ground',
+      values.apartment,
     )
 
     if (!nextSummary.isValid) {
@@ -181,6 +198,10 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
       return
     }
 
+    if (nextSummary.estimatedTotal !== summary.estimatedTotal || nextSummary.apartment !== summary.apartment) {
+      setSubmissionFailed(t('booking.settingsChanged'))
+      return
+    }
     let saved
 
     const discountOwnerNote =
@@ -191,7 +212,9 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
             before: formatMoney(nextSummary.priceBeforeDiscount, locale, content.pricing.currency),
             after: formatMoney(nextSummary.estimatedTotal, locale, content.pricing.currency),
           })
-        : ''
+        : nextSummary.discountKind === 'weeksave'
+          ? t('booking.promotionOwnerNote', { code: nextSummary.discountCode, before: formatMoney(nextSummary.priceBeforeDiscount, locale, content.pricing.currency), after: formatMoney(nextSummary.estimatedTotal, locale, content.pricing.currency) })
+          : ''
     const message = [discountOwnerNote, values.message ? `${t('booking.clientMessagePrefix')}\n${values.message}` : '']
       .filter(Boolean)
       .join('\n\n')
@@ -217,7 +240,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     }
 
     try {
-      const result = await emailService.sendReservationInquiry(saved, content, locale)
+      const result = await emailService.sendReservationInquiry(saved, latestContent, locale)
       setSuccess({ reservationNumber: saved.reservationNumber, provider: result.provider })
     } catch {
       setEmailFailed(t('booking.emailFailed'))
@@ -292,6 +315,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
             <input
               className="field"
               type="date"
+              max={checkIn ? toISODate(addDays(toDate(checkIn), bookingLimits.maxNights)) : undefined}
               min={checkIn ? toISODate(addDays(toDate(checkIn), 1)) : toISODate(addDays(toDate(earliestCheckIn), 1))}
               {...register('checkOut')}
             />
@@ -392,7 +416,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         <div className="mt-5 grid min-w-0 gap-4 sm:grid-cols-2">
           <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.fullName')}
-            <input className="field" autoComplete="name" {...register('fullName')} />
+            <input className="field" autoComplete="name" maxLength={bookingLimits.fullName} {...register('fullName')} />
             <FieldError message={errors.fullName?.message} />
           </label>
           <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
@@ -402,12 +426,12 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
           </label>
           <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.phone')}
-            <input className="field" type="tel" autoComplete="tel" {...register('phone')} />
+            <input className="field" type="tel" autoComplete="tel" maxLength={bookingLimits.phone} {...register('phone')} />
             <FieldError message={errors.phone?.message} />
           </label>
           <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)] sm:col-span-2">
             {t('booking.message')}
-            <textarea className="field min-h-28 resize-y" {...register('message')} />
+            <textarea className="field min-h-28 resize-y" maxLength={bookingLimits.message} {...register('message')} />
             <FieldError message={errors.message?.message} />
           </label>
         </div>
