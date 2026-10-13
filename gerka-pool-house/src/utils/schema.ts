@@ -1,8 +1,9 @@
+import { resolveSiteContent } from './contentTemplates'
 import { siteUrl } from '../config/site'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from './locale'
-import { applyGuestLimitToText, isApartment2Enabled } from './pricing'
+import { getBothApartmentsNightly, getStayTimes, isApartment2Enabled } from './pricing'
 
 function absoluteUrl(path: string) {
   if (!path) return siteUrl
@@ -10,18 +11,23 @@ function absoluteUrl(path: string) {
   return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`
 }
 
-export function buildHomeSchema(content: SiteContent, locale: Locale) {
+export function buildHomeSchema(rawContent: SiteContent, locale: Locale) {
+  const content = resolveSiteContent(rawContent)
+  const times = getStayTimes(content.pricing)
   const homeUrl = absoluteUrl(content.seo.home.canonicalPath)
-  const image = absoluteUrl(content.seo.home.ogImage ?? content.hero.image.src)
+  const image = absoluteUrl(content.seo.home.ogImage || content.hero.image.src)
   const logo = absoluteUrl('/social-logo.png')
   const address = localize(content.contact.address, locale)
   const telephone = content.contact.phone.trim()
   const sameAs = [content.contact.facebookUrl, content.contact.instagramUrl].filter(
     (url): url is string => Boolean(url),
   )
-  const priceRange = isApartment2Enabled(content.pricing)
-    ? `${content.pricing.room1Nightly}-${content.pricing.room1Nightly + content.pricing.room2Nightly} PLN`
-    : `${content.pricing.room1Nightly} PLN`
+  const rates = isApartment2Enabled(content.pricing)
+    ? [content.pricing.room1Nightly, content.pricing.room2Nightly, getBothApartmentsNightly(content.pricing)]
+    : [content.pricing.room1Nightly]
+  const priceRange = rates.length > 1
+    ? `${Math.min(...rates)}-${Math.max(...rates)} ${content.pricing.currency}`
+    : `${rates[0]} ${content.pricing.currency}`
 
   return {
     '@context': 'https://schema.org',
@@ -53,8 +59,8 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
         ...(telephone ? { telephone } : {}),
         email: content.contact.email,
         priceRange,
-        checkinTime: '15:00',
-        checkoutTime: '12:00',
+        checkinTime: times.checkIn,
+        checkoutTime: times.checkOut,
         amenityFeature: content.amenities.map((amenity) => ({
           '@type': 'LocationFeatureSpecification',
           name: localize(amenity.title, locale),
@@ -72,7 +78,7 @@ export function buildHomeSchema(content: SiteContent, locale: Locale) {
             name: localize(item.question, locale),
             acceptedAnswer: {
               '@type': 'Answer',
-              text: item.id === 'capacity' ? applyGuestLimitToText(answer, content.pricing) : answer,
+              text: answer,
             },
           }
         }),

@@ -127,13 +127,17 @@ export function ResponsiveImage({
       {image.avif ? <source srcSet={image.avif} type="image/avif" sizes={sizes} /> : null}
       {image.webp ? <source srcSet={image.webp} type="image/webp" sizes={sizes} /> : null}
       <img
+        key={`${image.src}:${mobileImage?.src ?? ''}`}
         src={optimizedFallbackSrc}
         alt={alt}
         className={cn('h-full w-full', imgClassName ?? 'object-cover')}
         loading={loading}
         decoding={loading === 'eager' ? 'sync' : 'async'}
         fetchPriority={fetchPriority}
-        onLoad={onLoad}
+        onLoad={(event) => {
+          if (hideOnError) event.currentTarget.style.display = ''
+          onLoad?.()
+        }}
         onError={
           hideOnError
             ? (event) => {

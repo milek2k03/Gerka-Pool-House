@@ -1,3 +1,24 @@
+# Osobne kalendarze apartamentow
+
+Dla istniejacej bazy uruchom w Supabase SQL Editor migracje
+`supabase/migrations/20261013000100_apartment_calendars.sql` przed wdrozeniem aplikacji.
+Dla nowej bazy `supabase/complete-setup.sql` zawiera juz te zmiany.
+
+Rezerwacje zapisuja pole `apartment`: `ground` (parter), `upper` (pietro)
+lub `both` (oba). Zaakceptowana rezerwacja blokuje tylko wybrane apartamenty.
+Baza uniemozliwia zatwierdzenie nakladajacych sie rezerwacji tego samego
+apartamentu, takze przy jednoczesnej pracy kilku administratorow.
+Dzien wyjazdu nie jest blokowany.
+
+Starsze rezerwacje jednego apartamentu sa przypisane do parteru, a rezerwacje
+wielu apartamentow do obu. Starsze reczne blokady bez wskazania apartamentu
+nadal blokuja oba; w panelu mozna zmienic ich przypisanie.
+Pojemnosc pietra wynika z maksymalnej liczby gosci pomniejszonej o pojemnosc parteru.
+
+Migracja zostanie odrzucona, jesli stare zaakceptowane rezerwacje nakladaja sie
+na siebie lub `rooms_used` wykracza poza obslugiwane 1-2 apartamenty.
+Przed ponownym uruchomieniem popraw takie wpisy.
+
 # Supabase - zapytania rezerwacyjne
 
 Po utworzeniu tabel uruchom rowniez migracje

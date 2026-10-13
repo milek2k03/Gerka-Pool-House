@@ -4,7 +4,13 @@ import { BrowserRouter } from 'react-router'
 import './i18n'
 import { SiteContentProvider } from './SiteContentProvider'
 import { AppRouter } from '../router/AppRouter'
+import { useSiteContent } from '../hooks/useSiteContent'
 import { initAnalytics } from '../services/analytics'
+
+function SiteLoading() {
+  const { content } = useSiteContent()
+  return <div className="grid min-h-screen place-items-center">{content.brandName}</div>
+}
 
 export function App() {
   useEffect(() => {
@@ -16,7 +22,7 @@ export function App() {
   return (
     <SiteContentProvider>
       <BrowserRouter>
-        <Suspense fallback={<div className="grid min-h-screen place-items-center">Gerka Pool House</div>}>
+        <Suspense fallback={<SiteLoading />}>
           <AppRouter />
         </Suspense>
       </BrowserRouter>

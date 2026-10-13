@@ -3,7 +3,8 @@ import { useEffect } from 'react'
 import { googleSiteVerification, siteUrl } from '../../config/site'
 import type { Locale } from '../../types/common'
 import type { SeoPageSettings } from '../../types/content'
-import { localize } from '../../utils/locale'
+import { localize, withLocaleQuery } from '../../utils/locale'
+import { useSiteContent } from '../../hooks/useSiteContent'
 
 interface SeoProps {
   settings: SeoPageSettings
@@ -47,11 +48,12 @@ function upsertLink(rel: string, href: string, hreflang?: string) {
 }
 
 export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
+  const { content } = useSiteContent()
   useEffect(() => {
     const title = localize(settings.title, locale)
     const description = localize(settings.description, locale)
     const canonical = resolveUrl(settings.canonicalPath) ?? siteUrl
-    const image = resolveUrl('/URLimage.png?v=9')
+    const image = resolveUrl(settings.ogImage || content.seo.home.ogImage || content.hero.image.src)
 
     document.title = title
     document.documentElement.lang = locale
@@ -61,7 +63,7 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertMeta('property', 'og:title', title)
     upsertMeta('property', 'og:description', description)
     upsertMeta('property', 'og:type', 'website')
-    upsertMeta('property', 'og:site_name', 'Gerka Pool House')
+    upsertMeta('property', 'og:site_name', content.brandName)
     upsertMeta('property', 'og:url', canonical)
     upsertMeta('property', 'og:locale', locale === 'pl' ? 'pl_PL' : 'en_US')
     upsertMeta('property', 'og:locale:alternate', locale === 'pl' ? 'en_US' : 'pl_PL')
@@ -70,9 +72,9 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     upsertMeta('name', 'twitter:card', 'summary_large_image')
     upsertMeta('property', 'og:image', image)
     upsertMeta('property', 'og:image:secure_url', image)
-    upsertMeta('property', 'og:image:type', image ? 'image/png' : undefined)
-    upsertMeta('property', 'og:image:width', image ? '2541' : undefined)
-    upsertMeta('property', 'og:image:height', image ? '1439' : undefined)
+    upsertMeta('property', 'og:image:type', undefined)
+    upsertMeta('property', 'og:image:width', undefined)
+    upsertMeta('property', 'og:image:height', undefined)
     upsertMeta('property', 'og:image:alt', title)
     upsertMeta('name', 'twitter:image', image)
     upsertMeta('name', 'twitter:image:alt', title)
@@ -82,14 +84,15 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
     }
 
     upsertLink('canonical', canonical)
-    upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'pl')
-    upsertLink('alternate', `${siteUrl}${settings.canonicalPath}?lng=en`, 'en')
-    upsertLink('alternate', `${siteUrl}${settings.canonicalPath}`, 'x-default')
+    upsertLink('alternate', withLocaleQuery(canonical, 'pl'), 'pl')
+    upsertLink('alternate', withLocaleQuery(canonical, 'en'), 'en')
+    upsertLink('alternate', withLocaleQuery(canonical, 'pl'), 'x-default')
     if (image) {
       upsertLink('image_src', image)
     }
 
     const scriptId = 'structured-data'
+    document.getElementById('static-business-schema')?.remove()
     document.getElementById(scriptId)?.remove()
     if (jsonLd) {
       const script = document.createElement('script')
@@ -98,7 +101,7 @@ export function Seo({ settings, locale, jsonLd, noindex }: SeoProps) {
       script.textContent = JSON.stringify(jsonLd)
       document.head.appendChild(script)
     }
-  }, [jsonLd, locale, noindex, settings])
+  }, [content.brandName, content.hero.image.src, content.seo.home.ogImage, jsonLd, locale, noindex, settings])
 
   return null
 }

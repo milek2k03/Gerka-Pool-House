@@ -12,7 +12,7 @@ const socialPreviewImage = '/URLimage.png?v=9'
 const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
-  version: 24,
+  version: 27,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -25,13 +25,14 @@ export const defaultSiteContent: SiteContent = {
       en: 'A private stay in Czarze, close to Bydgoszcz, Chelmno and Dabrowa Chelminska.',
     },
     lead: {
-      pl: 'Gerka Pool House w Czarżu to wygodny nocleg niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z prywatną strefą basenową, ogrodem, grillem, parkingiem i szybkim WiFi.',
-      en: 'Gerka Pool House in Czarze is a comfortable stay near Bydgoszcz, Chelmno and Dabrowa Chelminska, with a private pool area, garden, barbecue, parking and fast WiFi.',
+      pl: '{{brandName}} w Czarżu to wygodny nocleg niedaleko Bydgoszczy, Torunia, Chełmna i Dąbrowy Chełmińskiej, z prywatną strefą basenową, sauną, ogrodem, grillem, parkingiem i szybkim WiFi.',
+      en: '{{brandName}} in Czarze is a comfortable stay near Bydgoszcz, Torun, Chelmno and Dabrowa Chelminska, with a private pool area, sauna, garden, barbecue, parking and fast WiFi.',
     },
     image: {
       src: heroBackgroundImage,
       webp: heroBackgroundImage,
     },
+    mobileUsesDesktop: true,
     mobileImage: {
       src: heroBackgroundImage,
       webp: heroBackgroundImage,
@@ -39,16 +40,16 @@ export const defaultSiteContent: SiteContent = {
   },
   about: {
     title: {
-      pl: 'Apartament na parterze i prywatna strefa basenowa',
-      en: 'Ground-floor apartment and a private pool area',
+      pl: 'Dwa apartamenty, prywatna strefa basenowa i sauna',
+      en: 'Two apartments, a private pool area and a sauna',
     },
     lead: {
-      pl: 'Aktualnie rezerwowany jest komfortowy apartament na parterze w Czarżu, niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej.',
-      en: 'The currently available stay is a comfortable ground-floor apartment in Czarze, near Bydgoszcz, Chelmno and Dabrowa Chelminska.',
+      pl: 'Wybierz apartament na parterze dla maksymalnie {{capacityGround}} osób, apartament na piętrze dla {{capacityUpper}} osób lub wynajmij całość dla maksymalnie {{maxGuests}} osób. W okolicy czekają Bydgoszcz, Toruń, Chełmno i Dąbrowa Chełmińska.',
+      en: 'Choose the ground-floor apartment for up to {{capacityGround}} guests, the upstairs apartment for {{capacityUpper}} guests, or rent both for up to {{maxGuests}} guests. Explore nearby Bydgoszcz, Torun, Chelmno and Dabrowa Chelminska.',
     },
     body: {
-      pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie 6 osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest podgrzewany prywatny basen z leżakami, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.',
-      en: '#### Ground-floor apartment\nDesigned for up to 6 guests.\n\nIt offers:\n* a spacious living room with a comfortable sofa bed,\n* a fully equipped kitchen,\n* 2 comfortable bedrooms,\n* a bathroom,\n* direct access to the garden and pool area.\n\nGuests can enjoy a heated private swimming pool with loungers, a terrace for shared meals, a barbecue area and a relaxing green outdoor space.\n\nIt is an ideal place for family holidays, weekend breaks and gatherings with friends.',
+      pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie {{capacityGround}} osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest prywatny basen podgrzewany od 1 maja do 30 września, sauna, leżaki, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.\n\nImprezy okolicznościowe można organizować na zewnątrz, na tarasie, od maja do końca września, po wcześniejszym uzgodnieniu z właścicielem. Cena jest ustalana indywidualnie.',
+      en: '#### Ground-floor apartment\nDesigned for up to {{capacityGround}} guests.\n\nIt offers:\n* a spacious living room with a comfortable sofa bed,\n* a fully equipped kitchen,\n* 2 comfortable bedrooms,\n* a bathroom,\n* direct access to the garden and pool area.\n\nGuests can enjoy a private swimming pool heated from 1 May to 30 September, a sauna, loungers, a terrace for shared meals, a barbecue area and a relaxing green outdoor space.\n\nIt is an ideal place for family holidays, weekend breaks and gatherings with friends.\n\nSpecial occasions can be organised outdoors on the terrace from May until the end of September, by prior arrangement with the owner. Pricing is agreed individually.',
     },
     highlights: [
       {
@@ -65,8 +66,8 @@ export const defaultSiteContent: SiteContent = {
         icon: 'relax',
         title: { pl: 'Rodziny i grupy', en: 'Families and groups' },
         description: {
-          pl: 'Komfortowy pobyt dla maksymalnie 6 osób.',
-          en: 'A comfortable stay for up to 6 guests.',
+          pl: 'Komfortowy pobyt dla maksymalnie {{capacityGround}} osób.',
+          en: 'A comfortable stay for up to {{capacityGround}} guests.',
         },
       },
       {
@@ -85,8 +86,8 @@ export const defaultSiteContent: SiteContent = {
       id: 'pool-terrace',
       title: { pl: 'Basen i taras', en: 'Pool and terrace' },
       alt: {
-        pl: 'Prywatny basen przy domu Gerka Pool House',
-        en: 'Private pool terrace at Gerka Pool House',
+        pl: 'Prywatny basen przy domu {{brandName}}',
+        en: 'Private pool terrace at {{brandName}}',
       },
       image: { src: poolWebp, webp: poolWebp, avif: poolAvif },
     },
@@ -131,8 +132,8 @@ export const defaultSiteContent: SiteContent = {
           id: 'apartment-1-room',
           title: { pl: 'Apartament na parterze', en: 'Ground-floor apartment' },
           alt: {
-            pl: 'Jasne wnętrze apartamentu na parterze w Gerka Pool House',
-            en: 'Bright interior of the ground-floor apartment at Gerka Pool House',
+            pl: 'Jasne wnętrze apartamentu na parterze w {{brandName}}',
+            en: 'Bright interior of the ground-floor apartment at {{brandName}}',
           },
           image: { src: roomWebp, webp: roomWebp, avif: roomAvif },
         },
@@ -150,8 +151,8 @@ export const defaultSiteContent: SiteContent = {
           id: 'apartment-2-room',
           title: { pl: 'Apartament na piętrze', en: 'First-floor apartment' },
           alt: {
-            pl: 'Komfortowe wnętrze apartamentu na piętrze w Gerka Pool House',
-            en: 'Comfortable interior of the first-floor apartment at Gerka Pool House',
+            pl: 'Komfortowe wnętrze apartamentu na piętrze w {{brandName}}',
+            en: 'Comfortable interior of the first-floor apartment at {{brandName}}',
           },
           image: { src: roomWebp, webp: roomWebp, avif: roomAvif },
         },
@@ -169,8 +170,8 @@ export const defaultSiteContent: SiteContent = {
           id: 'terrace-pool-main',
           title: { pl: 'Basen i leżaki', en: 'Pool and loungers' },
           alt: {
-            pl: 'Prywatny basen z leżakami przy Gerka Pool House',
-            en: 'Private swimming pool with loungers at Gerka Pool House',
+            pl: 'Prywatny basen z leżakami przy {{brandName}}',
+            en: 'Private swimming pool with loungers at {{brandName}}',
           },
           image: { src: poolWebp, webp: poolWebp, avif: poolAvif },
         },
@@ -188,12 +189,21 @@ export const defaultSiteContent: SiteContent = {
   ],
   amenities: [
     {
+      id: 'sauna',
+      icon: 'relax',
+      title: { pl: 'Sauna', en: 'Sauna' },
+      description: {
+        pl: 'Sauna na terenie obiektu do relaksu podczas pobytu.',
+        en: 'A sauna on the property for relaxation during your stay.',
+      },
+    },
+    {
       id: 'pool',
       icon: 'pool',
       title: { pl: 'Basen', en: 'Swimming pool' },
       description: {
-        pl: 'Prywatna strefa wodna do spokojnego wypoczynku w sezonie.',
-        en: 'A private water area for peaceful seasonal relaxation.',
+        pl: 'Prywatny basen podgrzewany od 1 maja do 30 września.',
+        en: 'Private swimming pool heated from 1 May to 30 September.',
       },
     },
     {
@@ -248,8 +258,8 @@ export const defaultSiteContent: SiteContent = {
       en: 'Surroundings made for slow discovery',
     },
     lead: {
-      pl: 'Czarże, Bydgoszcz, Chełmno i Dąbrowa Chełmińska dają spokojną bazę na nocleg, spacery, rodzinny obiad, dzień nad wodą i krótkie wycieczki po okolicy.',
-      en: 'Czarze, Bydgoszcz, Chelmno and Dabrowa Chelminska make a calm base for a stay, walks, family meals, days by the water and short local trips.',
+      pl: 'Czarże, Bydgoszcz, Toruń, Chełmno i Dąbrowa Chełmińska dają spokojną bazę na nocleg, spacery, rodzinny obiad, dzień nad wodą i krótkie wycieczki po okolicy.',
+      en: 'Czarze, Bydgoszcz, Torun, Chelmno and Dabrowa Chelminska make a calm base for a stay, walks, family meals, days by the water and short local trips.',
     },
     image: { src: lakeWebp, webp: lakeWebp, avif: lakeAvif },
     items: [
@@ -422,8 +432,8 @@ export const defaultSiteContent: SiteContent = {
         title: { pl: 'Port Lotniczy Bydgoszcz', en: 'Bydgoszcz Airport' },
         distance: { pl: 'ok. 35 km od obiektu', en: 'approx. 35 km from the property' },
         description: {
-          pl: 'Najbliższe lotnisko dla gości Gerka Pool House. To najwygodniejszy wybór przy podróży z przesiadką lub połączeniach krajowych. Do obiektu najlepiej dojechać samochodem, taksówką albo wcześniej zamówionym transportem.',
-          en: 'The closest airport for Gerka Pool House guests. It is the most convenient choice for connecting or domestic routes. The property is best reached by car, taxi or pre-arranged transport.',
+          pl: 'Najbliższe lotnisko dla gości {{brandName}}. To najwygodniejszy wybór przy podróży z przesiadką lub połączeniach krajowych. Do obiektu najlepiej dojechać samochodem, taksówką albo wcześniej zamówionym transportem.',
+          en: 'The closest airport for {{brandName}} guests. It is the most convenient choice for connecting or domestic routes. The property is best reached by car, taxi or pre-arranged transport.',
         },
       },
       {
@@ -458,8 +468,8 @@ export const defaultSiteContent: SiteContent = {
         title: { pl: 'Lotnisko Chopina w Warszawie', en: 'Warsaw Chopin Airport' },
         distance: { pl: 'ok. 280 km od obiektu', en: 'approx. 280 km from the property' },
         description: {
-          pl: 'Największe lotnisko w Polsce, z dużą liczbą połączeń międzynarodowych i krajowych. To dobra opcja dla gości podróżujących z dalszych kierunków i planujących dojazd autem do Gerka Pool House.',
-          en: 'Poland’s largest airport, with many international and domestic connections. A good option for guests travelling from farther destinations and planning to drive to Gerka Pool House.',
+          pl: 'Największe lotnisko w Polsce, z dużą liczbą połączeń międzynarodowych i krajowych. To dobra opcja dla gości podróżujących z dalszych kierunków i planujących dojazd autem do {{brandName}}.',
+          en: 'Poland’s largest airport, with many international and domestic connections. A good option for guests travelling from farther destinations and planning to drive to {{brandName}}.',
         },
       },
     ],
@@ -478,16 +488,21 @@ export const defaultSiteContent: SiteContent = {
   },
   pricing: {
     room1Nightly: 1000,
-    room2Nightly: 300,
-    room2Enabled: false,
+    room2Nightly: 1600,
+    bothNightly: 2500,
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    weeksaveBaseNightly: 500,
+    weeksaveExtraGuestNightly: 200,
+    room2Enabled: true,
     room1Capacity: 6,
     maxGuests: 14,
     minStayNights: 1,
     currency: 'PLN',
     discounts: [],
     extraInfo: {
-      pl: 'Cena weekendowa wynosi 1000 zł za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Doba hotelowa trwa od 15:00, wymeldowanie do 12:00. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
-      en: 'The weekend rate is 1000 PLN per night: Friday to Saturday, Saturday to Sunday and Sunday to Monday. Check-in starts at 15:00 and check-out is by 12:00. The amount requires confirmation by the owner after checking availability.',
+      pl: 'Cena weekendowa wynosi {{priceGround}} za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Doba hotelowa trwa od {{checkInTime}}, wymeldowanie do {{checkOutTime}}. Apartament na piętrze dla {{capacityUpper}} osób: {{priceUpper}} za dobę. Wynajem całości (parter i piętro): {{priceBoth}} za dobę. Kwota wymaga potwierdzenia przez właściciela po sprawdzeniu dostępności terminu.',
+      en: 'The weekend rate is {{priceGround}} per night: Friday to Saturday, Saturday to Sunday and Sunday to Monday. Check-in starts at {{checkInTime}} and check-out is by {{checkOutTime}}. Upstairs apartment for {{capacityUpper}} guests: {{priceUpper}} per night. Both apartments together: {{priceBoth}} per night. The amount requires confirmation by the owner after checking availability.',
     },
   },
   faq: [
@@ -498,8 +513,8 @@ export const defaultSiteContent: SiteContent = {
         en: 'How many people can stay at the property?',
       },
       answer: {
-        pl: 'Aktualnie rezerwowany apartament na parterze jest przeznaczony dla maksymalnie 6 osób.',
-        en: 'The currently available ground-floor apartment is designed for up to 6 guests.',
+        pl: '{{capacitySummary}}',
+        en: '{{capacitySummary}}',
       },
     },
     {
@@ -520,8 +535,8 @@ export const defaultSiteContent: SiteContent = {
         en: 'Is the pool private?',
       },
       answer: {
-        pl: 'Tak, basen jest dostępny wyłącznie dla gości Gerka Pool House w czasie zarezerwowanego pobytu.',
-        en: 'Yes, the pool is available exclusively to Gerka Pool House guests during the booked stay.',
+        pl: 'Tak, basen jest dostępny wyłącznie dla gości {{brandName}} w czasie zarezerwowanego pobytu. Basen jest podgrzewany od 1 maja do 30 września.',
+        en: 'Yes, the pool is available exclusively to {{brandName}} guests during the booked stay. It is heated from 1 May to 30 September.',
       },
     },
     {
@@ -531,8 +546,8 @@ export const defaultSiteContent: SiteContent = {
         en: 'How is the stay price calculated?',
       },
       answer: {
-        pl: 'W weekendy obowiązuje stała cena 1000 zł za noc: z piątku na sobotę, z soboty na niedzielę oraz z niedzieli na poniedziałek. Od poniedziałku do czwartku może obowiązywać niższa cena promocyjna zgodnie z warunkami w cenniku.',
-        en: 'On weekends, a fixed rate of 1000 PLN per night applies: Friday to Saturday, Saturday to Sunday and Sunday to Monday. From Monday to Thursday, a lower promotional rate may apply according to the pricing terms.',
+        pl: '{{pricingSummary}}',
+        en: '{{pricingSummary}}',
       },
     },
     {
@@ -542,8 +557,19 @@ export const defaultSiteContent: SiteContent = {
         en: 'What are the check-in and check-out times?',
       },
       answer: {
-        pl: 'Zameldowanie jest możliwe od 15:00, a wymeldowanie do 12:00.',
-        en: 'Check-in is available from 15:00 and check-out is by 12:00.',
+        pl: 'Zameldowanie jest możliwe od {{checkInTime}}, a wymeldowanie do {{checkOutTime}}.',
+        en: 'Check-in is available from {{checkInTime}} and check-out is by {{checkOutTime}}.',
+      },
+    },
+    {
+      id: 'terrace-events',
+      question: {
+        pl: 'Czy można zorganizować imprezę okolicznościową?',
+        en: 'Can special occasions be organised at the property?',
+      },
+      answer: {
+        pl: 'Imprezy okolicznościowe można organizować na zewnątrz, na tarasie, od maja do końca września, po wcześniejszym uzgodnieniu z właścicielem. Cena jest ustalana indywidualnie.',
+        en: 'Special occasions can be organised outdoors on the terrace from May until the end of September, by prior arrangement with the owner. Pricing is agreed individually.',
       },
     },
     {
@@ -573,8 +599,8 @@ export const defaultSiteContent: SiteContent = {
       en: 'Booking inquiry confirmation',
     },
     confirmationBody: {
-      pl: 'Dziękujemy za kontakt.\n\nTwoje zapytanie rezerwacyjne zostało przesłane do właściciela obiektu Gerka Pool House.\n\nWkrótce otrzymasz odpowiedź dotyczącą dostępności wybranego terminu.',
-      en: 'Thank you for contacting us.\n\nYour booking inquiry has been sent to the owner of Gerka Pool House.\n\nYou will soon receive a reply about the availability of your selected dates.',
+      pl: 'Dziękujemy za kontakt.\n\nTwoje zapytanie rezerwacyjne zostało przesłane do właściciela obiektu {{brandName}}.\n\nWkrótce otrzymasz odpowiedź dotyczącą dostępności wybranego terminu.',
+      en: 'Thank you for contacting us.\n\nYour booking inquiry has been sent to the owner of {{brandName}}.\n\nYou will soon receive a reply about the availability of your selected dates.',
     },
   },
   contact: {
@@ -594,48 +620,48 @@ export const defaultSiteContent: SiteContent = {
   seo: {
     home: {
       title: {
-        pl: 'Nocleg Bydgoszcz i okolice | Gerka Pool House Czarże',
-        en: 'Accommodation near Bydgoszcz | Gerka Pool House Czarze',
+        pl: 'Nocleg Bydgoszcz i okolice | {{brandName}} Czarże',
+        en: 'Accommodation near Bydgoszcz | {{brandName}} Czarze',
       },
       description: {
-        pl: 'Gerka Pool House w Czarżu to prywatny nocleg niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z basenem, ogrodem, grillem i parkingiem.',
-        en: 'Gerka Pool House in Czarze is private accommodation near Bydgoszcz, Chelmno and Dabrowa Chelminska, with a pool, garden, barbecue and parking.',
+        pl: '{{brandName}} w Czarżu to prywatny nocleg niedaleko Bydgoszczy, Chełmna i Dąbrowy Chełmińskiej, z basenem, ogrodem, grillem i parkingiem.',
+        en: '{{brandName}} in Czarze is private accommodation near Bydgoszcz, Chelmno and Dabrowa Chelminska, with a pool, garden, barbecue and parking.',
       },
       canonicalPath: '/',
       ogImage: socialPreviewImage,
     },
     admin: {
       title: {
-        pl: 'Panel administratora | Gerka Pool House',
-        en: 'Admin panel | Gerka Pool House',
+        pl: 'Panel administratora | {{brandName}}',
+        en: 'Admin panel | {{brandName}}',
       },
       description: {
-        pl: 'Panel zarządzania treścią, galerią, cennikiem, FAQ, rezerwacjami i SEO obiektu Gerka Pool House.',
-        en: 'Management panel for content, gallery, pricing, FAQ, reservations and SEO of Gerka Pool House.',
+        pl: 'Panel zarządzania treścią, galerią, cennikiem, FAQ, rezerwacjami i SEO obiektu {{brandName}}.',
+        en: 'Management panel for content, gallery, pricing, FAQ, reservations and SEO of {{brandName}}.',
       },
       canonicalPath: '/admin',
       ogImage: socialPreviewImage,
     },
     privacy: {
       title: {
-        pl: 'Polityka prywatności | Gerka Pool House',
-        en: 'Privacy Policy | Gerka Pool House',
+        pl: 'Polityka prywatności | {{brandName}}',
+        en: 'Privacy Policy | {{brandName}}',
       },
       description: {
-        pl: 'Informacje o przetwarzaniu danych osobowych w związku z obsługą zapytań Gerka Pool House.',
-        en: 'Information about personal data processing related to Gerka Pool House inquiries.',
+        pl: 'Informacje o przetwarzaniu danych osobowych w związku z obsługą zapytań {{brandName}}.',
+        en: 'Information about personal data processing related to {{brandName}} inquiries.',
       },
       canonicalPath: '/privacy',
       ogImage: socialPreviewImage,
     },
     cookies: {
       title: {
-        pl: 'Polityka cookies | Gerka Pool House',
-        en: 'Cookie Policy | Gerka Pool House',
+        pl: 'Polityka cookies | {{brandName}}',
+        en: 'Cookie Policy | {{brandName}}',
       },
       description: {
-        pl: 'Informacje o plikach cookies, analityce i narzędziach pomiarowych na stronie Gerka Pool House.',
-        en: 'Information about cookies, analytics and measurement tools on the Gerka Pool House website.',
+        pl: 'Informacje o plikach cookies, analityce i narzędziach pomiarowych na stronie {{brandName}}.',
+        en: 'Information about cookies, analytics and measurement tools on the {{brandName}} website.',
       },
       canonicalPath: '/cookies',
       ogImage: socialPreviewImage,

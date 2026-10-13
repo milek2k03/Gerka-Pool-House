@@ -10,6 +10,8 @@ import {
 const tableName = 'site_content'
 const contentId = 'main'
 const storageKey = 'gerka-pool-house:site-content:v1'
+const contentChangedEvent = 'gerka:site-content:changed'
+const contentChannelName = 'gerka-site-content'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const previousHeroImageMarkers = [
@@ -916,6 +918,115 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     upsertFaq(defaultSiteContent.faq.find((item) => item.id === 'hotel-day'))
   }
 
+  if (storedVersion < 25) {
+    content.version = defaultSiteContent.version
+    content.pricing.room2Nightly = 1600
+    content.pricing.bothNightly = 2500
+    content.pricing.room2Enabled = true
+    content.pricing.room1Capacity = 6
+    content.pricing.maxGuests = 14
+    content.pricing.extraInfo = structuredClone(defaultSiteContent.pricing.extraInfo)
+    content.hero.lead = structuredClone(defaultSiteContent.hero.lead)
+    content.about.title = structuredClone(defaultSiteContent.about.title)
+    content.about.lead = structuredClone(defaultSiteContent.about.lead)
+    content.area.lead = structuredClone(defaultSiteContent.area.lead)
+
+    for (const locale of ['pl', 'en'] as const) {
+      content.about.body[locale] = content.about.body[locale].replaceAll('12:00', '11:00')
+      const poolCopy = defaultSiteContent.amenities.find((item) => item.id === 'pool')!
+      const eventCopy = defaultSiteContent.faq.find((item) => item.id === 'terrace-events')!
+      if (!content.about.body[locale].includes(poolCopy.description[locale])) {
+        content.about.body[locale] += `\n\n${poolCopy.description[locale]}`
+      }
+      if (!content.about.body[locale].includes(eventCopy.answer[locale])) {
+        content.about.body[locale] += `\n\n${eventCopy.answer[locale]}`
+      }
+    }
+
+    for (const id of ['pool', 'sauna']) {
+      const item = structuredClone(defaultSiteContent.amenities.find((amenity) => amenity.id === id)!)
+      const index = content.amenities.findIndex((amenity) => amenity.id === id)
+      if (index >= 0) content.amenities[index] = item
+      else content.amenities.push(item)
+    }
+    const torun = defaultSiteContent.area.items.find((item) => item.id === 'torun')
+    if (torun && !content.area.items.some((item) => item.id === 'torun')) {
+      content.area.items.push(structuredClone(torun))
+    }
+    for (const id of ['capacity', 'pool', 'pricing', 'hotel-day', 'terrace-events']) {
+      const item = structuredClone(defaultSiteContent.faq.find((faq) => faq.id === id)!)
+      const index = content.faq.findIndex((faq) => faq.id === id)
+      if (index >= 0) content.faq[index] = item
+      else content.faq.push(item)
+    }
+  }
+
+  if (storedVersion < 26) {
+    content.version = defaultSiteContent.version
+    const existingTimes = content.faq.find((item) => item.id === 'hotel-day')?.answer.pl.match(/\b\d{2}:\d{2}\b/g)
+    if (existingTimes?.[0] && content.pricing.checkInTime === defaultSiteContent.pricing.checkInTime) content.pricing.checkInTime = existingTimes[0]
+    if (existingTimes?.[1] && content.pricing.checkOutTime === defaultSiteContent.pricing.checkOutTime) content.pricing.checkOutTime = existingTimes[1]
+    content.pricing.weeksaveBaseNightly ??= defaultSiteContent.pricing.weeksaveBaseNightly
+    content.pricing.weeksaveExtraGuestNightly ??= defaultSiteContent.pricing.weeksaveExtraGuestNightly
+
+    // Convert existing mentions to live variables without replacing unrelated admin text.
+    const replacements = [
+      [new RegExp(`\\b${content.pricing.checkInTime}\\b`, 'g'), '{{checkInTime}}'],
+      [new RegExp(`\\b${content.pricing.checkOutTime}\\b`, 'g'), '{{checkOutTime}}'],
+      [/\b1000\s*(?:zł|PLN)/g, '{{priceGround}}'],
+      [/\b1600\s*(?:zł|PLN)/g, '{{priceUpper}}'],
+      [/\b2500\s*(?:zł|PLN)/g, '{{priceBoth}}'],
+      [new RegExp(`\\b${String(content.pricing.room1Nightly).replace('.', '\\.')}\\s*(?:zł|PLN)`, 'g'), '{{priceGround}}'],
+      [new RegExp(`\\b${String(content.pricing.room2Nightly).replace('.', '\\.')}\\s*(?:zł|PLN)`, 'g'), '{{priceUpper}}'],
+      [new RegExp(`\\b${String(content.pricing.bothNightly).replace('.', '\\.')}\\s*(?:zł|PLN)`, 'g'), '{{priceBoth}}'],
+      [/\b6(?= osób| guests)/g, '{{capacityGround}}'],
+      [/\b8(?= osób| guests)/g, '{{capacityUpper}}'],
+      [/\b14(?= osób| guests)/g, '{{maxGuests}}'],
+      [/\b15:00\b/g, '{{checkInTime}}'],
+      [/\b(?:11:00|12:00)\b/g, '{{checkOutTime}}'],
+    ] as const
+    const tokenize = (value: unknown, localized = false): unknown => {
+      if (typeof value === 'string' && localized) {
+        let text = value
+        for (const [pattern, token] of replacements) text = text.replace(pattern, token)
+        return text
+      }
+      if (Array.isArray(value)) return value.map((item) => tokenize(item, localized))
+      if (value && typeof value === 'object') {
+        return Object.fromEntries(Object.entries(value).map(([key, item]) =>
+          [key, tokenize(item, localized || key === 'pl' || key === 'en')],
+        ))
+      }
+      return value
+    }
+    content = tokenize(content) as SiteContent
+    for (const item of content.faq) {
+      for (const locale of ['pl', 'en'] as const) {
+        const answer = item.answer[locale]
+        if (item.id === 'capacity' && /^(Apartament na parterze mieści|The ground-floor apartment accommodates)/.test(answer)) {
+          item.answer[locale] = '{{capacitySummary}}'
+        }
+        if (item.id === 'pricing' && /^(Apartament na parterze kosztuje|The ground-floor apartment costs)/.test(answer)) {
+          item.answer[locale] = '{{pricingSummary}}'
+        }
+      }
+    }
+  }
+
+  if (storedVersion < 27) {
+    content.hero.mobileUsesDesktop = !content.hero.mobileImage || content.hero.mobileImage.src === content.hero.image.src
+    content.version = defaultSiteContent.version
+    const tokenizeBrand = (value: unknown, localized = false): unknown => {
+      if (typeof value === 'string' && localized) return value.replaceAll('Gerka Pool House', '{{brandName}}')
+      if (Array.isArray(value)) return value.map((item) => tokenizeBrand(item, localized))
+      if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, item]) =>
+        [key, tokenizeBrand(item, localized || key === 'pl' || key === 'en')],
+      ))
+      return value
+    }
+    content = tokenizeBrand(content) as SiteContent
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 
@@ -986,6 +1097,22 @@ export const contentRepository = {
   },
 
   async save(content: SiteContent) {
+    const pricing = content.pricing
+    if (!Number.isInteger(pricing.room1Capacity) || pricing.room1Capacity < 1 ||
+      !Number.isInteger(pricing.maxGuests) || pricing.maxGuests < pricing.room1Capacity ||
+      (pricing.room2Enabled && pricing.maxGuests <= pricing.room1Capacity) ||
+      !Number.isInteger(pricing.minStayNights) || pricing.minStayNights < 1) {
+      throw new Error('Invalid apartment capacity or minimum stay')
+    }
+    for (const time of [content.pricing.checkInTime, content.pricing.checkOutTime]) {
+      if (time !== undefined && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+        throw new Error('Invalid check-in or check-out time')
+      }
+    }
+    for (const price of [content.pricing.room1Nightly, content.pricing.room2Nightly,
+      content.pricing.bothNightly, content.pricing.weeksaveBaseNightly, content.pricing.weeksaveExtraGuestNightly]) {
+      if (price !== undefined && (!Number.isFinite(price) || price < 0)) throw new Error('Invalid price')
+    }
     const next = removeExpiredAvailability({
       ...content,
       version: defaultSiteContent.version,
@@ -1001,7 +1128,16 @@ export const contentRepository = {
       if (error) throw error
     }
 
-    return this.saveLocal(next)
+    this.saveLocal(next)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(contentChangedEvent))
+      if ('BroadcastChannel' in window) {
+        const channel = new BroadcastChannel(contentChannelName)
+        channel.postMessage({ type: contentChangedEvent })
+        channel.close()
+      }
+    }
+    return next
   },
 
   async cleanupExpiredAvailability() {
@@ -1029,7 +1165,7 @@ export const contentRepository = {
   },
 
   subscribe(onChange: () => void | Promise<void>) {
-    if (!isSupabaseConfigured || typeof window === 'undefined') return () => undefined
+    if (typeof window === 'undefined') return () => undefined
 
     let active = true
 
@@ -1040,14 +1176,26 @@ export const contentRepository = {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') notify()
     }
-    const interval = window.setInterval(notify, 5 * 60 * 1000)
+    const interval = isSupabaseConfigured ? window.setInterval(notify, 60 * 1000) : undefined
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === storageKey || event.key === null) notify()
+    }
+    const channel = 'BroadcastChannel' in window ? new BroadcastChannel(contentChannelName) : null
+    if (channel) channel.onmessage = (event) => {
+      if (event.data?.type === contentChangedEvent) notify()
+    }
 
+    window.addEventListener(contentChangedEvent, notify)
+    window.addEventListener('storage', handleStorage)
     window.addEventListener('focus', notify)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       active = false
-      window.clearInterval(interval)
+      if (interval) window.clearInterval(interval)
+      channel?.close()
+      window.removeEventListener(contentChangedEvent, notify)
+      window.removeEventListener('storage', handleStorage)
       window.removeEventListener('focus', notify)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }

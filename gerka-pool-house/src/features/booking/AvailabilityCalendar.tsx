@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { AvailabilityRange } from '../../types/booking'
 import { cn } from '../../utils/cn'
-import { getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
+import { eachNight, getTodayISO, isDateWithinRange, toISODate } from '../../utils/date'
 import { Button } from '../../components/ui/Button'
 import { getLocale } from '../../utils/locale'
 
@@ -14,7 +14,7 @@ interface AvailabilityCalendarProps {
   checkIn?: string
   checkOut?: string
   minDate: string
-  onSelectDate: (date: string) => void
+  onSelectDate?: (date: string) => void
 }
 
 function getStatus(date: string, ranges: AvailabilityRange[]) {
@@ -110,7 +110,9 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
           const isPast = date < minDate
           const isPastDay = date <= today
           const displayStatus = isPastDay ? 'past' : status === 'available' && isPast ? 'unavailable' : status
-          const disabled = displayStatus !== 'available' || isPast
+          const canCheckOut = Boolean(checkIn && !checkOut && date > checkIn &&
+            !eachNight(checkIn, date).some((night) => ranges.some((range) => isDateWithinRange(night, range.from, range.to))))
+          const disabled = !onSelectDate || (displayStatus !== 'available' && !canCheckOut) || isPast
           const statusLabel =
             displayStatus === 'past'
               ? t('booking.pastDay')
@@ -127,7 +129,7 @@ export const AvailabilityCalendar = memo(function AvailabilityCalendar({
               disabled={disabled}
               aria-label={`${dayFormatter.format(day)}: ${statusLabel}${isSelected ? `, ${t('booking.selected')}` : ''}`}
               aria-pressed={isSelected || isBetween}
-              onClick={() => onSelectDate(date)}
+              onClick={() => onSelectDate?.(date)}
               className={cn(
                 'aspect-square rounded-xl text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]',
                 displayStatus === 'available' && !isPast && 'bg-[var(--color-surface-2)] text-[var(--color-ink)] hover:bg-[var(--color-brass)] hover:text-[#111827]',

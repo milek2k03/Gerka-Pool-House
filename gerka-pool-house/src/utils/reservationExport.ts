@@ -1,3 +1,4 @@
+import { apartmentLabel, getReservationApartment } from './apartments'
 import type { ReservationRequest, ReservationStatus } from '../types/booking'
 import type { Locale } from '../types/common'
 import { formatDate, formatMoney } from './format'
@@ -116,7 +117,7 @@ export function downloadReservationsForExcel({
     formatDate(reservation.checkOut, locale),
     reservation.nights,
     reservation.guests,
-    reservation.roomsUsed,
+    apartmentLabel(getReservationApartment(reservation), locale),
     formatMoney(reservation.nightlyPrice, locale),
     formatMoney(reservation.estimatedTotal, locale),
     reservation.message || '',

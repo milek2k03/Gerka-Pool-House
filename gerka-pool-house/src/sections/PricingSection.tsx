@@ -6,26 +6,18 @@ import type { Locale } from '../types/common'
 import type { PriceSettings } from '../types/content'
 import { formatMoney } from '../utils/format'
 import { localize } from '../utils/locale'
-import { getEffectiveMaxGuests, isApartment2Enabled } from '../utils/pricing'
-
-function getExampleGuestCounts(pricing: PriceSettings) {
-  const maxGuests = getEffectiveMaxGuests(pricing)
-  const room2Enabled = isApartment2Enabled(pricing)
-  const firstExample = Math.max(1, Math.min(4, maxGuests))
-  const secondExample = Math.min(maxGuests, Math.max(pricing.room1Capacity + 1, 8))
-  const values = room2Enabled ? [firstExample, secondExample, maxGuests] : [firstExample, maxGuests]
-
-  return [...new Set(values)].filter((count) => count > 0).sort((a, b) => a - b)
-}
+import { getBothApartmentsNightly, getEffectiveMaxGuests, getStayTimes, getWeeksaveRates, isApartment2Enabled } from '../utils/pricing'
+import { getApartmentCapacity } from '../utils/apartments'
 
 export function PricingSection({ pricing, locale }: { pricing: PriceSettings; locale: Locale }) {
   const { t } = useTranslation()
   const room2Enabled = isApartment2Enabled(pricing)
   const fixedApartmentPricing = !room2Enabled
   const maxGuests = getEffectiveMaxGuests(pricing)
+  const times = getStayTimes(pricing)
+  const promo = getWeeksaveRates(pricing)
   const room1 = formatMoney(pricing.room1Nightly, locale, pricing.currency)
-  const bothRooms = formatMoney(pricing.room1Nightly + pricing.room2Nightly, locale, pricing.currency)
-  const exampleGuestCounts = getExampleGuestCounts(pricing)
+  const bothRooms = formatMoney(getBothApartmentsNightly(pricing), locale, pricing.currency)
 
   return (
     <section id="pricing" className="section-spacing bg-[var(--color-paper)] px-5 text-white sm:px-8 lg:px-10">
@@ -33,7 +25,7 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
         <SectionHeading
           eyebrow={t('sections.pricingEyebrow')}
           title={t('sections.pricingTitle')}
-          lead={fixedApartmentPricing ? t('sections.pricingLead', { count: maxGuests }) : t('sections.pricingLeadExpanded')}
+          lead={fixedApartmentPricing ? t('sections.pricingLead', { count: maxGuests, price: room1 }) : t('sections.pricingLeadExpanded')}
           tone="dark"
         />
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -53,9 +45,8 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
                 <tr>
                   <td className="px-3 py-5 align-top sm:px-5">
                     <span className="block font-semibold sm:inline">
-                      {fixedApartmentPricing ? t('pricing.groundApartment') : t('pricing.room1')}
+                      {t('pricing.groundApartment')}
                     </span>
-                    <span className="mt-1 block text-sm leading-5 text-[var(--color-muted)] sm:ml-2 sm:mt-0 sm:inline">{t('pricing.baseRoom')}</span>
                   </td>
                   <td className="break-words px-3 py-5 align-top leading-6 sm:px-5">{t('pricing.upToGuests', { count: pricing.room1Capacity })}</td>
                   <td className="break-words px-3 py-5 align-top font-semibold leading-6 sm:px-5 sm:text-lg">
@@ -65,11 +56,10 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
                 {room2Enabled ? (
                   <tr>
                     <td className="px-3 py-5 align-top sm:px-5">
-                      <span className="block font-semibold sm:inline">{t('pricing.room2')}</span>
-                      <span className="mt-1 block text-sm leading-5 text-[var(--color-muted)] sm:ml-2 sm:mt-0 sm:inline">{t('pricing.extraRoom')}</span>
+                      <span className="block font-semibold sm:inline">{t('pricing.upperApartment')}</span>
                     </td>
                     <td className="break-words px-3 py-5 align-top leading-6 sm:px-5">
-                      {t('pricing.activatedAbove', { count: pricing.room1Capacity })}
+                      {t('pricing.upToGuests', { count: getApartmentCapacity(pricing, 'upper') })}
                     </td>
                     <td className="break-words px-3 py-5 align-top font-semibold leading-6 sm:px-5 sm:text-lg">
                       {formatMoney(pricing.room2Nightly, locale, pricing.currency)}
@@ -88,7 +78,7 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
               <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-brass)]">
                 {t('pricing.weeksaveTitle')}
               </span>
-              <p className="mt-2 text-white">{t('pricing.weeksaveOffer')}</p>
+              <p className="mt-2 text-white">{t('pricing.weeksaveOffer', { basePrice: formatMoney(promo.base, locale, pricing.currency), extraPrice: formatMoney(promo.extraGuest, locale, pricing.currency) })}</p>
             </div>
           </div>
 
@@ -114,22 +104,22 @@ export function PricingSection({ pricing, locale }: { pricing: PriceSettings; lo
               </div>
             ) : (
               <dl className="mt-5 grid gap-4 text-sm">
-                {exampleGuestCounts.map((count) => {
-                  const price = count > pricing.room1Capacity ? bothRooms : room1
-
-                  return (
-                    <div key={count} className="flex items-center justify-between gap-4">
-                      <dt className="text-[var(--color-muted)]">{t('pricing.people', { count })}</dt>
-                      <dd className="font-semibold">{t('pricing.perNight', { price })}</dd>
-                    </div>
-                  )
-                })}
+                {[
+                  { label: t('pricing.groundApartment'), price: room1 },
+                  { label: t('pricing.upperApartment'), price: formatMoney(pricing.room2Nightly, locale, pricing.currency) },
+                  { label: t('pricing.bothApartments'), price: bothRooms },
+                ].map(({ label, price }) => (
+                  <div key={label} className="flex items-center justify-between gap-4">
+                    <dt className="text-[var(--color-muted)]">{label}</dt>
+                    <dd className="shrink-0 font-semibold">{t('pricing.perNight', { price })}</dd>
+                  </div>
+                ))}
               </dl>
             )}
             <div className="mt-6 flex items-start gap-3 rounded-[1.1rem] bg-[var(--color-surface-2)] p-4 text-sm leading-6 text-[var(--color-muted)]">
               <UsersRound aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-[var(--color-brass)]" />
               <p>
-                {t('pricing.maxGuests', { count: maxGuests })}. {t('pricing.minStay', { count: pricing.minStayNights })}. {t('pricing.hotelDay')}.
+                {t('pricing.maxGuests', { count: maxGuests })}. {t('pricing.minStay', { count: pricing.minStayNights })}. {t('pricing.hotelDay', { checkInTime: times.checkIn, checkOutTime: times.checkOut })}.
                 {fixedApartmentPricing ? ` ${t('pricing.fixedIncluded', { count: maxGuests })}` : ` ${localize(pricing.extraInfo, locale)}`}
               </p>
             </div>

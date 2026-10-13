@@ -3,6 +3,8 @@
 import { Resend } from 'resend'
 import { z } from 'zod'
 
+import { apartmentLabel, getReservationApartment } from '../src/utils/apartments.js'
+import { resolveReservationOwnerEmail } from './_booking-settings.js'
 import { loadLocalEnv } from './_env.js'
 
 loadLocalEnv()
@@ -44,6 +46,7 @@ const requestSchema = z
       checkIn: z.string().date(),
       checkOut: z.string().date(),
       nights: z.number().int().min(1).max(90),
+      apartment: z.enum(['ground', 'upper', 'both']).optional(),
       roomsUsed: z.number().int().min(1).max(4),
       nightlyPrice: z.number().min(0),
       estimatedTotal: z.number().min(0),
@@ -284,7 +287,6 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const resendApiKey = process.env.RESEND_API_KEY
   const fromEmail = process.env.RESEND_FROM_EMAIL
-  const ownerEmail = process.env.RESERVATION_OWNER_EMAIL
 
   if (!resendApiKey || resendApiKey === 're_xxxxxxxxx' || !fromEmail) {
     return res.status(500).json({ error: 'Email provider is not configured' })
@@ -300,7 +302,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const inquiry = payload.request
   const copy = emailCopy[payload.locale]
   const clientBody = appendAutomaticNotice(payload.clientBody, copy.automaticNotice)
-  const finalOwnerEmail = ownerEmail || payload.ownerEmail
+  let finalOwnerEmail: string
+  try {
+    finalOwnerEmail = await resolveReservationOwnerEmail(payload.ownerEmail)
+  } catch {
+    return res.status(503).json({ error: 'Could not load reservation email settings. Please try again.' })
+  }
   const resend = new Resend(resendApiKey)
   const tagValue = payload.reservationNumber.replace(/[^a-zA-Z0-9_-]/g, '_')
 
@@ -312,7 +319,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       ${row(copy.dates, `${inquiry.checkIn} - ${inquiry.checkOut}`)}
       ${row(copy.nights, inquiry.nights)}
       ${row(copy.guests, inquiry.guests)}
-      ${row(copy.rooms, inquiry.roomsUsed)}
+      ${row(copy.rooms, apartmentLabel(getReservationApartment(inquiry), payload.locale))}
       ${sectionTitle(copy.clientDetails)}
       ${row(copy.client, inquiry.fullName)}
       ${row(copy.email, inquiry.email)}
@@ -356,7 +363,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         `${copy.dates}: ${inquiry.checkIn} - ${inquiry.checkOut}`,
         `${copy.nights}: ${inquiry.nights}`,
         `${copy.guests}: ${inquiry.guests}`,
-        `${copy.rooms}: ${inquiry.roomsUsed}`,
+        `${copy.rooms}: ${apartmentLabel(getReservationApartment(inquiry), payload.locale)}`,
         `${copy.estimatedTotal}: ${inquiry.estimatedTotal} ${payload.currency}`,
         `${copy.message}: ${inquiry.message || '-'}`,
       ].join('\n'),

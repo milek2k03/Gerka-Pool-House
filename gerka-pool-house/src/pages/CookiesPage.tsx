@@ -15,7 +15,7 @@ export function CookiesPage() {
       <section className="bg-[var(--color-paper)] px-5 pb-20 pt-36 sm:px-8 lg:px-10 lg:pb-[120px]">
         <div className="mx-auto max-w-3xl rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] sm:p-8">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brass)]">
-            Gerka Pool House
+            {content.brandName}
           </p>
           <h1 className="text-4xl font-semibold text-[var(--color-ink)]">{t('legal.cookiesTitle')}</h1>
           <p className="mt-6 text-lg leading-8 text-[var(--color-muted)]">{t('legal.cookiesBody')}</p>

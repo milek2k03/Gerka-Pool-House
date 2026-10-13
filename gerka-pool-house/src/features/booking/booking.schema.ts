@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const bookingSchema = z.object({
+  apartment: z.enum(['ground', 'upper', 'both']).default('ground'),
   checkIn: z.string().min(1, 'validation.required'),
   checkOut: z.string().min(1, 'validation.required'),
   guests: z.coerce.number().int().min(1, 'validation.minGuests'),

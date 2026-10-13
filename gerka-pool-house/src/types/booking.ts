@@ -1,3 +1,5 @@
+export type ApartmentSelection = 'ground' | 'upper' | 'both'
+
 export type ReservationStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled'
 
 export type AvailabilityStatus = 'booked' | 'unavailable'
@@ -6,6 +8,7 @@ export interface AvailabilityRange {
   id: string
   from: string
   to: string
+  apartment?: ApartmentSelection
   status: AvailabilityStatus
 }
 
@@ -20,6 +23,7 @@ export interface ReservationRequest {
   checkIn: string
   checkOut: string
   nights: number
+  apartment: ApartmentSelection
   roomsUsed: number
   nightlyPrice: number
   estimatedTotal: number
@@ -32,6 +36,7 @@ export interface StaySummary {
   checkOut: string
   guests: number
   nights: number
+  apartment: ApartmentSelection
   roomsUsed: number
   roomLabels: string[]
   nightlyPrice: number

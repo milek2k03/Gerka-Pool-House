@@ -6,7 +6,6 @@ import { useSiteContent } from '../hooks/useSiteContent'
 import { HeroSection } from '../sections/HeroSection'
 import { buildHomeSchema } from '../utils/schema'
 import { getLocale } from '../utils/locale'
-import { applyGuestLimitToText } from '../utils/pricing'
 
 const HomeDeferredSections = lazy(() =>
   import('../sections/HomeDeferredSections').then((module) => ({ default: module.HomeDeferredSections })),
@@ -16,16 +15,7 @@ export function HomePage() {
   const { content } = useSiteContent()
   const { i18n } = useTranslation()
   const locale = getLocale(i18n.language)
-  const homeSeo = useMemo(
-    () => ({
-      ...content.seo.home,
-      description: {
-        pl: applyGuestLimitToText(content.seo.home.description.pl, content.pricing),
-        en: applyGuestLimitToText(content.seo.home.description.en, content.pricing),
-      },
-    }),
-    [content.pricing, content.seo.home],
-  )
+  const homeSeo = content.seo.home
   const homeSchema = useMemo(() => buildHomeSchema(content, locale), [content, locale])
 
   return (

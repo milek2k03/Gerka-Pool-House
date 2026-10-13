@@ -5,7 +5,7 @@ import { SectionHeading } from '../components/ui/SectionHeading'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
 import { localize } from '../utils/locale'
-import { applyGuestLimitToText, isApartment2Enabled } from '../utils/pricing'
+import { isApartment2Enabled } from '../utils/pricing'
 
 type RichPart =
   | {
@@ -251,7 +251,7 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           {supportingParts.length > 0 ? (
             <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
-              <RichParts parts={supportingParts} formatLine={(line) => applyGuestLimitToText(line, content.pricing)} />
+              <RichParts parts={supportingParts} />
             </div>
           ) : null}
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
@@ -265,7 +265,7 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
                 </div>
                 <h3 className="text-base font-semibold text-[var(--color-ink)]">{localize(item.title, locale)}</h3>
                 <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                  {applyGuestLimitToText(localize(item.description, locale), content.pricing)}
+                  {localize(item.description, locale)}
                 </p>
               </article>
             ))}

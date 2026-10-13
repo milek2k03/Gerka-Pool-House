@@ -1,3 +1,4 @@
+import { apartmentLabel } from '../utils/apartments'
 import type { ReservationRequest } from '../types/booking'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
@@ -73,7 +74,7 @@ export const emailService = {
       `${copy.guests}: ${request.guests}`,
       `${copy.dates}: ${request.checkIn} - ${request.checkOut}`,
       `${copy.nights}: ${request.nights}`,
-      `${copy.rooms}: ${request.roomsUsed}`,
+      `${copy.rooms}: ${apartmentLabel(request.apartment, locale)}`,
       `${copy.estimatedPrice}: ${request.estimatedTotal} ${content.pricing.currency}`,
       `${copy.message}: ${request.message || '-'}`,
     ].join('\n')
@@ -86,7 +87,7 @@ export const emailService = {
       ownerBody,
       clientSubject: content.booking.confirmationSubject[locale],
       clientBody: appendAutomaticNotice(
-        `${content.booking.confirmationBody[locale]}\n\n${copy.reservationNumber}: ${request.reservationNumber}`,
+        `${content.booking.confirmationBody[locale]}\n\n${copy.reservationNumber}: ${request.reservationNumber}\n${copy.rooms}: ${apartmentLabel(request.apartment, locale)}`,
         copy.automaticNotice,
       ),
     }

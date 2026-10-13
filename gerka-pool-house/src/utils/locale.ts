@@ -9,3 +9,10 @@ export function getLocale(value?: string): Locale {
 export function localize(value: LocalizedString, locale: Locale): string {
   return value[locale] || value[defaultLocale] || ''
 }
+
+export function withLocaleQuery(value: string, locale: Locale) {
+  const url = new URL(value)
+  if (locale === defaultLocale) url.searchParams.delete('lng')
+  else url.searchParams.set('lng', locale)
+  return url.toString()
+}

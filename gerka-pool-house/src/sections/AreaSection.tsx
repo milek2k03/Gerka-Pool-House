@@ -49,6 +49,16 @@ function InfoCard({
           ))}
         </ul>
       ) : null}
+      {item.link?.href.trim() ? (
+        <a
+          href={item.link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex text-sm font-semibold text-[var(--color-brass)] underline underline-offset-4"
+        >
+          {localize(item.link.label, locale) || item.link.href}
+        </a>
+      ) : null}
     </article>
   )
 }
@@ -146,7 +156,7 @@ export function AreaSection({ content, locale }: { content: SiteContent; locale:
                 <h3 className="text-2xl font-semibold text-[var(--color-ink)]">{t('sections.airportsTitle')}</h3>
               </div>
               <p className="mt-4 max-w-4xl text-sm leading-6 text-[var(--color-muted)]">
-                {t('sections.airportsLead')}
+                {t('sections.airportsLead', { brandName: content.brandName })}
               </p>
               <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {airports.map((item) => (

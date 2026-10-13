@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { SectionHeading } from '../components/ui/SectionHeading'
 import type { Locale } from '../types/common'
 import type { SiteContent } from '../types/content'
+import { isMapEmbedUrl } from '../utils/contact'
 import { localize } from '../utils/locale'
 
 export function ContactSection({ content, locale }: { content: SiteContent; locale: Locale }) {
   const { t } = useTranslation()
-  const hasMapEmbed = content.contact.mapEmbedUrl.includes('google.com/maps') && content.contact.mapEmbedUrl.includes('output=embed')
+  const hasMapEmbed = isMapEmbedUrl(content.contact.mapEmbedUrl)
   const phone = content.contact.phone.trim()
   const secondaryPhone = (content.contact.secondaryPhone ?? '').trim()
 
@@ -76,7 +77,7 @@ export function ContactSection({ content, locale }: { content: SiteContent; loca
         <div className="min-h-[360px] overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] shadow-[var(--shadow-soft)]">
           {hasMapEmbed ? (
             <iframe
-              title={t('contact.mapTitle')}
+              title={t('contact.mapTitle', { brandName: content.brandName })}
               src={content.contact.mapEmbedUrl}
               className="h-full min-h-[360px] w-full"
               loading="lazy"

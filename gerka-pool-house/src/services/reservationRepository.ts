@@ -1,4 +1,5 @@
-import type { AvailabilityRange, ReservationRequest, ReservationStatus } from '../types/booking'
+import type { ApartmentSelection, AvailabilityRange, ReservationRequest, ReservationStatus } from '../types/booking'
+import { apartmentsOverlap, getReservationApartment } from '../utils/apartments'
 import { getSupabaseClient, isSupabaseConfigured } from './supabaseClient'
 
 const tableName = 'reservation_requests'
@@ -21,6 +22,7 @@ interface ReservationRow {
   check_in: string
   check_out: string
   nights: number
+  apartment: ApartmentSelection
   rooms_used: number
   nightly_price: number
   estimated_total: number
@@ -50,7 +52,8 @@ function read(): ReservationRequest[] {
       legacyStorageCleaned = true
     }
 
-    return JSON.parse(window.localStorage.getItem(storageKey) ?? '[]') as ReservationRequest[]
+    const items = JSON.parse(window.localStorage.getItem(storageKey) ?? '[]') as ReservationRequest[]
+    return items.map((item) => ({ ...item, apartment: getReservationApartment(item) }))
   } catch {
     return []
   }
@@ -68,6 +71,7 @@ function fromRow(row: ReservationRow): ReservationRequest {
     checkIn: row.check_in,
     checkOut: row.check_out,
     nights: Number(row.nights),
+    apartment: row.apartment ?? (Number(row.rooms_used) > 1 ? 'both' : 'ground'),
     roomsUsed: Number(row.rooms_used),
     nightlyPrice: Number(row.nightly_price),
     estimatedTotal: Number(row.estimated_total),
@@ -88,6 +92,7 @@ function toRow(request: ReservationRequest): ReservationRow {
     check_in: request.checkIn,
     check_out: request.checkOut,
     nights: request.nights,
+    apartment: request.apartment,
     rooms_used: request.roomsUsed,
     nightly_price: request.nightlyPrice,
     estimated_total: request.estimatedTotal,
@@ -141,7 +146,7 @@ async function listFromSupabase() {
   const { data, error } = await supabase
     .from(tableName)
     .select(
-      'id,reservation_number,created_at,full_name,email,phone,guests,check_in,check_out,nights,rooms_used,nightly_price,estimated_total,message,status',
+      'id,reservation_number,created_at,full_name,email,phone,guests,check_in,check_out,nights,apartment,rooms_used,nightly_price,estimated_total,message,status',
     )
     .order('created_at', { ascending: false })
 
@@ -150,11 +155,12 @@ async function listFromSupabase() {
   return (data ?? []).map((row) => fromRow(row as ReservationRow))
 }
 
-function asAvailability(items: Pick<ReservationRequest, 'checkIn' | 'checkOut' | 'id'>[]): AvailabilityRange[] {
+function asAvailability(items: Pick<ReservationRequest, 'checkIn' | 'checkOut' | 'id' | 'apartment'>[]): AvailabilityRange[] {
   return items.map((item) => ({
     id: `reservation-${item.id}`,
     from: item.checkIn,
     to: item.checkOut,
+    apartment: item.apartment,
     status: 'booked',
   }))
 }
@@ -162,7 +168,7 @@ function asAvailability(items: Pick<ReservationRequest, 'checkIn' | 'checkOut' |
 async function acceptedReservationsAsAvailability(): Promise<AvailabilityRange[]> {
   if (isSupabaseConfigured) {
     const response = await publicSupabaseRequest(
-      `${tableName}?select=id,check_in,check_out,status&status=eq.accepted&order=check_in.asc`,
+      `${tableName}?select=id,check_in,check_out,apartment,status&status=eq.accepted&order=check_in.asc`,
     )
 
     if (!response?.ok) {
@@ -173,12 +179,14 @@ async function acceptedReservationsAsAvailability(): Promise<AvailabilityRange[]
       id: string
       check_in: string
       check_out: string
+      apartment: ApartmentSelection
     }>
 
     return data.map((row) => ({
       id: `reservation-${String(row.id)}`,
       from: String(row.check_in),
       to: String(row.check_out),
+      apartment: row.apartment,
       status: 'booked',
     }))
   }
@@ -244,7 +252,16 @@ export const reservationRepository = {
       return listFromSupabase()
     }
 
-    const next = read().map((item) => (item.id === id ? { ...item, status } : item))
+    const items = read()
+    const selected = items.find((item) => item.id === id)
+    if (status === 'accepted' && selected && items.some((item) =>
+      item.id !== id && item.status === 'accepted' &&
+      apartmentsOverlap(selected.apartment, item.apartment) &&
+      selected.checkIn < item.checkOut && selected.checkOut > item.checkIn,
+    )) {
+      throw new Error('Apartment already booked for these dates')
+    }
+    const next = items.map((item) => (item.id === id ? { ...item, status } : item))
     write(next)
     return next
   },

@@ -43,6 +43,7 @@ import type {
   SiteContent,
 } from '../types/content'
 import type {
+  ApartmentSelection,
   AvailabilityRange,
   AvailabilityStatus,
   ReservationRequest,
@@ -58,6 +59,9 @@ import {
   downloadReservationsForExcel,
 } from '../utils/reservationExport'
 import { GalleryItemMediaPicker } from './GalleryItemMediaPicker'
+import { AvailabilityCalendar } from '../features/booking/AvailabilityCalendar'
+import { getBothApartmentsNightly, getStayTimes, getWeeksaveRates } from '../utils/pricing'
+import { apartmentLabel, apartmentsOverlap, getReservationApartment } from '../utils/apartments'
 import { AdminLogin } from './AdminLogin'
 
 type TabId =
@@ -316,6 +320,7 @@ function createAvailabilityDraft(status: AvailabilityStatus = 'booked'): Availab
   return {
     from,
     to: nextDayISO(from),
+    apartment: 'ground',
     status,
   }
 }
@@ -390,6 +395,7 @@ function findReservationAcceptanceConflict(
     (item) =>
       item.id !== reservation.id &&
       item.status === 'accepted' &&
+      apartmentsOverlap(getReservationApartment(reservation), getReservationApartment(item)) &&
       rangesOverlap(reservation.checkIn, reservation.checkOut, item.checkIn, item.checkOut),
   )
 
@@ -398,6 +404,7 @@ function findReservationAcceptanceConflict(
   }
 
   const conflictingRange = availability.find((range) =>
+    apartmentsOverlap(getReservationApartment(reservation), range.apartment) &&
     rangesOverlap(reservation.checkIn, reservation.checkOut, range.from, range.to),
   )
 
@@ -410,7 +417,7 @@ function findReservationAcceptanceConflict(
 
 export function AdminPage() {
   const adminAuth = useAdminAuth()
-  const { content, saveContent, resetContent } = useSiteContent()
+  const { content, saveContent, resetContent } = useSiteContent({ raw: true })
   const { t, i18n } = useTranslation()
   const locale = getLocale(i18n.language)
   const [activeTab, setActiveTab] = useState<TabId>('content')
@@ -1032,9 +1039,10 @@ export function AdminPage() {
                     </div>
                     <TextInput
                       label={t('admin.fields.imageUrl')}
-                      value={(draft.hero.mobileImage ?? draft.hero.image).src}
+                      value={(draft.hero.mobileUsesDesktop ? draft.hero.image : draft.hero.mobileImage ?? draft.hero.image).src}
                       onChange={(value) =>
                         mutate((next) => {
+                          next.hero.mobileUsesDesktop = false
                           next.hero.mobileImage = { src: value, type: 'image' }
                         })
                       }
@@ -1045,6 +1053,7 @@ export function AdminPage() {
                       unsupportedMessage={t('admin.mediaUploadImageUnsupported')}
                       onUploaded={(upload) =>
                         mutate((next) => {
+                          next.hero.mobileUsesDesktop = false
                           next.hero.mobileImage = { ...upload.asset, type: 'image' }
                         })
                       }
@@ -1055,6 +1064,7 @@ export function AdminPage() {
                       className="justify-self-start"
                       onClick={() =>
                         mutate((next) => {
+                          next.hero.mobileUsesDesktop = true
                           next.hero.mobileImage = next.hero.image
                         })
                       }
@@ -1067,7 +1077,7 @@ export function AdminPage() {
                       {t('admin.fields.heroMobileImagePreview')}
                     </p>
                     <ResponsiveImage
-                      image={draft.hero.mobileImage ?? draft.hero.image}
+                      image={draft.hero.mobileUsesDesktop ? draft.hero.image : draft.hero.mobileImage ?? draft.hero.image}
                       alt=""
                       className="aspect-[9/16] rounded-md border border-[var(--color-border)] bg-[var(--color-deep)]"
                       imgClassName="object-cover object-[63%_48%]"
@@ -1488,6 +1498,37 @@ export function AdminPage() {
                     />
                   </label>
                   <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.bothPrice')}
+                    <input className="field" type="number" min={0}
+                      value={getBothApartmentsNightly(draft.pricing)}
+                      onChange={(event) => mutate((next) => void (next.pricing.bothNightly = numberValue(event)))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.checkInTime')}
+                    <input className="field" type="time" required value={getStayTimes(draft.pricing).checkIn}
+                      onChange={(event) => mutate((next) => void (next.pricing.checkInTime = event.target.value))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.checkOutTime')}
+                    <input className="field" type="time" required value={getStayTimes(draft.pricing).checkOut}
+                      onChange={(event) => mutate((next) => void (next.pricing.checkOutTime = event.target.value))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.weeksaveBasePrice')}
+                    <input className="field" type="number" min={0} value={getWeeksaveRates(draft.pricing).base}
+                      onChange={(event) => mutate((next) => void (next.pricing.weeksaveBaseNightly = numberValue(event)))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.weeksaveExtraPrice')}
+                    <input className="field" type="number" min={0} value={getWeeksaveRates(draft.pricing).extraGuest}
+                      onChange={(event) => mutate((next) => void (next.pricing.weeksaveExtraGuestNightly = numberValue(event)))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                    {t('admin.fields.room1Capacity')}
+                    <input className="field" type="number" min={1} value={draft.pricing.room1Capacity}
+                      onChange={(event) => mutate((next) => void (next.pricing.room1Capacity = numberValue(event)))} />
+                  </label>
+                  <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
                     {t('admin.fields.maxGuests')}
                     <input
                       className="field"
@@ -1508,6 +1549,7 @@ export function AdminPage() {
                     />
                   </label>
                 </div>
+                <p className="text-sm leading-6 text-[var(--color-muted)]">{t('admin.fields.dynamicContentHelp', { interpolation: { skipOnVariables: true } })}</p>
                 <LocalizedField
                   label={t('admin.fields.extraInfo')}
                   value={draft.pricing.extraInfo}
@@ -1689,7 +1731,7 @@ export function AdminPage() {
                 </div>
                 <p className="rounded-md bg-[var(--color-paper)] p-4 text-sm text-[var(--color-muted)]">
                   {draft.pricing.room2Enabled
-                    ? `8 osób: ${formatMoney(draft.pricing.room1Nightly + draft.pricing.room2Nightly, locale)}`
+                    ? `${t('booking.bothApartments')}: ${formatMoney(getBothApartmentsNightly(draft.pricing), locale)}`
                     : t('admin.fields.room2DisabledSummary', { count: draft.pricing.room1Capacity })}
                 </p>
               </div>
@@ -1697,6 +1739,23 @@ export function AdminPage() {
 
             {activeTab === 'availability' ? (
               <div className="grid gap-5">
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {(['ground', 'upper'] as const).map((apartment) => (
+                    <div key={apartment}>
+                      <h3 className="mb-3 font-semibold">{apartmentLabel(apartment, locale)}</h3>
+                      <AvailabilityCalendar
+                        minDate={getTomorrowISO()}
+                        ranges={[
+                          ...draft.availability,
+                          ...reservations.filter((item) => item.status === 'accepted').map((item) => ({
+                            id: item.id, from: item.checkIn, to: item.checkOut,
+                            apartment: getReservationApartment(item), status: 'booked' as const,
+                          })),
+                        ].filter((range) => apartmentsOverlap(apartment, range.apartment))}
+                      />
+                    </div>
+                  ))}
+                </div>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <Button
                     type="button"
@@ -1728,7 +1787,14 @@ export function AdminPage() {
                         {newAvailabilityDraft.from} - {getInclusiveUnavailableEnd(newAvailabilityDraft)}
                       </p>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(10rem,0.7fr)_1fr_1fr_auto] lg:items-end">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 lg:items-end">
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('booking.apartment')}
+                        <select className="field" value={newAvailabilityDraft.apartment ?? 'both'}
+                          onChange={(event) => updateNewAvailabilityDraft((next) => { next.apartment = event.target.value as ApartmentSelection })}>
+                          {(['ground', 'upper', 'both'] as const).map((apartment) => <option key={apartment} value={apartment}>{apartmentLabel(apartment, locale)}</option>)}
+                        </select>
+                      </label>
                       <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
                         {t('admin.fields.availabilityStatus')}
                         <select
@@ -1851,7 +1917,14 @@ export function AdminPage() {
                 ) : null}
                 {visibleAvailability.map(({ range, index }) => (
                   <article key={range.id} className="grid gap-4 rounded-md border border-[var(--color-border)] p-4">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-[minmax(10rem,0.7fr)_1fr_1fr_auto] lg:items-end">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 lg:items-end">
+                      <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+                        {t('booking.apartment')}
+                        <select className="field" value={range.apartment ?? 'both'}
+                          onChange={(event) => mutate((next) => { next.availability[index].apartment = event.target.value as ApartmentSelection })}>
+                          {(['ground', 'upper', 'both'] as const).map((apartment) => <option key={apartment} value={apartment}>{apartmentLabel(apartment, locale)}</option>)}
+                        </select>
+                      </label>
                       <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
                         {t('admin.fields.availabilityStatus')}
                         <select
@@ -2519,6 +2592,11 @@ export function AdminPage() {
                       }
                     />
                     <TextInput
+                      label={t('admin.fields.ogImage')}
+                      value={settings.ogImage ?? ''}
+                      onChange={(value) => mutate((next) => void (next.seo[pageKey as keyof SiteContent['seo']].ogImage = value))}
+                    />
+                    <TextInput
                       label={t('admin.fields.canonical')}
                       value={settings.canonicalPath}
                       onChange={(value) =>
@@ -2762,7 +2840,7 @@ export function AdminPage() {
                                 <ReservationDetailRow label={t('admin.reservationDetailEmail')} value={reservation.email} />
                                 <ReservationDetailRow label={t('admin.reservationDetailPhone')} value={reservation.phone} />
                                 <ReservationDetailRow label={t('admin.reservationDetailNights')} value={reservation.nights} />
-                                <ReservationDetailRow label={t('admin.reservationDetailRooms')} value={reservation.roomsUsed} />
+                                <ReservationDetailRow label={t('booking.apartment')} value={apartmentLabel(getReservationApartment(reservation), locale)} />
                                 <ReservationDetailRow
                                   label={t('admin.reservationDetailCreated')}
                                   value={new Date(reservation.createdAt).toLocaleString(locale)}

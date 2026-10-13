@@ -26,3 +26,15 @@ export function applyGuestLimitToText(value: string, pricing: PriceSettings) {
     .replace(/1 to\s+\d+\s+guests/gi, `1 to ${maxGuests} guests`)
     .replace(/is\s+\d+\s+guests/gi, `is ${maxGuests} guests`)
 }
+
+export function getBothApartmentsNightly(pricing: PriceSettings) {
+  return pricing.bothNightly ?? pricing.room1Nightly + pricing.room2Nightly
+}
+
+export function getStayTimes(pricing: PriceSettings) {
+  return { checkIn: pricing.checkInTime ?? '15:00', checkOut: pricing.checkOutTime ?? '11:00' }
+}
+
+export function getWeeksaveRates(pricing: PriceSettings) {
+  return { base: pricing.weeksaveBaseNightly ?? 500, extraGuest: pricing.weeksaveExtraGuestNightly ?? 200 }
+}

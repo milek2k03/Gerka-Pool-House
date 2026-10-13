@@ -7,9 +7,8 @@ import type { Locale } from '../types/common'
 import type { FaqItem, PriceSettings } from '../types/content'
 import { cn } from '../utils/cn'
 import { localize } from '../utils/locale'
-import { applyGuestLimitToText } from '../utils/pricing'
 
-export function FaqSection({ items, locale, pricing }: { items: FaqItem[]; locale: Locale; pricing: PriceSettings }) {
+export function FaqSection({ items, locale }: { items: FaqItem[]; locale: Locale; pricing: PriceSettings }) {
   const { t } = useTranslation()
   const [openId, setOpenId] = useState(items[0]?.id)
 
@@ -39,7 +38,7 @@ export function FaqSection({ items, locale, pricing }: { items: FaqItem[]; local
                 <div className={cn('grid transition-all', isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
                   <div className="overflow-hidden">
                     <p className="px-5 pb-5 text-sm leading-6 text-[var(--color-muted)]">
-                      {item.id === 'capacity' ? applyGuestLimitToText(answer, pricing) : answer}
+                      {answer}
                     </p>
                   </div>
                 </div>

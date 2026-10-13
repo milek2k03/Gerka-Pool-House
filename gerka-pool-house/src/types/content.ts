@@ -75,6 +75,11 @@ export interface FaqItem {
 export interface PriceSettings {
   room1Nightly: number
   room2Nightly: number
+  bothNightly?: number
+  checkInTime?: string
+  checkOutTime?: string
+  weeksaveBaseNightly?: number
+  weeksaveExtraGuestNightly?: number
   room2Enabled: boolean
   room1Capacity: number
   maxGuests: number
@@ -132,6 +137,7 @@ export interface SiteContent {
     lead: LocalizedString
     image: ImageAsset
     mobileImage?: ImageAsset
+    mobileUsesDesktop?: boolean
   }
   about: {
     title: LocalizedString

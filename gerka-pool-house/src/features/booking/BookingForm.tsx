@@ -15,7 +15,8 @@ import { formatDate, formatMoney } from '../../utils/format'
 import { localize } from '../../utils/locale'
 import { addDays, getTomorrowISO, toDate, toISODate } from '../../utils/date'
 import { cn } from '../../utils/cn'
-import { getEffectiveMaxGuests, isApartment2Enabled } from '../../utils/pricing'
+import { apartmentsOverlap, getApartmentCapacity } from '../../utils/apartments'
+import { isApartment2Enabled } from '../../utils/pricing'
 import { calculateStaySummary } from './booking.utils'
 import { normalizeDiscountCode } from '../../utils/discounts'
 import { bookingSchema, type BookingFormInput, type BookingFormValues } from './booking.schema'
@@ -59,6 +60,8 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
   const [success, setSuccess] = useState<{ reservationNumber: string; provider: EmailDeliveryProvider } | null>(null)
   const [emailFailed, setEmailFailed] = useState<string | null>(null)
   const [submissionFailed, setSubmissionFailed] = useState('')
+  const [availabilityFailed, setAvailabilityFailed] = useState(false)
+  const [availabilityLoading, setAvailabilityLoading] = useState(true)
   const [reservationAvailability, setReservationAvailability] = useState<AvailabilityRange[]>([])
   const earliestCheckIn = getTomorrowISO()
   const {
@@ -71,6 +74,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
   } = useForm<BookingFormInput, unknown, BookingFormValues>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
+      apartment: 'ground',
       checkIn: '',
       checkOut: '',
       guests: 0,
@@ -83,9 +87,9 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     },
   })
 
-  const [checkIn, checkOut, guestsValue, discountCode] = useWatch({
+  const [checkIn, checkOut, guestsValue, discountCode, selectedApartment] = useWatch({
     control,
-    name: ['checkIn', 'checkOut', 'guests', 'discountCode'],
+    name: ['checkIn', 'checkOut', 'guests', 'discountCode', 'apartment'],
   })
   const guests = Number(guestsValue || 0)
   const normalizedDiscountCode = normalizeDiscountCode(discountCode)
@@ -93,12 +97,13 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
     () => [...content.availability, ...reservationAvailability],
     [content.availability, reservationAvailability],
   )
-  const maxGuests = getEffectiveMaxGuests(content.pricing)
   const room2Enabled = isApartment2Enabled(content.pricing)
+  const apartment = room2Enabled ? selectedApartment ?? 'ground' : 'ground'
+  const maxGuests = getApartmentCapacity(content.pricing, apartment)
 
   const summary = useMemo(
-    () => calculateStaySummary(checkIn, checkOut, guests, content.pricing, availability, discountCode),
-    [checkIn, checkOut, guests, availability, content.pricing, discountCode],
+    () => calculateStaySummary(checkIn, checkOut, guests, content.pricing, availability, discountCode, apartment),
+    [checkIn, checkOut, guests, availability, content.pricing, discountCode, apartment],
   )
 
   useEffect(() => {
@@ -110,11 +115,14 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
 
         if (active) {
           setReservationAvailability(nextAvailability)
+          setAvailabilityFailed(false)
         }
       } catch {
         if (active) {
-          setReservationAvailability([])
+          setAvailabilityFailed(true)
         }
+      } finally {
+        if (active) setAvailabilityLoading(false)
       }
     }
 
@@ -149,16 +157,29 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
   const onSubmit = handleSubmit(async (values) => {
     setEmailFailed(null)
     setSubmissionFailed('')
+    let latestAvailability: AvailabilityRange[]
+    try {
+      latestAvailability = await reservationRepository.listAcceptedAvailability()
+      setReservationAvailability(latestAvailability)
+      setAvailabilityFailed(false)
+    } catch {
+      setAvailabilityFailed(true)
+      return
+    }
     const nextSummary = calculateStaySummary(
       values.checkIn,
       values.checkOut,
       Number(values.guests),
       content.pricing,
-      availability,
+      [...content.availability, ...latestAvailability],
       values.discountCode,
+      room2Enabled ? values.apartment : 'ground',
     )
 
-    if (!nextSummary.isValid) return
+    if (!nextSummary.isValid) {
+      setSubmissionFailed(t(summaryReasonKey(nextSummary.reason) ?? 'booking.dateBlocked'))
+      return
+    }
 
     let saved
 
@@ -184,6 +205,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         checkIn: values.checkIn,
         checkOut: values.checkOut,
         nights: nextSummary.nights,
+        apartment: nextSummary.apartment,
         roomsUsed: nextSummary.roomsUsed,
         nightlyPrice: nextSummary.nightlyPrice,
         estimatedTotal: nextSummary.estimatedTotal,
@@ -219,19 +241,46 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
 
   return (
     <div className="grid min-w-0 gap-5 lg:grid-cols-[0.95fr_1.05fr] lg:gap-6">
-      <AvailabilityCalendar
-        ranges={availability}
-        checkIn={checkIn}
-        checkOut={checkOut}
-        minDate={earliestCheckIn}
-        onSelectDate={onSelectCalendarDate}
-      />
+      <div className="grid content-start gap-5">
+        {(room2Enabled ? ['ground', 'upper'] as const : ['ground'] as const).map((calendarApartment) => (
+          <div key={calendarApartment}>
+            <h3 className="mb-3 font-semibold text-[var(--color-ink)]">
+              {t(calendarApartment === 'ground' ? 'booking.groundApartment' : 'booking.upperApartment')}
+            </h3>
+            <AvailabilityCalendar
+              ranges={availability.filter((range) => apartmentsOverlap(calendarApartment, range.apartment))}
+              checkIn={apartmentsOverlap(apartment, calendarApartment) ? checkIn : undefined}
+              checkOut={apartmentsOverlap(apartment, calendarApartment) ? checkOut : undefined}
+              minDate={earliestCheckIn}
+              onSelectDate={(date) => {
+                if (apartment !== 'both' && apartment !== calendarApartment) {
+                  setValue('apartment', calendarApartment, { shouldValidate: true })
+                  setValue('checkIn', date, { shouldValidate: true })
+                  setValue('checkOut', '', { shouldValidate: true })
+                  return
+                }
+                onSelectCalendarDate(date)
+              }}
+            />
+          </div>
+        ))}
+      </div>
 
       <form
         className="min-w-0 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-soft)] sm:p-6"
         onSubmit={onSubmit}
         noValidate
       >
+        {room2Enabled ? (
+          <label className="mb-4 grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+            {t('booking.apartment')}
+            <select className="field" {...register('apartment')}>
+              <option value="ground">{t('booking.groundApartment')}</option>
+              <option value="upper">{t('booking.upperApartment')}</option>
+              <option value="both">{t('booking.bothApartments')}</option>
+            </select>
+          </label>
+        ) : null}
         <div className="grid min-w-0 gap-4 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-4 sm:grid-cols-3">
           <label className="grid min-w-0 gap-2 text-sm font-medium text-[var(--color-ink)]">
             {t('booking.checkIn')}
@@ -329,7 +378,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
               </div>
               {!room2Enabled ? (
                 <p className="rounded-[1rem] border border-[var(--color-brass)] bg-[rgba(214,181,138,0.10)] p-3 text-xs leading-5 text-[var(--color-muted)] sm:col-span-2">
-                  {t('booking.fixedApartmentPriceNote', { count: maxGuests })}
+                  {t('booking.fixedApartmentPriceNote', { count: maxGuests, price: formatMoney(content.pricing.room1Nightly, locale, content.pricing.currency) })}
                 </p>
               ) : null}
             </dl>
@@ -394,6 +443,9 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
           </div>
         ) : null}
 
+        {availabilityFailed ? (
+          <p className="mt-4 text-sm text-red-300" role="alert">{t('booking.availabilityFailed')}</p>
+        ) : null}
         {submissionFailed ? (
           <p className="mt-4 rounded-[1rem] border border-red-400/25 bg-red-950/35 p-3 text-sm text-red-100" role="alert">
             {submissionFailed}
@@ -401,7 +453,7 @@ export function BookingForm({ content, locale }: { content: SiteContent; locale:
         ) : null}
 
         <div className="mt-5 grid min-w-0 gap-3 xl:grid-cols-[auto_minmax(16rem,21rem)] xl:items-start">
-          <Button type="submit" className="w-full xl:min-w-80 xl:self-start" disabled={isSubmitting || !summary.isValid}>
+          <Button type="submit" className="w-full xl:min-w-80 xl:self-start" disabled={isSubmitting || availabilityLoading || availabilityFailed || !summary.isValid}>
             <Send aria-hidden="true" className="size-4" />
             {t('booking.send')}
           </Button>

@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react'
 import { Link, useLocation } from 'react-router'
 
+import { defaultSiteContent } from '../../constants/defaultContent'
 import logoMark from '../../assets/images/gerka-logo.webp'
 import { useSiteContent } from '../../hooks/useSiteContent'
 
@@ -24,13 +25,15 @@ export function Logo({ to = '/' }: { to?: string }) {
       className="inline-flex min-w-0 items-center rounded-[1.1rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brass)]"
     >
       <span className="grid h-12 w-20 shrink-0 place-items-center p-1 sm:h-16 sm:w-[6.5rem] lg:h-[4.25rem] lg:w-28">
-        <img
+        {content.logoText.trim() && content.logoText !== defaultSiteContent.logoText ? (
+          <span className="text-xl font-semibold tracking-wide text-[var(--color-brass)]">{content.logoText}</span>
+        ) : <img
           src={logoMark}
           alt=""
           className="h-[88%] w-[88%] -translate-y-0.5 object-contain sm:-translate-y-1"
           loading="eager"
           decoding="async"
-        />
+        />}
       </span>
     </Link>
   )

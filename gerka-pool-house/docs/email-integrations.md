@@ -63,3 +63,12 @@ owner_body
 client_subject
 client_body
 ```
+
+
+When Supabase is configured on the server (`SUPABASE_URL` / `SUPABASE_ANON_KEY`
+or their `VITE_` equivalents), the owner recipient is read from the trusted
+`site_content` row on each request. Editing `booking.ownerEmail` in the admin
+panel therefore takes effect without changing server environment variables.
+If that read fails, the endpoint returns 503 and does not send to an outdated
+recipient. `RESERVATION_OWNER_EMAIL` remains a fallback for installations without
+Supabase. The verified sender (`RESEND_FROM_EMAIL`) stays a server setting.
