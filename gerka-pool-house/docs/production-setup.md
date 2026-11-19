@@ -87,7 +87,7 @@ Dodaj:
 | `VITE_RESERVATION_EMAIL_ENDPOINT` | `/api/reservation-email` |
 | `RESEND_API_KEY` | nowy klucz `re_...` z Resend |
 | `RESEND_FROM_EMAIL` | `Gerka Pool House <rezerwacje@gerkapoolhouse.pl>` |
-| `RESERVATION_OWNER_EMAIL` | adres odbierający zapytania, np. `rezerwacje@gerkapoolhouse.pl` |
+| `RESERVATION_OWNER_EMAIL` | `gerkapoolhouse@gmail.com` (w Supabase ustaw również „Adres do powiadomień” w panelu admina) |
 | `ALLOWED_ORIGIN` | `https://www.gerkapoolhouse.pl` |
 
 Opcjonalnie:

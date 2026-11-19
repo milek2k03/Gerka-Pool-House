@@ -12,7 +12,7 @@ const socialPreviewImage = '/URLimage.png?v=9'
 const heroBackgroundImage = '/newBackground.webp'
 
 export const defaultSiteContent: SiteContent = {
-  version: 28,
+  version: 29,
   brandName: 'Gerka Pool House',
   logoText: 'GPH',
   hero: {
@@ -50,6 +50,10 @@ export const defaultSiteContent: SiteContent = {
     body: {
       pl: '#### Apartament na parterze\nPrzeznaczony dla maksymalnie {{capacityGround}} osób.\n\nOferuje:\n* przestronny salon z wygodną rozkładaną sofą,\n* w pełni wyposażoną kuchnię,\n* 2 komfortowe sypialnie,\n* łazienkę,\n* bezpośrednie wyjście do ogrodu i strefy basenowej.\n\nDo dyspozycji gości jest prywatny basen podgrzewany od 1 maja do 30 września, sauna, leżaki, taras do wspólnego biesiadowania, miejsce do grillowania oraz przestrzeń do relaksu w otoczeniu zieleni.\n\nTo idealne miejsce na rodzinne wakacje, weekendowy wypoczynek lub spotkania w gronie przyjaciół.\n\nImprezy okolicznościowe można organizować na zewnątrz, na tarasie, od maja do końca września, po wcześniejszym uzgodnieniu z właścicielem. Cena jest ustalana indywidualnie.',
       en: '#### Ground-floor apartment\nDesigned for up to {{capacityGround}} guests.\n\nIt offers:\n* a spacious living room with a comfortable sofa bed,\n* a fully equipped kitchen,\n* 2 comfortable bedrooms,\n* a bathroom,\n* direct access to the garden and pool area.\n\nGuests can enjoy a private swimming pool heated from 1 May to 30 September, a sauna, loungers, a terrace for shared meals, a barbecue area and a relaxing green outdoor space.\n\nIt is an ideal place for family holidays, weekend breaks and gatherings with friends.\n\nSpecial occasions can be organised outdoors on the terrace from May until the end of September, by prior arrangement with the owner. Pricing is agreed individually.',
+    },
+    upperBody: {
+      pl: '#### Apartament na piętrze\nPrzystosowany do pobytu do {{capacityUpper}} osób.\n\nZnajdują się w nim:\n* 3 wygodne sypialnie,\n* salon z częścią wypoczynkową i rozkładaną sofą,\n* jadalnia,\n* w pełni wyposażona kuchnia,\n* 2 łazienki,\n* balkon z widokiem na okolicę.',
+      en: '#### First-floor apartment\nDesigned for stays of up to {{capacityUpper}} guests.\n\nIt includes:\n* 3 comfortable bedrooms,\n* a living room with a lounge area and sofa bed,\n* a dining area,\n* a fully equipped kitchen,\n* 2 bathrooms,\n* a balcony overlooking the surroundings.',
     },
     highlights: [
       {
@@ -593,7 +597,7 @@ export const defaultSiteContent: SiteContent = {
       pl: 'Wybierz daty pobytu i liczbę gości, aby sprawdzić dostępność oraz koszt apartamentu za wybrane noce.',
       en: 'Choose your stay dates and guest count to check availability and the apartment price for the selected nights.',
     },
-    ownerEmail: 'rezerwacje@gerkapoolhouse.pl',
+    ownerEmail: 'gerkapoolhouse@gmail.com',
     confirmationSubject: {
       pl: 'Potwierdzenie wysłania zapytania',
       en: 'Booking inquiry confirmation',

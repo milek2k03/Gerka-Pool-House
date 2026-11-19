@@ -163,7 +163,7 @@ function TextAreaInput({
   return (
     <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
       {label}
-      <textarea className="field min-h-28 resize-y" value={value} onChange={(event) => onChange(event.target.value)} />
+      <textarea aria-label={label} className="field min-h-28 resize-y" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   )
 }
@@ -1109,6 +1109,13 @@ export function AdminPage() {
                   textarea
                   onChange={(language, value) => mutate((next) => void (next.about.body[language] = value))}
                 />
+                <LocalizedField
+                  label={t('admin.fields.aboutUpperBody')}
+                  value={draft.about.upperBody}
+                  textarea
+                  onChange={(language, value) => mutate((next) => void (next.about.upperBody[language] = value))}
+                />
+                <p className="text-sm text-[var(--color-muted)]">{t('admin.fields.aboutUpperBodyHelp')}</p>
                 <LocalizedField
                   label={t('sections.areaEyebrow')}
                   value={draft.area.title}

@@ -116,7 +116,7 @@ test('stored site content receives new rates and amenities while preserving manu
   } }
   try {
     const migrated = contentRepository.loadLocal()
-    assert.equal(migrated.version, 28)
+    assert.equal(migrated.version, defaultSiteContent.version)
     assert.equal(migrated.pricing.room2Nightly, 1600)
     assert.equal(migrated.pricing.bothNightly, 2500)
     assert.equal(migrated.pricing.room2Enabled, true)
@@ -565,12 +565,12 @@ test('email API validates dates and sends escaped, idempotent owner/client messa
   const originalFetch = globalThis.fetch
   const sent = []
   try {
-    Object.assign(process.env, { VERCEL: '1', RESEND_API_KEY: 're_test_key', RESEND_FROM_EMAIL: 'test@example.com',
+    Object.assign(process.env, { VERCEL: '1', RESEND_API_KEY: 're_test_key', RESEND_FROM_EMAIL: 'Gerka Pool House <rezerwacje@gerkapoolhouse.pl>',
       ALLOWED_ORIGIN: 'https://test.example.com', SUPABASE_URL: 'https://settings.example.com', SUPABASE_ANON_KEY: 'test-key' })
     const { default: handler } = await import('../api/reservation-email.ts')
     globalThis.fetch = async (url, options) => {
       const address = String(url)
-      if (address.includes('/rest/v1/site_content')) return new Response(JSON.stringify([{ content: { booking: { ownerEmail: 'saved-owner@example.com' } } }]))
+      if (address.includes('/rest/v1/site_content')) return new Response(JSON.stringify([{ content: { booking: { ownerEmail: 'gerkapoolhouse@gmail.com' } } }]))
       assert.ok(address.startsWith('https://api.resend.com/'))
       sent.push({ body: JSON.parse(options.body), headers: Object.fromEntries(new Headers(options.headers)) })
       return new Response(JSON.stringify({ id: `mail-${sent.length}` }), { headers: { 'Content-Type': 'application/json' } })
@@ -587,8 +587,12 @@ test('email API validates dates and sends escaped, idempotent owner/client messa
     }
     assert.equal((await call(body)).status, 200)
     assert.equal(sent.length, 2)
-    assert.equal(sent[0].body.to, 'saved-owner@example.com')
+    assert.equal(sent[0].body.to, 'gerkapoolhouse@gmail.com')
     assert.equal(sent[1].body.to, 'guest@example.com')
+    assert.equal(sent[0].body.from, 'Gerka Pool House <rezerwacje@gerkapoolhouse.pl>')
+    assert.equal(sent[1].body.from, 'Gerka Pool House <rezerwacje@gerkapoolhouse.pl>')
+    assert.equal(sent[0].body.reply_to, 'guest@example.com')
+    assert.equal(sent[1].body.reply_to, 'gerkapoolhouse@gmail.com')
     assert.equal(sent[0].headers['idempotency-key'], 'owner-GPH-20990615-TEST')
     assert.ok(!sent[0].body.html.includes('<script>'))
     assert.ok(sent[0].body.html.includes('&lt;script&gt;'))
@@ -616,6 +620,56 @@ test('booking today and tomorrow follow the property time zone rather than a vis
   } finally { globalThis.Date = OriginalDate }
 })
 
+
+test('upstairs descriptions migrate without losing edits and render independently in both languages', async () => {
+  const { defaultSiteContent } = await import('../src/constants/defaultContent.ts')
+  const { contentRepository } = await import('../src/services/contentRepository.ts')
+  const { resolveSiteContent } = await import('../src/utils/contentTemplates.ts')
+  const { AboutSection } = await import('../src/sections/AboutSection.tsx')
+  const { default: React } = await import('react')
+  const { renderToStaticMarkup } = await import('react-dom/server')
+  const { default: i18n } = await import('i18next')
+  const legacy = structuredClone(defaultSiteContent)
+  legacy.version = 28
+  delete legacy.about.upperBody
+  for (const locale of ['pl', 'en']) {
+    legacy.about.body[locale] = `#### Ground ${locale}\nGround edited ${locale}\n\n#### Upstairs ${locale}\nUpper edited ${locale} {{capacityUpper}}\n\n* Feature ${locale}\n\nUpper ending ${locale}`
+  }
+  const originalWindow = globalThis.window
+  const storage = new Map([['gerka-pool-house:site-content:v1', JSON.stringify(legacy)]])
+  globalThis.window = { localStorage: {
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value),
+  } }
+  try {
+    const loaded = contentRepository.loadLocal()
+    assert.equal(loaded.version, defaultSiteContent.version)
+    for (const locale of ['pl', 'en']) {
+      assert.equal(loaded.about.body[locale], `#### Ground ${locale}\nGround edited ${locale}`)
+      assert.match(loaded.about.upperBody[locale], new RegExp(`Upper ending ${locale}`))
+      loaded.about.upperBody[locale] = `Upper independently edited ${locale} {{capacityUpper}}`
+    }
+    contentRepository.saveLocal(loaded)
+    const reloaded = contentRepository.loadLocal()
+    assert.deepEqual(reloaded.about.upperBody, loaded.about.upperBody)
+    reloaded.pricing.room2Enabled = true
+    reloaded.pricing.room1Capacity = 6
+    reloaded.pricing.maxGuests = 14
+    for (const locale of ['pl', 'en']) {
+      await i18n.changeLanguage(locale)
+      // Both cards must still render if the owner removes the Markdown heading.
+      reloaded.about.body[locale] = `Ground plain text ${locale}`
+      const render = () => renderToStaticMarkup(React.createElement(AboutSection, { content: resolveSiteContent(reloaded), locale }))
+      const enabled = render()
+      assert.ok(enabled.includes(`Ground plain text ${locale}`))
+      assert.ok(enabled.includes(`Upper independently edited ${locale} 8`))
+      assert.ok(!enabled.includes(`Upper independently edited ${locale === 'pl' ? 'en' : 'pl'}`))
+      reloaded.pricing.room2Enabled = false
+      assert.ok(!render().includes(`Upper independently edited ${locale}`))
+      reloaded.pricing.room2Enabled = true
+    }
+  } finally { globalThis.window = originalWindow }
+})
 
 test('patched image library supports the server resizing and compositing pipeline', async () => {
   const { default: sharp } = await import('sharp')

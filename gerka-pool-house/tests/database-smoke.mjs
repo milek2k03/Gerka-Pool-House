@@ -45,6 +45,19 @@ try {
   await assert.rejects(db.query(`update public.reservation_requests set rooms_used=2 where id=$1`, [pending]), (error) => error.code === '23514')
   await db.exec(apartments)
   await db.exec(manual)
+  const recipientMigration = await readFile('supabase/migrations/20261119000100_reservation_notification_recipient.sql', 'utf8')
+  await db.query(`update public.site_content set content=$1,updated_at='2026-01-01T00:00:00Z' where id='main'`, [{
+    availability: [], booking: { ownerEmail: 'rezerwacje@gerkapoolhouse.pl', confirmationSubject: { pl: 'Dziękujemy' } },
+    updatedAt: '2026-01-01T00:00:00Z',
+  }])
+  await db.exec(recipientMigration)
+  const changed = (await db.query(`select content,updated_at from public.site_content where id='main'`)).rows[0]
+  assert.equal(changed.content.booking.ownerEmail, 'gerkapoolhouse@gmail.com')
+  assert.equal(changed.content.booking.confirmationSubject.pl, 'Dziękujemy')
+  assert.equal(Date.parse(changed.content.updatedAt), new Date(changed.updated_at).getTime())
+  assert.ok(Date.parse(changed.content.updatedAt) > Date.parse('2026-01-01T00:00:00Z'))
+  await db.exec(recipientMigration)
+  assert.deepEqual((await db.query(`select content,updated_at from public.site_content where id='main'`)).rows[0], changed)
   // Minimal Supabase platform fixtures let the complete policy setup run in real PostgreSQL.
   await db.exec(`
     create schema auth; create schema storage;

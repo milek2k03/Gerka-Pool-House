@@ -143,6 +143,7 @@ export interface SiteContent {
     title: LocalizedString
     lead: LocalizedString
     body: LocalizedString
+    upperBody: LocalizedString
     highlights: FeatureItem[]
   }
   gallery: GalleryItem[]

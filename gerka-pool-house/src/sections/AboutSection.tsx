@@ -184,37 +184,16 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
   const sections = parseRichSections(localize(content.about.body, locale))
   const headedSections = sections.filter((section) => section.heading)
   const apartment1Split = headedSections[0] ? splitApartmentSection(headedSections[0]) : null
-  const apartment2Split = headedSections[1] ? splitApartmentSection(headedSections[1]) : null
-  const apartment2Capacity = Math.max(1, content.pricing.maxGuests - content.pricing.room1Capacity)
-  const fallbackApartment2Section: RichSectionContent = {
-    id: 'apartment-2-fallback',
-    heading: t('about.apartment2FallbackTitle'),
-    parts: [
-      {
-        type: 'paragraphs',
-        lines: [
-          t('about.apartment2FallbackIntro', { count: apartment2Capacity }),
-          t('about.apartment2FallbackOfferLabel'),
-        ],
-      },
-      {
-        type: 'list',
-        items: [
-          t('about.apartment2FallbackBedroom'),
-          t('about.apartment2FallbackLivingRoom'),
-          t('about.apartment2FallbackDiningRoom'),
-          t('about.apartment2FallbackKitchen'),
-          t('about.apartment2FallbackBathrooms'),
-          t('about.apartment2FallbackBalcony'),
-        ],
-      },
-    ],
+  const upperSections = parseRichSections(localize(content.about.upperBody, locale))
+  const apartment2Section: RichSectionContent = {
+    id: 'apartment-2',
+    heading: upperSections.find((section) => section.heading)?.heading ?? t('about.apartment2FallbackTitle'),
+    parts: upperSections.flatMap((section) => section.parts),
   }
   const supportingParts = [
     ...sections.filter((section) => !section.heading).flatMap((section) => section.parts),
     ...(apartment1Split?.overflow ?? []),
-    ...(room2Enabled ? apartment2Split?.overflow ?? [] : []),
-    ...headedSections.slice(2).flatMap((section) => section.parts),
+    ...headedSections.slice(1).flatMap((section) => section.parts),
   ]
 
   return (
@@ -230,26 +209,24 @@ export function AboutSection({ content, locale }: { content: SiteContent; locale
 
         <div className="mt-10 grid gap-5 lg:grid-cols-2">
           {apartment1Split ? (
-            <>
-              <ApartmentCard section={apartment1Split.card} />
-              {room2Enabled ? (
-                <ApartmentCard section={apartment2Split?.card ?? fallbackApartment2Section} />
-              ) : (
-                <ApartmentComingSoonCard
-                  title={t('about.apartment2FallbackTitle')}
-                  message={t('pricing.room2DisabledNotice', { count: content.pricing.room1Capacity })}
-                />
-              )}
-            </>
+            <ApartmentCard section={apartment1Split.card} />
           ) : (
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] lg:col-span-2">
+            <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)]">
               <RichParts parts={sections.flatMap((section) => section.parts)} />
             </div>
+          )}
+          {room2Enabled ? (
+            <ApartmentCard section={apartment2Section} />
+          ) : (
+            <ApartmentComingSoonCard
+              title={t('about.apartment2FallbackTitle')}
+              message={t('pricing.room2DisabledNotice', { count: content.pricing.room1Capacity })}
+            />
           )}
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          {supportingParts.length > 0 ? (
+          {apartment1Split && supportingParts.length > 0 ? (
             <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-paper-2)] p-6 shadow-[var(--shadow-soft)]">
               <RichParts parts={supportingParts} />
             </div>

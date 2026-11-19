@@ -16,7 +16,7 @@ Server variables:
 VITE_RESERVATION_EMAIL_ENDPOINT=/api/reservation-email
 RESEND_API_KEY=re_xxxxxxxxx
 RESEND_FROM_EMAIL=Gerka Pool House <rezerwacje@gerkapoolhouse.pl>
-RESERVATION_OWNER_EMAIL=rezerwacje@gerkapoolhouse.pl
+RESERVATION_OWNER_EMAIL=gerkapoolhouse@gmail.com
 ALLOWED_ORIGIN=https://gerkapoolhouse.pl
 ```
 
@@ -72,3 +72,15 @@ panel therefore takes effect without changing server environment variables.
 If that read fails, the endpoint returns 503 and does not send to an outdated
 recipient. `RESERVATION_OWNER_EMAIL` remains a fallback for installations without
 Supabase. The verified sender (`RESEND_FROM_EMAIL`) stays a server setting.
+
+Gerka Pool House uses two separate addresses:
+
+- Sender of both messages: `Gerka Pool House <rezerwacje@gerkapoolhouse.pl>` (`RESEND_FROM_EMAIL`).
+- Owner notification recipient: `gerkapoolhouse@gmail.com` (`booking.ownerEmail`, set in Admin > Contact > Notification email).
+- Client confirmation recipient: the guest's email from the booking form. Replies to this confirmation go to the owner notification recipient.
+
+For an existing database, save the notification address in the admin panel or run
+`supabase/migrations/20261119000100_reservation_notification_recipient.sql` once.
+Changing the default content or `RESERVATION_OWNER_EMAIL` does not overwrite the
+recipient already saved in Supabase. Configure `RESEND_FROM_EMAIL` on the hosting
+provider too, verify `gerkapoolhouse.pl` in Resend and redeploy the server function.

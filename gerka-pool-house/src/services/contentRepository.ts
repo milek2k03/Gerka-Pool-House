@@ -1046,6 +1046,22 @@ function migrateContent(content: SiteContent, storedVersion: number): SiteConten
     }
   }
 
+  if (storedVersion < 29) {
+    content.version = defaultSiteContent.version
+    // Preserve an upstairs description previously entered as the second heading
+    // in the shared body, moving it into the new dedicated editor.
+    for (const locale of ['pl', 'en'] as const) {
+      const body = content.about.body[locale]
+      const headings = [...body.matchAll(/^####[ \t]+.+$/gm)]
+      const start = headings[1]?.index
+      if (start !== undefined) {
+        const end = headings[2]?.index ?? body.length
+        content.about.upperBody[locale] = body.slice(start, end).trim()
+        content.about.body[locale] = [body.slice(0, start).trim(), body.slice(end).trim()].filter(Boolean).join('\n\n')
+      }
+    }
+  }
+
   return removeExpiredAvailability(repairBundledAssetPaths(content))
 }
 
