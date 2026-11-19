@@ -23,8 +23,8 @@ export function getContentVariables(content: SiteContent, locale: Locale) {
     priceUpper,
     priceBoth,
     apartmentsTitle: locale === 'pl'
-      ? (expanded ? 'Dwa apartamenty, prywatna strefa basenowa i sauna' : 'Apartament na parterze, prywatna strefa basenowa i sauna')
-      : (expanded ? 'Two apartments, a private pool area and a sauna' : 'Ground-floor apartment, a private pool area and a sauna'),
+      ? (expanded ? 'Dwa apartamenty, prywatna strefa basenowa, sauna i balia' : 'Apartament na parterze, prywatna strefa basenowa, sauna i balia')
+      : (expanded ? 'Two apartments, a private pool area, a sauna and a hot tub' : 'Ground-floor apartment, a private pool area, a sauna and a hot tub'),
     apartmentsOffer: locale === 'pl'
       ? (expanded ? `Wybierz apartament na parterze dla maksymalnie ${pricing.room1Capacity} osób, apartament na piętrze dla ${capacityUpper} osób lub wynajmij całość dla maksymalnie ${pricing.maxGuests} osób.` : `Dostępny jest apartament na parterze dla maksymalnie ${pricing.room1Capacity} osób.`)
       : (expanded ? `Choose the ground-floor apartment for up to ${pricing.room1Capacity} guests, the upstairs apartment for ${capacityUpper} guests, or rent both for up to ${pricing.maxGuests} guests.` : `The ground-floor apartment is available for up to ${pricing.room1Capacity} guests.`),

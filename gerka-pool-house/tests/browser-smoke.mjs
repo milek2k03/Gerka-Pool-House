@@ -144,6 +144,17 @@ try {
   await page.reload(); await page.locator('#pricing').waitFor()
   await page.getByText(/check-out.*10:30/i).first().waitFor()
 
+  await admin.getByRole('button', { name: pl.admin.tabs.content, exact: true }).click()
+  await admin.getByLabel(`${pl.admin.fields.aboutUpperBody} PL`, { exact: true }).fill('#### Piętro testowe\nOsobny opis piętra dla {{capacityUpper}} osób.')
+  await admin.getByLabel(`${pl.admin.fields.aboutUpperBody} EN`, { exact: true }).fill('#### Upstairs test\nIndependent upstairs description for {{capacityUpper}} guests.')
+  await admin.getByRole('button', { name: pl.admin.saveChanges, exact: true }).click()
+  await admin.getByText(pl.admin.allChangesSaved, { exact: true }).waitFor()
+  assert.ok(content.about.upperBody.pl.includes('{{capacityUpper}}'))
+  await page.goto(`${origin}/?lng=pl`)
+  await page.locator('#about').getByText('Osobny opis piętra dla 8 osób.', { exact: true }).waitFor()
+  await page.goto(`${origin}/?lng=en`)
+  await page.locator('#about').getByText('Independent upstairs description for 8 guests.', { exact: true }).waitFor()
+
   // Desktop file drops add all successful files, preserve concurrent edits and reject duplicate batches.
   await admin.getByRole('button', { name: pl.admin.tabs.gallery, exact: true }).click()
   const galleryId = content.gallerySections[0].id
